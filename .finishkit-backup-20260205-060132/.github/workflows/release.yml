@@ -1,0 +1,30 @@
+name: Release (GoReleaser)
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Needed for pushing Homebrew formula to the tap repo:
+          # Create a classic PAT with 'repo' scope and save as GORELEASER_TOKEN
+          GORELEASER_TOKEN: ${{ secrets.GORELEASER_TOKEN }}

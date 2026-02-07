@@ -19,4 +19,4 @@ jobs:
       - name: Test
         run: echo gogogo
       - name: Build
-        run: go build ./...
+        run: go build ./..

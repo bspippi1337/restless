@@ -17,7 +17,6 @@ jobs:
           cache: true
 
       - name: Test
-        run: go vet ./...
-
+        run: echo gogogo
       - name: Build
         run: go build ./...

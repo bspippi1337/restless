@@ -1,0 +1,121 @@
+name: Magic Runfiles
+
+on:
+  push:
+    branches: ["master"]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: write # trengs for å publisere Release på tags
+
+jobs:
+  build-runfiles:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux: lager .run (single runfile)
+          - goos: linux
+            goarch: amd64
+            runfile: true
+          - goos: linux
+            goarch: arm64
+            runfile: true
+
+          # Windows/macOS: single-file binær
+          - goos: windows
+            goarch: amd64
+            runfile: false
+          - goos: darwin
+            goarch: arm64
+            runfile: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: false # unngår go.sum-cache-nag om repoet er bootstrap
+
+      - name: Guard rails (modules)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f go.mod ]; then
+            echo "❌ Missing go.mod. Run: go mod init ... && go mod tidy"
+            exit 1
+          fi
+
+      - name: Build restless (single binary)
+        shell: bash
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+
+          OUT="restless-${GOOS}-${GOARCH}"
+          if [ "${GOOS}" = "windows" ]; then OUT="${OUT}.exe"; fi
+
+          # ✨ Spell of reproducibility
+          go env
+          go test ./... || true
+
+          go build -trimpath -ldflags "-s -w" -o "dist/${OUT}" ./cmd/uac
+
+          # quick sanity check (won't execute on non-native targets)
+          if [ "${GOOS}" = "linux" ] && [ "${GOARCH}" = "amd64" ]; then
+            ./dist/${OUT} --help >/dev/null 2>&1 || true
+          fi
+
+      - name: Create Linux .run (single runfile)
+        if: ${{ matrix.runfile }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y makeself
+
+          GOOS="${{ matrix.goos }}"
+          GOARCH="${{ matrix.goarch }}"
+          BIN="restless-${GOOS}-${GOARCH}"
+          RUN="restless-${GOOS}-${GOARCH}.run"
+
+          mkdir -p "payload-${GOOS}-${GOARCH}"
+          cp "dist/${BIN}" "payload-${GOOS}-${GOARCH}/restless"
+          chmod +x "payload-${GOOS}-${GOARCH}/restless"
+
+          cat > "payload-${GOOS}-${GOARCH}/run.sh" <<'SH'
+          #!/usr/bin/env sh
+          set -eu
+          HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+          exec "$HERE/restless" "$@"
+          SH
+          chmod +x "payload-${GOOS}-${GOARCH}/run.sh"
+
+          # creates ONE file: .run
+          makeself --quiet \
+            "payload-${GOOS}-${GOARCH}" \
+            "dist/${RUN}" \
+            "restless (${GOOS}/${GOARCH})" \
+            ./run.sh --help >/dev/null 2>&1 || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: restless-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+
+      - name: Publish GitHub Release (tags only)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*

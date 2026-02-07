@@ -19,8 +19,6 @@ jobs:
           go-version: "1.22"
           cache: true
 
-      - name: Verify modules
-        run: go mod tidy
 
       - name: Test
         run: go test ./...

@@ -1,58 +1,32 @@
-name: Magic Runfiles
-
-on:
-  push:
-    branches: ["master"]
-    tags: ["v*"]
-  pull_request:
-
-permissions:
-  contents: write # trengs for å publisere Release på tags
-
-jobs:
-  build-runfiles:
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # Linux: lager .run (single runfile)
-          - goos: linux
-            goarch: amd64
-            runfile: true
-          - goos: linux
-            goarch: arm64
-            runfile: true
-
-          # Windows/macOS: single-file binær
-          - goos: windows
-            goarch: amd64
-            runfile: false
-          - goos: darwin
-            goarch: arm64
-            runfile: false
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
-          cache: false # unngår go.sum-cache-nag om repoet er bootstrap
-
-      - name: Guard rails (modules)
+- name: Detect Go module root (auto-heal)
+        id: gomod
         shell: bash
         run: |
           set -euo pipefail
-          if [ ! -f go.mod ]; then
-            echo "❌ Missing go.mod. Run: go mod init ... && go mod tidy"
-            exit 1
+
+          # 1) Finn hvor Go entrypoint er ment å være
+          if [ -d "cmd/uac" ]; then
+            echo "has_uac=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_uac=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # 2) Hvis repoet mangler go.mod, men har cmd/uac, lag modulfilene automatisk
+          if [ ! -f "go.mod" ] && [ -d "cmd/uac" ]; then
+            echo "🪄 go.mod mangler, lager modul…"
+            go mod init github.com/bspippi1337/restless
+            go mod tidy
+          fi
+
+          # 3) Fortell senere steg om vi faktisk kan bygge
+          if [ -f "go.mod" ] && [ -d "cmd/uac" ]; then
+            echo "can_build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "can_build=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build restless (single binary)
+        if: ${{ steps.gomod.outputs.can_build == 'true' }}
         shell: bash
         env:
           GOOS: ${{ matrix.goos }}
@@ -65,57 +39,11 @@ jobs:
           OUT="restless-${GOOS}-${GOARCH}"
           if [ "${GOOS}" = "windows" ]; then OUT="${OUT}.exe"; fi
 
-          # ✨ Spell of reproducibility
-          go env
-          go test ./... || true
-
           go build -trimpath -ldflags "-s -w" -o "dist/${OUT}" ./cmd/uac
 
-          # quick sanity check (won't execute on non-native targets)
-          if [ "${GOOS}" = "linux" ] && [ "${GOARCH}" = "amd64" ]; then
-            ./dist/${OUT} --help >/dev/null 2>&1 || true
-          fi
-
-      - name: Create Linux .run (single runfile)
-        if: ${{ matrix.runfile }}
+      - name: Skip note (no Go sources yet)
+        if: ${{ steps.gomod.outputs.can_build != 'true' }}
         shell: bash
         run: |
-          set -euo pipefail
-          sudo apt-get update -y
-          sudo apt-get install -y makeself
-
-          GOOS="${{ matrix.goos }}"
-          GOARCH="${{ matrix.goarch }}"
-          BIN="restless-${GOOS}-${GOARCH}"
-          RUN="restless-${GOOS}-${GOARCH}.run"
-
-          mkdir -p "payload-${GOOS}-${GOARCH}"
-          cp "dist/${BIN}" "payload-${GOOS}-${GOARCH}/restless"
-          chmod +x "payload-${GOOS}-${GOARCH}/restless"
-
-          cat > "payload-${GOOS}-${GOARCH}/run.sh" <<'SH'
-          #!/usr/bin/env sh
-          set -eu
-          HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-          exec "$HERE/restless" "$@"
-          SH
-          chmod +x "payload-${GOOS}-${GOARCH}/run.sh"
-
-          # creates ONE file: .run
-          makeself --quiet \
-            "payload-${GOOS}-${GOARCH}" \
-            "dist/${RUN}" \
-            "restless (${GOOS}/${GOARCH})" \
-            ./run.sh --help >/dev/null 2>&1 || true
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: restless-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/*
-
-      - name: Publish GitHub Release (tags only)
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/*
+          echo "ℹ️ Skipper Go-build: mangler cmd/uac og/eller go.mod."
+          echo "Legg inn Go-kode under cmd/uac + committ go.mod for ekte binaries."

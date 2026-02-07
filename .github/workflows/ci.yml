@@ -8,20 +8,37 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Go (kun hvis go.mod finnes)
       - name: Setup Go
+        if: ${{ hashFiles('**/go.mod') != '' }}
         uses: actions/setup-go@v5
         with:
           go-version: "1.22"
-          cache: true
+          cache: false
 
-
-      - name: Test
+      - name: Go Test
+        if: ${{ hashFiles('**/go.mod') != '' }}
         run: go test ./...
 
-      - name: Build
+      - name: Go Build
+        if: ${{ hashFiles('**/go.mod') != '' }}
         run: go build ./...
+
+      # Node (kun hvis package.json finnes)
+      - name: Setup Node
+        if: ${{ hashFiles('**/package.json') != '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: npm ci
+        if: ${{ hashFiles('**/package-lock.json') != '' }}
+        run: npm ci
+
+      - name: npm test
+        if: ${{ hashFiles('**/package.json') != '' }}
+        run: npm test --silent

@@ -24,3 +24,9 @@ clean:
 
 doctor:
 	go run ./cmd/restless doctor
+
+acceptance:
+	@echo "Open docs/QA-ACCEPTANCE-TESTS.md"
+
+brand:
+	@python3 scripts/brand_export_icons.py

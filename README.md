@@ -47,3 +47,11 @@ See: `docs/SECURITY.md` and `docs/RFC-0002-domain-first-discovery.md`
 
 ## License
 MIT
+
+## Brand
+
+- Primary mark: **Logo B — The Path**
+- Tokens: `assets/brand/tokens/brand.json` and `assets/brand/tokens/brand.css`
+- Logo: `assets/brand/logo/restless_logo_B.svg` (animated version included)
+- Exports: `assets/brand/logo/exports/` (PNG/ICO/iconset)
+- Preview: `bash scripts/brand_preview.sh` then open `/preview.html`

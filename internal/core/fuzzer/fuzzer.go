@@ -4,26 +4,26 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/bspippi1337/restless/internal/core/discovery"
+	"github.com/bspippi1337/restless/internal/core/model"
 )
 
 type Options struct {
 	MaxExtra int
 }
 
-func Expand(seeds []discovery.Endpoint, opt Options) []discovery.Endpoint {
+func Expand(seeds []model.Endpoint, opt Options) []model.Endpoint {
 	maxExtra := opt.MaxExtra
 	if maxExtra <= 0 { maxExtra = 50 }
 
 	seen := map[string]bool{}
-	add := func(m, p string, out *[]discovery.Endpoint) {
+	add := func(m, p string, out *[]model.Endpoint) {
 		k := strings.ToUpper(m) + " " + p
 		if seen[k] { return }
 		seen[k] = true
-		*out = append(*out, discovery.Endpoint{Method: strings.ToUpper(m), Path: p})
+		*out = append(*out, model.Endpoint{Method: strings.ToUpper(m), Path: p})
 	}
 
-	out := []discovery.Endpoint{}
+	out := []model.Endpoint{}
 	for _, s := range seeds {
 		p := strings.TrimSpace(s.Path)
 		if p == "" || !strings.HasPrefix(p, "/") { continue }

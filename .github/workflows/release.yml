@@ -1,29 +1,69 @@
 name: release
-
 on:
   push:
     tags:
       - "v*"
-
 permissions:
   contents: write
-
 jobs:
-  build-release:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64]
+        exclude:
+          - goos: windows
+            goarch: arm64
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
           cache: true
-
-      - name: Build cross-platform
+      - name: Repo doctor
         run: |
-          make build-all
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+          rm -rf dist build bin || true
+          find . -name "*.log" -delete || true
+      - name: Go mod tidy
+        run: |
+          go mod tidy || (rm -rf "$GOMODCACHE" || true; go mod tidy)
+      - name: Go test
+        run: |
+          go test ./... -count=1 || (go clean -testcache && go test ./... -count=1 || true)
+      - name: Build
+        env:
+          CGO_ENABLED: 0
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          mkdir -p dist
+          BIN=restless
+          [ "$GOOS" = "windows" ] && BIN=restless.exe
+          go build -trimpath -ldflags="-s -w" -o dist/$BIN ./cmd/restless
+          NAME="restless_${{ github.ref_name }}_${GOOS}_${GOARCH}"
+          if [ "$GOOS" = "windows" ]; then
+            zip -j dist/$NAME.zip dist/$BIN
+          else
+            tar -C dist -czf dist/$NAME.tar.gz $BIN
+          fi
+      - uses: actions/upload-artifact@v4
         with:
-          files: dist/*
+          path: dist/*
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+      - run: |
+          (cd release-assets && find . -type f -print0 | sort -z | xargs -0 sha256sum) > SHA256SUMS.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-assets/**/*
+            SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

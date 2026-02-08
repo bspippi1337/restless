@@ -1,1 +1,74 @@
+name: build-and-release
 
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64]
+        exclude:
+          # Windows arm64 kan legges til senere hvis ønskelig
+          - goos: windows
+            goarch: arm64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          mkdir -p dist
+          BIN=restless
+          if [ "$GOOS" = "windows" ]; then BIN=restless.exe; fi
+          go build -trimpath -ldflags="-s -w" \
+            -o dist/${BIN} ./cmd/restless
+
+          ARCHIVE=restless_${{ github.ref_name }}_${GOOS}_${GOARCH}
+          if [ "$GOOS" = "windows" ]; then
+            zip -j dist/${ARCHIVE}.zip dist/${BIN}
+          else
+            tar -C dist -czf dist/${ARCHIVE}.tar.gz ${BIN}
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: restless-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

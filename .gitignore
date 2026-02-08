@@ -1,0 +1,15 @@
+/bin/
+/dist/
+/build/
+/logs/
+.fixall-logs/
+*.log
+*.tmp
+*.jks
+*.pfx
+*.pem
+*.key
+*.crt
+*.keystore
+.DS_Store
+Thumbs.db

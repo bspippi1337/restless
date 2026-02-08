@@ -9,6 +9,7 @@ import (
 
 	"github.com/bspippi1337/restless/internal/core/docparse"
 	"github.com/bspippi1337/restless/internal/core/fuzzer"
+	"github.com/bspippi1337/restless/internal/core/model"
 	"github.com/bspippi1337/restless/internal/core/probe"
 	"github.com/bspippi1337/restless/internal/core/scrape"
 )
@@ -97,9 +98,18 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 	}
 
 	if opt.Fuzz {
-		seed := dedupe(endpoints)
-		exp := fuzzer.Expand(seed, fuzzer.Options{MaxExtra: 60})
-		for _, e := range exp {
+		
+seed := dedupe(endpoints)
+
+// Convert to minimal shared shape to avoid import cycles (discovery <-> fuzzer).
+seedModel := make([]model.Endpoint, 0, len(seed))
+for _, s := range seed {
+    seedModel = append(seedModel, model.Endpoint{Method: s.Method, Path: s.Path})
+}
+
+expModel := fuzzer.Expand(seedModel, fuzzer.Options{MaxExtra: 60})
+for _, em := range expModel {
+    e := Endpoint{Method: em.Method, Path: em.Path}
 			e.Evidences = append(e.Evidences, Evidence{
 				Source: SourceFuzzer,
 				URL:    base,

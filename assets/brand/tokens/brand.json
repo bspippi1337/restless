@@ -1,0 +1,37 @@
+{
+  "name": "Restless",
+  "version": "brand-v1",
+  "colors": {
+    "midnightSlate": "#0A2540",
+    "signalBlue": "#2563EB",
+    "steelGray": "#6B7280",
+    "mistGray": "#E5E7EB",
+    "ivoryWhite": "#F9FAFB",
+    "success": "#16A34A",
+    "warning": "#CA8A04",
+    "error": "#B91C1C"
+  },
+  "typography": {
+    "ui": {
+      "family": "Inter",
+      "weights": [
+        "400",
+        "500",
+        "600"
+      ]
+    },
+    "mono": {
+      "family": "JetBrains Mono",
+      "weights": [
+        "400",
+        "500"
+      ]
+    }
+  },
+  "logo": {
+    "primary": "Logo B \u2014 The Path",
+    "strokeWidth": 2,
+    "grid": "24x24",
+    "radius": 3
+  }
+}

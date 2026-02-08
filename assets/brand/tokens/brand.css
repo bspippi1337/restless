@@ -1,0 +1,14 @@
+:root {
+  --rls-midnight-slate: #0A2540;
+  --rls-signal-blue:    #2563EB;
+  --rls-steel-gray:     #6B7280;
+  --rls-mist-gray:      #E5E7EB;
+  --rls-ivory-white:    #F9FAFB;
+
+  --rls-success:        #16A34A;
+  --rls-warning:        #CA8A04;
+  --rls-error:          #B91C1C;
+
+  --rls-font-ui:        "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --rls-font-mono:      "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}

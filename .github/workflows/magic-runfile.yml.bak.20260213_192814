@@ -1,4 +1,3 @@
-name: magic-runfile
 - name: Detect Go module root (auto-heal)
         id: gomod
         shell: bash

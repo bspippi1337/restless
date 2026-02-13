@@ -1,4 +1,3 @@
- <img src="assets/brand/logo/exports/restless_logo_B_32x32.png" alt="restless logo" height="28"> restless
 
 [![Release](https://img.shields.io/github/v/release/bspippi1337/restless?include_prereleases&label=latest)](https://github.com/bspippi1337/restless/releases)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/bspippi1337/restless)](https://golang.org/)

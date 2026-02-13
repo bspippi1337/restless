@@ -1,0 +1,15 @@
+- name: Setup Node
+        if: ${{ hashFiles('npm/package.json') != '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: npm ci (wrapper)
+        if: ${{ hashFiles('npm/package-lock.json') != '' && hashFiles('npm/package.json') != '' }}
+        working-directory: npm
+        run: npm ci
+
+      - name: npm test (wrapper)
+        if: ${{ hashFiles('npm/package.json') != '' }}
+        working-directory: npm
+        run: npm test --silent

@@ -11,8 +11,8 @@ import (
 )
 
 type OpenAPI struct {
-	OpenAPI string `json:"openapi,omitempty" yaml:"openapi,omitempty"`
-	Swagger string `json:"swagger,omitempty" yaml:"swagger,omitempty"`
+	OpenAPI string                    `json:"openapi,omitempty" yaml:"openapi,omitempty"`
+	Swagger string                    `json:"swagger,omitempty" yaml:"swagger,omitempty"`
 	Paths   map[string]map[string]any `json:"paths,omitempty" yaml:"paths,omitempty"`
 }
 

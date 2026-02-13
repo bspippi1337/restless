@@ -13,12 +13,16 @@ type Options struct {
 
 func Expand(seeds []model.Endpoint, opt Options) []model.Endpoint {
 	maxExtra := opt.MaxExtra
-	if maxExtra <= 0 { maxExtra = 50 }
+	if maxExtra <= 0 {
+		maxExtra = 50
+	}
 
 	seen := map[string]bool{}
 	add := func(m, p string, out *[]model.Endpoint) {
 		k := strings.ToUpper(m) + " " + p
-		if seen[k] { return }
+		if seen[k] {
+			return
+		}
 		seen[k] = true
 		*out = append(*out, model.Endpoint{Method: strings.ToUpper(m), Path: p})
 	}
@@ -26,7 +30,9 @@ func Expand(seeds []model.Endpoint, opt Options) []model.Endpoint {
 	out := []model.Endpoint{}
 	for _, s := range seeds {
 		p := strings.TrimSpace(s.Path)
-		if p == "" || !strings.HasPrefix(p, "/") { continue }
+		if p == "" || !strings.HasPrefix(p, "/") {
+			continue
+		}
 		seen[strings.ToUpper(s.Method)+" "+p] = true
 	}
 
@@ -34,9 +40,13 @@ func Expand(seeds []model.Endpoint, opt Options) []model.Endpoint {
 	reLeaf := regexp.MustCompile(`/([a-z0-9_\-]+)$`)
 
 	for _, s := range seeds {
-		if len(out) >= maxExtra { break }
+		if len(out) >= maxExtra {
+			break
+		}
 		p := strings.TrimSpace(s.Path)
-		if p == "" || !strings.HasPrefix(p, "/") { continue }
+		if p == "" || !strings.HasPrefix(p, "/") {
+			continue
+		}
 
 		if reVar.MatchString(p) {
 			base := reVar.ReplaceAllString(p, "")
@@ -65,7 +75,9 @@ func Expand(seeds []model.Endpoint, opt Options) []model.Endpoint {
 	}
 
 	for _, p := range []string{"/health", "/status", "/version"} {
-		if len(out) >= maxExtra { break }
+		if len(out) >= maxExtra {
+			break
+		}
 		add("GET", p, &out)
 	}
 	return out

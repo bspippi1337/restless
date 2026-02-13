@@ -31,7 +31,9 @@ type keymap struct {
 	Help     key.Binding
 }
 
-func (k keymap) ShortHelp() []key.Binding { return []key.Binding{k.Discover, k.Help, k.TabPrev, k.TabNext, k.Quit} }
+func (k keymap) ShortHelp() []key.Binding {
+	return []key.Binding{k.Discover, k.Help, k.TabPrev, k.TabNext, k.Quit}
+}
 func (k keymap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Discover, k.Help},
@@ -189,7 +191,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) runDiscover(domain string) tea.Cmd {
 	return func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), 18*time.Second)
+		_, cancel := context.WithTimeout(context.Background(), 18*time.Second)
 		defer cancel()
 		finding, err := discovery.DiscoverDomain(domain, discovery.Options{
 			BudgetSeconds: 15,

@@ -26,7 +26,7 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 	if domain == "" {
 		return Finding{}, errors.New("domain is empty")
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(max(10,opt.BudgetSeconds))*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(max(10, opt.BudgetSeconds))*time.Second)
 	defer cancel()
 
 	hosts := HostCandidates(domain)
@@ -39,7 +39,9 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 	for _, h := range hosts {
 		oas, urls, err := docparse.TryOpenAPI(ctx, h)
 		if err == nil && oas != nil && len(oas.Paths) > 0 {
-			if base == "" { base = h }
+			if base == "" {
+				base = h
+			}
 			docURLs = append(docURLs, urls...)
 			eps := docparse.EndpointsFromOpenAPI(oas)
 			for i := range eps {
@@ -57,15 +59,17 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 		}
 	}
 
-	if base == "" { base = hosts[0] }
+	if base == "" {
+		base = hosts[0]
+	}
 
 	smURLs, smPaths := scrape.SitemapDocs(ctx, base, max(12, opt.BudgetPages*3))
 	if len(smURLs) > 0 {
 		docURLs = append(docURLs, smURLs...)
 		for _, p := range smPaths {
 			endpoints = append(endpoints, Endpoint{
-				Method: "GET",
-				Path:   p,
+				Method:  "GET",
+				Path:    p,
 				FullURL: base + p,
 				Evidences: []Evidence{{
 					Source: SourceSitemap,
@@ -78,14 +82,16 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 		}
 	}
 
-	scrHits, scrVisited := scrape.LightDocsScrape(ctx, base, max(1,opt.BudgetPages))
+	scrHits, scrVisited := scrape.LightDocsScrape(ctx, base, max(1, opt.BudgetPages))
 	docURLs = append(docURLs, scrVisited...)
 	for _, hit := range scrHits {
 		url := ""
-		if len(scrVisited) > 0 { url = scrVisited[0] }
+		if len(scrVisited) > 0 {
+			url = scrVisited[0]
+		}
 		endpoints = append(endpoints, Endpoint{
-			Method: hit.Method,
-			Path:   hit.Path,
+			Method:  hit.Method,
+			Path:    hit.Path,
 			FullURL: base + hit.Path,
 			Evidences: []Evidence{{
 				Source: SourceHTML,
@@ -98,18 +104,18 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 	}
 
 	if opt.Fuzz {
-		
-seed := dedupe(endpoints)
 
-// Convert to minimal shared shape to avoid import cycles (discovery <-> fuzzer).
-seedModel := make([]model.Endpoint, 0, len(seed))
-for _, s := range seed {
-    seedModel = append(seedModel, model.Endpoint{Method: s.Method, Path: s.Path})
-}
+		seed := dedupe(endpoints)
 
-expModel := fuzzer.Expand(seedModel, fuzzer.Options{MaxExtra: 60})
-for _, em := range expModel {
-    e := Endpoint{Method: em.Method, Path: em.Path}
+		// Convert to minimal shared shape to avoid import cycles (discovery <-> fuzzer).
+		seedModel := make([]model.Endpoint, 0, len(seed))
+		for _, s := range seed {
+			seedModel = append(seedModel, model.Endpoint{Method: s.Method, Path: s.Path})
+		}
+
+		expModel := fuzzer.Expand(seedModel, fuzzer.Options{MaxExtra: 60})
+		for _, em := range expModel {
+			e := Endpoint{Method: em.Method, Path: em.Path}
 			e.Evidences = append(e.Evidences, Evidence{
 				Source: SourceFuzzer,
 				URL:    base,
@@ -183,8 +189,12 @@ func dedupe(in []Endpoint) []Endpoint {
 	for _, e := range in {
 		mm := strings.ToUpper(strings.TrimSpace(e.Method))
 		pp := strings.TrimSpace(e.Path)
-		if mm == "" { mm = "GET" }
-		if pp == "" || !strings.HasPrefix(pp, "/") { continue }
+		if mm == "" {
+			mm = "GET"
+		}
+		if pp == "" || !strings.HasPrefix(pp, "/") {
+			continue
+		}
 		kk := k{mm, pp}
 		if ex, ok := seen[kk]; ok {
 			ex.Evidences = append(ex.Evidences, e.Evidences...)
@@ -195,7 +205,9 @@ func dedupe(in []Endpoint) []Endpoint {
 		}
 	}
 	out := make([]Endpoint, 0, len(seen))
-	for _, v := range seen { out = append(out, v) }
+	for _, v := range seen {
+		out = append(out, v)
+	}
 	return out
 }
 
@@ -204,12 +216,21 @@ func uniq(in []string, maxN int) []string {
 	out := []string{}
 	for _, s := range in {
 		s = strings.TrimSpace(s)
-		if s == "" || seen[s] { continue }
+		if s == "" || seen[s] {
+			continue
+		}
 		seen[s] = true
 		out = append(out, s)
-		if maxN > 0 && len(out) >= maxN { break }
+		if maxN > 0 && len(out) >= maxN {
+			break
+		}
 	}
 	return out
 }
 
-func max(a, b int) int { if a>b { return a }; return b }
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}

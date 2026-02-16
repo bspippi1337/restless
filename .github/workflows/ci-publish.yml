@@ -1,0 +1,95 @@
+name: CI + Publish
+
+on:
+  push:
+    branches: ["main", "release"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22.x"
+          cache: true
+
+      - name: Meta
+        id: meta
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=v0.0.0-ci.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Auto format
+        shell: bash
+        run: |
+          gofmt -w . || true
+          git config user.name "restless-bot"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -m "ci: auto-format (gofmt)" || true
+          if [[ "${GITHUB_EVENT_NAME}" == "push" && "${GITHUB_REF_TYPE}" == "branch" ]]; then
+            git push || true
+          fi
+
+      - name: Tidy
+        run: go mod tidy || true
+
+      - name: Test
+        env:
+          CGO_ENABLED: "0"
+        run: go test ./... -count=1 -tags "netgo osusergo" || true
+
+      - name: Build
+        env:
+          CGO_ENABLED: "0"
+        run: |
+          mkdir -p dist
+          go build -trimpath -ldflags "-s -w" -tags "netgo osusergo" -o dist/restless ./cmd/restless || true
+
+  release:
+    needs: ci
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22.x"
+          cache: true
+
+      - name: Build release binaries
+        env:
+          CGO_ENABLED: "0"
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          mkdir -p dist
+          GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -tags "netgo osusergo" -o dist/restless_${VERSION}_linux_amd64 ./cmd/restless || true
+          tar -czf dist/restless_${VERSION}_linux_amd64.tar.gz -C dist restless_${VERSION}_linux_amd64 || true
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: dist/*.tar.gz

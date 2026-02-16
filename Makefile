@@ -1,32 +1,17 @@
-.PHONY: tidy test run build build-all clean doctor
+SHELL := /bin/sh
 
-tidy:
-	go mod tidy
+APP := restless
+DIST := dist
+
+.PHONY: test build clean
 
 test:
-	go test ./...
-
-run:
-	go run ./cmd/restless
+	@CGO_ENABLED=0 go test ./... -count=1 -tags "netgo osusergo"
 
 build:
-	mkdir -p bin
-	go build -o bin/restless ./cmd/restless
-
-build-all:
-	mkdir -p dist
-	GOOS=linux   GOARCH=amd64 go build -o dist/restless_linux_amd64   ./cmd/restless
-	GOOS=darwin  GOARCH=amd64 go build -o dist/restless_darwin_amd64  ./cmd/restless
-	GOOS=windows GOARCH=amd64 go build -o dist/restless_windows_amd64.exe ./cmd/restless
+	@mkdir -p $(DIST)
+	@CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -tags "netgo osusergo" -o $(DIST)/$(APP) ./cmd/restless
+	@echo "Built: $(DIST)/$(APP)"
 
 clean:
-	rm -rf bin dist build logs
-
-doctor:
-	go run ./cmd/restless doctor
-
-acceptance:
-	@echo "Open docs/QA-ACCEPTANCE-TESTS.md"
-
-brand:
-	@python3 scripts/brand_export_icons.py
+	@rm -rf $(DIST)

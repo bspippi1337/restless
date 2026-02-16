@@ -1,0 +1,48 @@
+/* Restless Docs Site — minimal, professional */
+:root{
+  --bg:#0b0f17;
+  --card:#111827;
+  --muted:#9ca3af;
+  --text:#e5e7eb;
+  --brand:#60a5fa;
+  --brand2:#34d399;
+  --border: rgba(255,255,255,.08);
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --radius: 16px;
+  --max: 1080px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:radial-gradient(1200px 600px at 20% -10%, rgba(96,165,250,.20), transparent 60%),
+radial-gradient(900px 500px at 90% 10%, rgba(52,211,153,.18), transparent 55%),
+var(--bg);color:var(--text);font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, "Apple Color Emoji","Segoe UI Emoji";}
+a{color:var(--brand);text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:var(--max);margin:0 auto;padding:28px 18px 60px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;border:1px solid var(--border);border-radius:999px;background:rgba(17,24,39,.55);backdrop-filter: blur(10px);box-shadow: var(--shadow);}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand2));box-shadow:0 8px 22px rgba(96,165,250,.25)}
+.brand h1{font-size:15px;margin:0;letter-spacing:.4px}
+.brand span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.nav .links{display:flex;gap:14px;flex-wrap:wrap}
+.hero{padding:54px 6px 22px}
+.kicker{display:inline-flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(17,24,39,.45)}
+.kicker b{color:var(--text);font-weight:600}
+.hero h2{font-size:42px;line-height:1.05;margin:18px 0 10px;letter-spacing:-.6px}
+.hero p{max-width:68ch;color:var(--muted);font-size:16px;line-height:1.6;margin:0 0 18px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.button{display:inline-flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(17,24,39,.55);color:var(--text);box-shadow:var(--shadow);font-weight:600}
+.button.primary{background:linear-gradient(135deg, rgba(96,165,250,.95), rgba(52,211,153,.85));border-color:rgba(255,255,255,.14);color:#071018}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-top:18px}
+.card{grid-column:span 12;padding:18px;border:1px solid var(--border);border-radius:var(--radius);background:rgba(17,24,39,.55);box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px;font-size:16px}
+.card p{margin:0;color:var(--muted);line-height:1.6}
+@media(min-width:820px){
+  .card.span6{grid-column:span 6}
+  .card.span4{grid-column:span 4}
+}
+.code{margin-top:12px;border-radius:14px;border:1px solid var(--border);background:rgba(2,6,23,.55);padding:14px;overflow:auto;font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;font-size:13px;line-height:1.5}
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.badge{font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:6px 10px;background:rgba(17,24,39,.45)}
+.footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--border);color:var(--muted);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.small{font-size:12px}
+hr.sep{border:none;border-top:1px solid var(--border);margin:18px 0}

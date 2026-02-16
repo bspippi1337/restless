@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Restless — Universal API Client (CLI + TUI)</title>
+  <meta name="description" content="Restless is a universal API client that discovers entry points, helps you craft requests, and saves reusable snippets. Built for terminal-first workflows." />
+  <link rel="icon" href="./assets/restless-mark.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./assets/site.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Restless</h1>
+          <span>Universal API Client • CLI + TUI</span>
+        </div>
+      </div>
+      <div class="links">
+        <a href="https://github.com/bspippi1337/restless">GitHub</a>
+        <a href="https://github.com/bspippi1337/restless/releases">Releases</a>
+        <a href="#quickstart">Quickstart</a>
+        <a href="#console">Console</a>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="kicker">⚡ <b>Discover</b> endpoints, <b>craft</b> requests, <b>save</b> snippets, <b>ship</b> workflows.</div>
+      <h2>Terminal-first API power, with a calm, high-end interface.</h2>
+      <p>
+        Restless learns an API’s entry points and helps you generate working requests interactively.
+        Use the console to iterate fast, then store your best calls as snippets with stats and history.
+      </p>
+      <div class="cta">
+        <a class="button primary" href="https://github.com/bspippi1337/restless/releases">Download releases</a>
+        <a class="button" href="https://github.com/bspippi1337/restless">View source</a>
+        <a class="button" href="#quickstart">Copy quickstart</a>
+      </div>
+      <div class="badges" aria-label="badges">
+        <div class="badge">Go • Pure-Go friendly</div>
+        <div class="badge">CLI + TUI</div>
+        <div class="badge">Snippets + History</div>
+        <div class="badge">Discovery + Fuzzer (alpha)</div>
+      </div>
+    </section>
+
+    <div class="grid" id="quickstart">
+      <div class="card span6">
+        <h3>Quickstart</h3>
+        <p>Run directly from source (works on Debian/Termux when CGO is off).</p>
+        <div class="code"><pre><code>git clone https://github.com/bspippi1337/restless
+cd restless
+go mod tidy
+CGO_ENABLED=0 go test ./... -count=1 -tags "netgo osusergo"
+CGO_ENABLED=0 go run ./cmd/restless --help</code></pre></div>
+      </div>
+
+      <div class="card span6" id="console">
+        <h3>Console (interactive)</h3>
+        <p>Build + run requests interactively, then save reusable snippets.</p>
+        <div class="code"><pre><code>restless console --profile openai
+# inside:
+suggest
+run
+save models
+snippets
+use models</code></pre></div>
+        <p class="small">Docs: <code>docs/CONSOLE.md</code> and <code>docs/SNIPPETS.md</code></p>
+      </div>
+
+      <div class="card span4">
+        <h3>Snippets</h3>
+        <p>Run and export saved calls with a single command. Snippets track success + latency.</p>
+        <div class="code"><pre><code>restless snippets list --profile openai
+restless snippets run  --profile openai models
+restless snippets export --profile openai models --format curl</code></pre></div>
+      </div>
+
+      <div class="card span4">
+        <h3>History</h3>
+        <p>Every run appends a JSONL record for analysis and future “smart suggestion” features.</p>
+        <div class="code"><pre><code>~/.config/restless/history/openai.jsonl</code></pre></div>
+      </div>
+
+      <div class="card span4">
+        <h3>Design goals</h3>
+        <p>Predictable, readable, and “boringly professional”. No jump-scares. Only good caffeine.</p>
+        <hr class="sep" />
+        <p class="small">Brand: dark graphite, electric blue, mint accent. Clean typography. Strong spacing.</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="small">© Restless • bspippi1337/restless</div>
+      <div class="small">
+        <a href="https://github.com/bspippi1337/restless/issues">Issues</a> ·
+        <a href="https://github.com/bspippi1337/restless/discussions">Discussions</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

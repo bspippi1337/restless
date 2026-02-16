@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -9,8 +10,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bspippi1337/restless/internal/console"
 	"github.com/bspippi1337/restless/internal/core/discovery"
 	"github.com/bspippi1337/restless/internal/help"
+	"github.com/bspippi1337/restless/internal/history"
+	"github.com/bspippi1337/restless/internal/httpclient"
+	"github.com/bspippi1337/restless/internal/profile"
+	"github.com/bspippi1337/restless/internal/snippets"
 )
 
 func main() {
@@ -32,6 +38,12 @@ func main() {
 	case "doctor":
 		cmdDoctor()
 		return
+	case "console":
+		cmdConsole(os.Args[2:])
+		return
+	case "snippets":
+		cmdSnippets(os.Args[2:])
+		return
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n\n", os.Args[1])
 		printRootHelp(2)
@@ -48,7 +60,9 @@ func printRootHelp(exit int) {
 	fmt.Fprintln(out, "")
 	fmt.Fprintln(out, "Commands:")
 	fmt.Fprintln(out, "  discover   Discover APIs starting from a domain")
-	fmt.Fprintln(out, "  doctor     Self-check and environment hints")
+	fmt.Fprintln(out, "  doctor     Self-check and environment hints
+  console    Interactive console (build requests + save snippets)
+  snippets   Manage saved request snippets")
 	fmt.Fprintln(out, "  version    Print version")
 	fmt.Fprintln(out, "  help       Show help")
 	fmt.Fprintln(out, "")
@@ -64,18 +78,18 @@ func cmdDiscover(args []string) {
 	fs.SetOutput(os.Stdout)
 
 	var (
-		verify        = fs.Bool("verify", false, "Validate discovered endpoints with live HTTP checks")
-		fuzz          = fs.Bool("fuzz", false, "Expand discovery using pattern-based probing")
-		budgetSeconds = fs.Int("budget-seconds", 15, "Maximum total discovery time")
-		budgetPages   = fs.Int("budget-pages", 6, "Maximum pages to crawl")
-		saveProfile   = fs.String("save-profile", "", "Save discovery results to a named profile")
-		overwrite     = fs.Bool("overwrite-profile", false, "Replace existing profile instead of merging")
-		profileDir    = fs.String("profile-dir", "", "Custom profile storage directory")
-		emitExamples  = fs.Bool("emit-examples", false, "Generate example requests inside the profile")
-		redactSecrets = fs.Bool("redact-secrets", false, "Remove detected tokens from generated examples")
-		jsonOut       = fs.Bool("json", false, "Output machine-readable JSON")
-		quiet         = fs.Bool("quiet", false, "Minimal output")
-		debug         = fs.Bool("debug", false, "Verbose diagnostic logging")
+		verify          = fs.Bool("verify", false, "Validate discovered endpoints with live HTTP checks")
+		fuzz            = fs.Bool("fuzz", false, "Expand discovery using pattern-based probing")
+		budgetSeconds   = fs.Int("budget-seconds", 15, "Maximum total discovery time")
+		budgetPages     = fs.Int("budget-pages", 6, "Maximum pages to crawl")
+		saveProfile     = fs.String("save-profile", "", "Save discovery results to a named profile")
+		overwrite       = fs.Bool("overwrite-profile", false, "Replace existing profile instead of merging")
+		profileDir      = fs.String("profile-dir", "", "Custom profile storage directory")
+		emitExamples    = fs.Bool("emit-examples", false, "Generate example requests inside the profile")
+		redactSecrets   = fs.Bool("redact-secrets", false, "Remove detected tokens from generated examples")
+		jsonOut         = fs.Bool("json", false, "Output machine-readable JSON")
+		quiet           = fs.Bool("quiet", false, "Minimal output")
+		debug           = fs.Bool("debug", false, "Verbose diagnostic logging")
 	)
 
 	// Dynamic help hook for stdlib flags:
@@ -372,4 +386,215 @@ func extractBlock(s, header string) string {
 		out = append(out, line)
 	}
 	return strings.Join(out, "\n") + "\n"
+}
+
+// -------------------- Console + Snippets (v1) --------------------
+
+func cmdConsole(args []string) {
+	fs := flag.NewFlagSet("console", flag.ContinueOnError)
+	fs.SetOutput(os.Stdout)
+
+	profileName := fs.String("profile", "", "Profile name to use (required)")
+	profileDir := fs.String("profile-dir", "", "Profile directory (default: ~/.config/restless/profiles)")
+	snippetDir := fs.String("snippet-dir", "", "Snippet directory override")
+	baseURL := fs.String("base", "", "Override base URL")
+
+	fs.Usage = func() {
+		out := fs.Output()
+		fmt.Fprintln(out, "restless console — interactive request builder")
+		fmt.Fprintln(out, "")
+		fmt.Fprintln(out, "Usage:")
+		fmt.Fprintln(out, "  restless console --profile <name> [--base <url>]")
+		fmt.Fprintln(out, "")
+		fmt.Fprintln(out, "Examples:")
+		fmt.Fprintln(out, "  restless console --profile openai")
+		fmt.Fprintln(out, "  restless console --profile openai --base https://api.openai.com")
+		fmt.Fprintln(out, "")
+		fmt.Fprintln(out, "Inside console: suggest, run, save <name>, snippets, use <name>")
+	}
+
+	if err := fs.Parse(args); err != nil {
+		fmt.Fprintln(os.Stdout, "")
+		fs.Usage()
+		os.Exit(2)
+	}
+	if strings.TrimSpace(*profileName) == "" {
+		fs.Usage()
+		os.Exit(2)
+	}
+
+	err := console.Run(console.Options{
+		ProfileName: *profileName,
+		ProfileDir:  *profileDir,
+		SnippetDir:  *snippetDir,
+		BaseURL:     *baseURL,
+	})
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "console error:", err)
+		os.Exit(1)
+	}
+}
+
+func cmdSnippets(args []string) {
+	if len(args) == 0 {
+		printSnippetsHelp()
+		return
+	}
+	switch args[0] {
+	case "-h", "--help", "help":
+		printSnippetsHelp()
+		return
+	case "list":
+		cmdSnippetsList(args[1:])
+	case "run":
+		cmdSnippetsRun(args[1:])
+	case "export":
+		cmdSnippetsExport(args[1:])
+	case "pin":
+		cmdSnippetsPin(args[1:], true)
+	case "unpin":
+		cmdSnippetsPin(args[1:], false)
+	default:
+		printSnippetsHelp()
+	}
+}
+
+func printSnippetsHelp() {
+	fmt.Println("restless snippets — manage saved request snippets")
+	fmt.Println("\nUsage:\n  restless snippets list --profile <name>\n  restless snippets pin --profile <name> <snippet>\n  restless snippets unpin --profile <name> <snippet>\n")
+}
+
+func cmdSnippetsList(args []string) {
+	fs := flag.NewFlagSet("snippets list", flag.ContinueOnError)
+	fs.SetOutput(os.Stdout)
+	profileName := fs.String("profile", "", "Profile name (required)")
+	snippetDir := fs.String("snippet-dir", "", "Snippet directory override")
+	if err := fs.Parse(args); err != nil { os.Exit(2) }
+	if *profileName == "" { printSnippetsHelp(); os.Exit(2) }
+
+	list, err := snippets.List(*snippetDir, *profileName)
+	if err != nil { fmt.Fprintln(os.Stderr, "snippets list error:", err); os.Exit(1) }
+	if len(list) == 0 { fmt.Println("(no snippets)"); return }
+	for _, sn := range list {
+		pin := " "; if sn.Pin { pin = "★" }
+		fmt.Printf("%s %-18s %-6s %-38s used=%d last=%s\n", pin, sn.Name, strings.ToUpper(sn.Method), sn.Path, sn.UseCount, sn.LastUsedAt)
+	}
+}
+
+func cmdSnippetsPin(args []string, pin bool) {
+	fs := flag.NewFlagSet("snippets pin", flag.ContinueOnError)
+	fs.SetOutput(os.Stdout)
+	profileName := fs.String("profile", "", "Profile name (required)")
+	snippetDir := fs.String("snippet-dir", "", "Snippet directory override")
+	if err := fs.Parse(args); err != nil { os.Exit(2) }
+	rest := fs.Args()
+	if *profileName == "" || len(rest) < 1 { printSnippetsHelp(); os.Exit(2) }
+
+	sn, err := snippets.Load(*snippetDir, *profileName, rest[0])
+	if err != nil { fmt.Fprintln(os.Stderr, "snippet load error:", err); os.Exit(1) }
+	sn.Pin = pin
+	_, err = snippets.Save(*snippetDir, sn, true)
+	if err != nil { fmt.Fprintln(os.Stderr, "snippet save error:", err); os.Exit(1) }
+	if pin { fmt.Println("★ pinned", sn.Name) } else { fmt.Println("unpinned", sn.Name) }
+}
+
+
+
+func cmdSnippetsRun(args []string) {
+	fs := flag.NewFlagSet("snippets run", flag.ContinueOnError)
+	fs.SetOutput(os.Stdout)
+	profileName := fs.String("profile", "", "Profile name (required)")
+	profileDir := fs.String("profile-dir", "", "Profile directory")
+	snippetDir := fs.String("snippet-dir", "", "Snippet directory override")
+	baseURL := fs.String("base", "", "Override base URL")
+	timeoutS := fs.Int("timeout", 0, "Override timeout seconds")
+	if err := fs.Parse(args); err != nil { os.Exit(2) }
+	rest := fs.Args()
+	if *profileName == "" || len(rest) < 1 { printSnippetsHelp(); os.Exit(2) }
+
+	pr, err := profile.Load(*profileDir, *profileName)
+	if err != nil { fmt.Fprintln(os.Stderr, "profile load error:", err); os.Exit(1) }
+	sn, err := snippets.Load(*snippetDir, *profileName, rest[0])
+	if err != nil { fmt.Fprintln(os.Stderr, "snippet load error:", err); os.Exit(1) }
+
+	res, err := snippets.RunSnippet(context.Background(), pr, sn, snippets.RunOptions{BaseURLOverride: *baseURL, TimeoutSeconds: *timeoutS})
+	ok := false
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "run error:", err)
+	} else {
+		ok = res.StatusCode >= 200 && res.StatusCode < 400
+		fmt.Printf("✅ %s (%d) %dms\n", res.Status, res.StatusCode, res.LatencyMs)
+		fmt.Println(httpclient.Redact(string(httpclient.PrettyJSON(res.Body))))
+	}
+	_ = history.Append(*profileName, history.Entry{Profile: *profileName, Name: sn.Name, Method: sn.Method, Path: sn.Path, BaseURL: chooseBase(pr, *baseURL), StatusCode: res.StatusCode, LatencyMs: res.LatencyMs, OK: ok})
+	_ = snippets.TouchWithResult(*snippetDir, sn, ok, res.LatencyMs)
+	if !ok { os.Exit(1) }
+}
+
+func cmdSnippetsExport(args []string) {
+	fs := flag.NewFlagSet("snippets export", flag.ContinueOnError)
+	fs.SetOutput(os.Stdout)
+	profileName := fs.String("profile", "", "Profile name (required)")
+	profileDir := fs.String("profile-dir", "", "Profile directory")
+	snippetDir := fs.String("snippet-dir", "", "Snippet directory override")
+	format := fs.String("format", "curl", "curl|httpie")
+	baseURL := fs.String("base", "", "Override base URL")
+	if err := fs.Parse(args); err != nil { os.Exit(2) }
+	rest := fs.Args()
+	if *profileName == "" || len(rest) < 1 { printSnippetsHelp(); os.Exit(2) }
+
+	pr, err := profile.Load(*profileDir, *profileName)
+	if err != nil { fmt.Fprintln(os.Stderr, "profile load error:", err); os.Exit(1) }
+	sn, err := snippets.Load(*snippetDir, *profileName, rest[0])
+	if err != nil { fmt.Fprintln(os.Stderr, "snippet load error:", err); os.Exit(1) }
+
+	base := chooseBase(pr, *baseURL)
+	headers := map[string]string{}
+	for k, v := range pr.Defaults { headers[k] = v }
+	for k, v := range sn.Headers { headers[k] = v }
+	if strings.ToLower(pr.AuthType) == "bearer" && headers["Authorization"] == "" && pr.AuthEnv != "" {
+		headers["Authorization"] = "Bearer ${ENV:" + pr.AuthEnv + "}"
+	}
+	req := httpclient.Request{Method: sn.Method, BaseURL: base, Path: sn.Path, Headers: headers, Query: map[string]string{}, Body: []byte(sn.Body)}
+	full, _ := httpclient.BuildURL(base, sn.Path, map[string]string{})
+
+	switch strings.ToLower(*format) {
+	case "curl":
+		fmt.Println(exportCurl(full, req))
+	case "httpie":
+		fmt.Println(exportHTTPie(full, req))
+	default:
+		fmt.Println("unknown format")
+		os.Exit(2)
+	}
+}
+
+func chooseBase(pr profile.Profile, override string) string {
+	if override != "" { return override }
+	if len(pr.BaseURLs) > 0 { return pr.BaseURLs[0] }
+	return ""
+}
+
+func exportCurl(url string, r httpclient.Request) string {
+	var b strings.Builder
+	b.WriteString("curl -i '"); b.WriteString(url); b.WriteString("' -X "); b.WriteString(strings.ToUpper(r.Method))
+	for k, v := range r.Headers {
+		b.WriteString(" -H '"); b.WriteString(k); b.WriteString(": "); b.WriteString(v); b.WriteString("'")
+	}
+	if len(r.Body) > 0 {
+		b.WriteString(" --data '"); b.WriteString(strings.ReplaceAll(string(r.Body), "'", "'\"'\"'")); b.WriteString("'")
+	}
+	return b.String()
+}
+
+func exportHTTPie(url string, r httpclient.Request) string {
+	var b strings.Builder
+	b.WriteString("http "); b.WriteString(strings.ToUpper(r.Method)); b.WriteString(" '"); b.WriteString(url); b.WriteString("'")
+	for k, v := range r.Headers {
+		b.WriteString(" "); b.WriteString(k); b.WriteString(":'"); b.WriteString(v); b.WriteString("'")
+	}
+	if len(r.Body) > 0 {
+		b.WriteString(" <<< '"); b.WriteString(strings.ReplaceAll(string(r.Body), "'", "'\"'\"'")); b.WriteString("'")
+	}
+	return b.String()
 }

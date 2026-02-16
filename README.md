@@ -20,3 +20,16 @@ restless discover --help
 ## Profiles
 
 Saved to `~/.config/restless/profiles/<name>.yaml` (Linux/macOS/Termux).
+
+
+## Console (interactive)
+
+Build and run requests interactively, then save them as snippets:
+
+```bash
+restless console --profile openai
+```
+
+Docs:
+- `docs/CONSOLE.md`
+- `docs/SNIPPETS.md`

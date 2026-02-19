@@ -1,0 +1,22 @@
+{
+  "name": "restless",
+  "version": "1.0.0",
+  "description": "REST api made easy and restless",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bspippi1337/restless.git"
+  },
+  "author": "Pippi Tednes",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bspippi1337/restless/issues"
+  },
+  "homepage": "https://github.com/bspippi1337/restless#readme"
+}

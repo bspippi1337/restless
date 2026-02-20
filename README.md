@@ -33,11 +33,3 @@ restless console --profile openai
 Docs:
 - `docs/CONSOLE.md`
 - `docs/SNIPPETS.md`
-
-
-## Website
-
-GitHub Pages is deployed automatically from `docs/`.
-
-- Repository: https://github.com/bspippi1337/restless
-- Releases: https://github.com/bspippi1337/restless/releases

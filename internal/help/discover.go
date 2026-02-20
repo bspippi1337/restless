@@ -8,8 +8,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-
-	"golang.org/x/term"
 )
 
 // HelpContext is intentionally small and dependency-free.
@@ -162,16 +160,17 @@ func NewDiscoverHelpContext(profileDir string) HelpContext {
 // --------- Tiny renderer (standalone; no other files needed) ---------
 
 func detectWidth(fallback int) int {
-	fd := int(os.Stdout.Fd())
-	if term.IsTerminal(fd) {
-		if w, _, err := term.GetSize(fd); err == nil && w > 0 {
-			if w < 60 {
+	// Avoid external deps (golang.org/x/term) to keep Termux builds painless.
+	// Prefer  if present, otherwise fall back.
+	if s := os.Getenv("COLUMNS"); s != "" {
+		if n, err := strconv.Atoi(strings.TrimSpace(s)); err == nil && n > 0 {
+			if n < 60 {
 				return 60
 			}
-			if w > 120 {
+			if n > 120 {
 				return 120
 			}
-			return w
+			return n
 		}
 	}
 	return fallback

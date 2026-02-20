@@ -8,13 +8,13 @@ import (
 )
 
 type Profile struct {
-	Name      string
-	Path      string
-	BaseURLs  []string
-	AuthType  string
-	AuthEnv   string
-	Defaults  map[string]string
-	TimeoutS  int
+	Name     string
+	Path     string
+	BaseURLs []string
+	AuthType string
+	AuthEnv  string
+	Defaults map[string]string
+	TimeoutS int
 	Endpoints []Endpoint
 }
 
@@ -74,17 +74,13 @@ func Load(profileDir, name string) (Profile, error) {
 			inBase, inAuth, inToken, inDefaults, inHeaders, inEndpoints = false, true, false, false, false, false
 			continue
 		case "token:":
-			if inAuth {
-				inToken = true
-			}
+			if inAuth { inToken = true }
 			continue
 		case "defaults:":
 			inBase, inAuth, inToken, inDefaults, inHeaders, inEndpoints = false, false, false, true, false, false
 			continue
 		case "headers:":
-			if inDefaults {
-				inHeaders = true
-			}
+			if inDefaults { inHeaders = true }
 			continue
 		case "endpoints:":
 			inBase, inAuth, inToken, inDefaults, inHeaders, inEndpoints = false, false, false, false, false, true
@@ -113,15 +109,11 @@ func Load(profileDir, name string) (Profile, error) {
 		}
 
 		if inHeaders {
-			if trim == "" || strings.HasSuffix(trim, ":") {
-				continue
-			}
+			if trim == "" || strings.HasSuffix(trim, ":") { continue }
 			if idx := strings.Index(trim, ":"); idx > 0 {
 				k := strings.TrimSpace(trim[:idx])
 				v := strings.TrimSpace(trim[idx+1:])
-				if k != "" && v != "" {
-					pr.Defaults[k] = v
-				}
+				if k != "" && v != "" { pr.Defaults[k] = v }
 			}
 			continue
 		}
@@ -147,65 +139,39 @@ func Load(profileDir, name string) (Profile, error) {
 	if len(pr.BaseURLs) == 0 {
 		pr.BaseURLs = []string{"https://api.example.com"}
 	}
-	if pr.AuthEnv == "" {
-		pr.AuthEnv = "RESTLESS_TOKEN"
-	}
-	if pr.AuthType == "" {
-		pr.AuthType = "bearer"
-	}
+	if pr.AuthEnv == "" { pr.AuthEnv = "RESTLESS_TOKEN" }
+	if pr.AuthType == "" { pr.AuthType = "bearer" }
 
 	return pr, nil
 }
 
 func afterColon(s string) string {
-	if i := strings.Index(s, ":"); i >= 0 {
-		return strings.TrimSpace(s[i+1:])
-	}
+	if i := strings.Index(s, ":"); i >= 0 { return strings.TrimSpace(s[i+1:]) }
 	return ""
 }
 
 func atoiSafe(s string, def int) int {
-	n := 0
-	ok := false
+	n := 0; ok := false
 	for _, r := range s {
-		if r < '0' || r > '9' {
-			if ok {
-				break
-			}
-			continue
-		}
-		ok = true
-		n = n*10 + int(r-'0')
+		if r < '0' || r > '9' { if ok { break }; continue }
+		ok = true; n = n*10 + int(r-'0')
 	}
-	if !ok {
-		return def
-	}
+	if !ok { return def }
 	return n
 }
 
 func atofSafe(s string, def float64) float64 {
 	s = strings.TrimSpace(s)
-	if s == "" {
-		return def
-	}
+	if s == "" { return def }
 	sign := 1.0
-	if strings.HasPrefix(s, "-") {
-		sign = -1.0
-		s = strings.TrimPrefix(s, "-")
-	}
+	if strings.HasPrefix(s, "-") { sign = -1.0; s = strings.TrimPrefix(s, "-") }
 	parts := strings.SplitN(s, ".", 2)
 	i := float64(atoiSafe(parts[0], 0))
-	if len(parts) == 1 {
-		return sign * i
-	}
-	frac := 0.0
-	div := 1.0
+	if len(parts) == 1 { return sign * i }
+	frac := 0.0; div := 1.0
 	for _, r := range parts[1] {
-		if r < '0' || r > '9' {
-			break
-		}
-		frac = frac*10 + float64(r-'0')
-		div *= 10
+		if r < '0' || r > '9' { break }
+		frac = frac*10 + float64(r-'0'); div *= 10
 	}
 	return sign * (i + frac/div)
 }

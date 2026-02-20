@@ -2,103 +2,299 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Restless — Universal API Client (CLI + TUI)</title>
-  <meta name="description" content="Restless is a universal API client that discovers entry points, helps you craft requests, and saves reusable snippets. Built for terminal-first workflows." />
-  <link rel="icon" href="./assets/restless-mark.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#0b0f1a" />
+  <title>Restless • Universal API Client (Domain-first)</title>
+  <meta name="description" content="Restless is a domain-first universal API client that discovers endpoints, generates working queries, and saves reusable profiles & snippets." />
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./assets/site.css" />
+  <script defer src="./assets/site.js"></script>
 </head>
 <body>
-  <div class="container">
-    <div class="nav">
+  <a class="skip" href="#content">Skip to content</a>
+
+  <header class="top">
+    <div class="wrap nav">
       <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <h1>Restless</h1>
-          <span>Universal API Client • CLI + TUI</span>
+        <img class="mark" src="./assets/mark.svg" alt="" aria-hidden="true" />
+        <div class="brandtext">
+          <div class="name">Restless</div>
+          <div class="tag">Universal API Client • Profiles • Snippets • SSE</div>
         </div>
       </div>
-      <div class="links">
-        <a href="https://github.com/bspippi1337/restless">GitHub</a>
-        <a href="https://github.com/bspippi1337/restless/releases">Releases</a>
-        <a href="#quickstart">Quickstart</a>
-        <a href="#console">Console</a>
+      <nav class="links" aria-label="Primary">
+        <a href="#why">Why</a>
+        <a href="#how">How it works</a>
+        <a href="#demo">Demo</a>
+        <a href="#docs">Docs</a>
+      </nav>
+      <div class="cta">
+        <a class="btn ghost" href="https://github.com/bspippi1337/restless" rel="noreferrer">GitHub</a>
+        <a class="btn" href="#get">Get Restless</a>
       </div>
     </div>
+  </header>
 
+  <main id="content">
     <section class="hero">
-      <div class="kicker">⚡ <b>Discover</b> endpoints, <b>craft</b> requests, <b>save</b> snippets, <b>ship</b> workflows.</div>
-      <h2>Terminal-first API power, with a calm, high-end interface.</h2>
-      <p>
-        Restless learns an API’s entry points and helps you generate working requests interactively.
-        Use the console to iterate fast, then store your best calls as snippets with stats and history.
-      </p>
-      <div class="cta">
-        <a class="button primary" href="https://github.com/bspippi1337/restless/releases">Download releases</a>
-        <a class="button" href="https://github.com/bspippi1337/restless">View source</a>
-        <a class="button" href="#quickstart">Copy quickstart</a>
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <div class="badge">
+            <span class="dot"></span>
+            <span>Domain-first discovery for REST APIs</span>
+          </div>
+
+          <h1>
+            Discover an API from a single domain,
+            then build requests like you already know the spec.
+          </h1>
+
+          <p class="lead">
+            Restless finds entry points (OpenAPI, docs, sitemaps), generates working queries,
+            and saves clean, reusable <strong>profiles</strong> and <strong>snippets</strong> over time.
+            It speaks CLI, and it can draw its own UI in the terminal.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn" href="#get">One-liners</a>
+            <a class="btn ghost" href="#demo">See the flow</a>
+          </div>
+
+          <div class="kpis" aria-label="Key capabilities">
+            <div class="kpi">
+              <div class="kpi-title">Discover</div>
+              <div class="kpi-text">OpenAPI • docs • sitemaps • hints</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-title">Generate</div>
+              <div class="kpi-text">Queries • curl • snippets • presets</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-title">Iterate</div>
+              <div class="kpi-text">Console • history • profiles</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-panel" role="img" aria-label="Terminal demo">
+          <div class="panel-top">
+            <div class="lights" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="panel-title">restless • interactive console</div>
+            <div class="panel-spacer"></div>
+          </div>
+          <pre class="term" id="term" aria-live="polite"></pre>
+          <div class="panel-foot">
+            <span class="chip">profiles</span>
+            <span class="chip">snippets</span>
+            <span class="chip">sse</span>
+            <span class="chip">doctor</span>
+          </div>
+        </div>
       </div>
-      <div class="badges" aria-label="badges">
-        <div class="badge">Go • Pure-Go friendly</div>
-        <div class="badge">CLI + TUI</div>
-        <div class="badge">Snippets + History</div>
-        <div class="badge">Discovery + Fuzzer (alpha)</div>
+      <div class="hero-glow" aria-hidden="true"></div>
+    </section>
+
+    <section class="section" id="why">
+      <div class="wrap">
+        <h2>Why Restless</h2>
+        <p class="sub">
+          Most API tools assume you already have a spec, a token, a base URL, and a plan.
+          Restless starts earlier: from a domain. It does the heavy lifting.
+        </p>
+
+        <div class="cards">
+          <article class="card">
+            <h3>Domain-first</h3>
+            <p>Type a domain. Restless hunts for entry points and organizes evidence, so you can move fast without guessing.</p>
+          </article>
+          <article class="card">
+            <h3>Profiles that grow</h3>
+            <p>Save what works. Profiles remember base URLs, auth hints, and discovered endpoints. No brittle copy pasta.</p>
+          </article>
+          <article class="card">
+            <h3>Snippets you can trust</h3>
+            <p>Generate working request snippets (curl or native). Keep them tidy, searchable, and reusable.</p>
+          </article>
+          <article class="card">
+            <h3>SSE & streaming</h3>
+            <p>First-class streaming support, so long-running tasks feel alive instead of frozen in time.</p>
+          </article>
+          <article class="card">
+            <h3>Built-in “Doctor”</h3>
+            <p>Automagic sanity checks. Fix what can be fixed, and print the rest with useful next steps.</p>
+          </article>
+          <article class="card">
+            <h3>Terminal UI</h3>
+            <p>Even in CLI-mode, Restless can draw a friendly UI and guide you like a co-pilot, not a lecture.</p>
+          </article>
+        </div>
       </div>
     </section>
 
-    <div class="grid" id="quickstart">
-      <div class="card span6">
-        <h3>Quickstart</h3>
-        <p>Run directly from source (works on Debian/Termux when CGO is off).</p>
-        <div class="code"><pre><code>git clone https://github.com/bspippi1337/restless
+    <section class="section" id="how">
+      <div class="wrap">
+        <h2>How it works</h2>
+        <p class="sub">A simple mental model: evidence in, structure out, productivity up.</p>
+
+        <div class="how-grid">
+          <div class="diagram card">
+            <img src="./assets/diagram.svg" alt="Diagram: Domain -> Discovery -> Evidence -> Console -> Snippets -> Profile" />
+          </div>
+
+          <div class="steps">
+            <div class="step card">
+              <div class="step-no">1</div>
+              <div>
+                <h3>Discover</h3>
+                <p>Search for <code>openapi.json</code>, <code>swagger</code>, sitemaps, docs pages, and known conventions.</p>
+              </div>
+            </div>
+            <div class="step card">
+              <div class="step-no">2</div>
+              <div>
+                <h3>Generate</h3>
+                <p>Turn findings into candidate endpoints, then generate ready-to-run requests.</p>
+              </div>
+            </div>
+            <div class="step card">
+              <div class="step-no">3</div>
+              <div>
+                <h3>Save profiles</h3>
+                <p><code>discover --save-profile</code> stores base settings so the next session starts where you left off.</p>
+              </div>
+            </div>
+            <div class="step card">
+              <div class="step-no">4</div>
+              <div>
+                <h3>Console & snippets</h3>
+                <p>An interactive console helps craft requests and stores them as searchable snippets.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="demo">
+      <div class="wrap">
+        <h2>Demo flow</h2>
+        <p class="sub">Copy, paste, ship. This is the happy path.</p>
+
+        <div class="grid2">
+          <div class="card">
+            <h3>Discover and save a profile</h3>
+            <pre class="code"><code>restless discover openai.com --save-profile openai</code></pre>
+            <p class="muted">Find entry points and store a reusable profile.</p>
+          </div>
+
+          <div class="card">
+            <h3>Launch the interactive console</h3>
+            <pre class="code"><code>restless console --profile openai</code></pre>
+            <p class="muted">Generate queries, run, and save snippets without leaving the session.</p>
+          </div>
+
+          <div class="card">
+            <h3>List and run snippets later</h3>
+            <pre class="code"><code>restless snippets list --profile openai
+restless snippets run  --profile openai models</code></pre>
+            <p class="muted">Over time, your snippet shelf becomes a personal API cookbook.</p>
+          </div>
+
+          <div class="card">
+            <h3>Stream responses (SSE)</h3>
+            <pre class="code"><code>restless request --profile openai GET /v1/models --stream</code></pre>
+            <p class="muted">No dead silence, no frozen terminals, just live output.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="get">
+      <div class="wrap">
+        <h2>Get Restless</h2>
+        <p class="sub">Start with a source build today. Releases can attach binaries as the CI matures.</p>
+
+        <div class="grid2">
+          <div class="card">
+            <h3>Linux / Debian / WSL</h3>
+            <pre class="code"><code>git clone https://github.com/bspippi1337/restless
 cd restless
-go mod tidy
-CGO_ENABLED=0 go test ./... -count=1 -tags "netgo osusergo"
-CGO_ENABLED=0 go run ./cmd/restless --help</code></pre></div>
-      </div>
+make build-all
+./dist/restless --help</code></pre>
+          </div>
+          <div class="card">
+            <h3>Termux</h3>
+            <pre class="code"><code>pkg update -y
+pkg install -y git golang make
+git clone https://github.com/bspippi1337/restless
+cd restless
+make build-all
+./dist/restless --help</code></pre>
+          </div>
+        </div>
 
-      <div class="card span6" id="console">
-        <h3>Console (interactive)</h3>
-        <p>Build + run requests interactively, then save reusable snippets.</p>
-        <div class="code"><pre><code>restless console --profile openai
-# inside:
-suggest
-run
-save models
-snippets
-use models</code></pre></div>
-        <p class="small">Docs: <code>docs/CONSOLE.md</code> and <code>docs/SNIPPETS.md</code></p>
+        <div class="callout card">
+          <div>
+            <h3>Tip</h3>
+            <p>Restless includes a fix-all script in <code>scripts/fixall.sh</code> for Termux/Debian environments.</p>
+          </div>
+          <div class="callout-cta">
+            <a class="btn ghost" href="https://github.com/bspippi1337/restless" rel="noreferrer">Open repo</a>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <div class="card span4">
-        <h3>Snippets</h3>
-        <p>Run and export saved calls with a single command. Snippets track success + latency.</p>
-        <div class="code"><pre><code>restless snippets list --profile openai
-restless snippets run  --profile openai models
-restless snippets export --profile openai models --format curl</code></pre></div>
+    <section class="section" id="docs">
+      <div class="wrap">
+        <h2>Docs</h2>
+        <p class="sub">Short, practical, and built for copy-paste.</p>
+
+        <div class="cards">
+          <article class="card">
+            <h3>CLI help</h3>
+            <p>Run <code>restless --help</code> for a command map, examples, and smart hints.</p>
+          </article>
+          <article class="card">
+            <h3>Discover</h3>
+            <p><code>discover --save-profile</code> stores your working setup so you can iterate fast.</p>
+          </article>
+          <article class="card">
+            <h3>Console + snippets</h3>
+            <p>Interactive generation that saves working snippets as a curated shelf.</p>
+          </article>
+        </div>
       </div>
+    </section>
+  </main>
 
-      <div class="card span4">
-        <h3>History</h3>
-        <p>Every run appends a JSONL record for analysis and future “smart suggestion” features.</p>
-        <div class="code"><pre><code>~/.config/restless/history/openai.jsonl</code></pre></div>
+  <footer class="foot">
+    <div class="wrap foot-grid">
+      <div>
+        <div class="foot-brand">
+          <img src="./assets/mark.svg" alt="" aria-hidden="true" />
+          <div>
+            <div class="foot-name">Restless</div>
+            <div class="muted">Universal API Client</div>
+          </div>
+        </div>
+        <p class="muted small">
+          Built for speed, clarity, and repeatability.
+        </p>
       </div>
-
-      <div class="card span4">
-        <h3>Design goals</h3>
-        <p>Predictable, readable, and “boringly professional”. No jump-scares. Only good caffeine.</p>
-        <hr class="sep" />
-        <p class="small">Brand: dark graphite, electric blue, mint accent. Clean typography. Strong spacing.</p>
+      <div class="foot-links">
+        <a href="https://github.com/bspippi1337/restless" rel="noreferrer">GitHub</a>
+        <a href="#get">Install</a>
+        <a href="#how">How it works</a>
+      </div>
+      <div class="foot-small muted small">
+        <div>© Restless</div>
+        <div id="buildstamp"></div>
       </div>
     </div>
-
-    <div class="footer">
-      <div class="small">© Restless • bspippi1337/restless</div>
-      <div class="small">
-        <a href="https://github.com/bspippi1337/restless/issues">Issues</a> ·
-        <a href="https://github.com/bspippi1337/restless/discussions">Discussions</a>
-      </div>
-    </div>
-  </div>
+  </footer>
 </body>
 </html>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 420" fill="none">
+  <defs>
+    <linearGradient id="g" x1="40" y1="40" x2="940" y2="380" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C5CFF"/>
+      <stop offset="1" stop-color="#36D1FF"/>
+    </linearGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#000" flood-opacity=".30"/>
+    </filter>
+  </defs>
+
+  <rect x="26" y="34" width="928" height="352" rx="28" fill="rgba(255,255,255,.035)" stroke="rgba(255,255,255,.10)"/>
+  <path d="M110 210H870" stroke="rgba(255,255,255,.10)" stroke-width="2"/>
+
+  <g filter="url(#sh)">
+    <rect x="70" y="138" width="150" height="144" rx="20" fill="rgba(15,21,38,.95)" stroke="rgba(255,255,255,.12)"/>
+    <rect x="250" y="138" width="170" height="144" rx="20" fill="rgba(15,21,38,.95)" stroke="rgba(255,255,255,.12)"/>
+    <rect x="450" y="138" width="150" height="144" rx="20" fill="rgba(15,21,38,.95)" stroke="rgba(255,255,255,.12)"/>
+    <rect x="630" y="138" width="140" height="144" rx="20" fill="rgba(15,21,38,.95)" stroke="rgba(255,255,255,.12)"/>
+    <rect x="800" y="138" width="150" height="144" rx="20" fill="rgba(15,21,38,.95)" stroke="rgba(255,255,255,.12)"/>
+  </g>
+
+  <path d="M220 210H250" stroke="url(#g)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M420 210H450" stroke="url(#g)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M600 210H630" stroke="url(#g)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M770 210H800" stroke="url(#g)" stroke-width="3" stroke-linecap="round"/>
+
+  <g font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial" fill="rgba(255,255,255,.88)">
+    <text x="96" y="176" font-size="16" font-weight="700">Domain</text>
+    <text x="96" y="202" font-size="13" fill="rgba(255,255,255,.65)">bankid.no</text>
+    <text x="96" y="222" font-size="13" fill="rgba(255,255,255,.65)">openai.com</text>
+
+    <text x="278" y="176" font-size="16" font-weight="700">Discovery</text>
+    <text x="278" y="202" font-size="13" fill="rgba(255,255,255,.65)">OpenAPI, docs,</text>
+    <text x="278" y="222" font-size="13" fill="rgba(255,255,255,.65)">sitemap, hints</text>
+
+    <text x="476" y="176" font-size="16" font-weight="700">Evidence</text>
+    <text x="476" y="202" font-size="13" fill="rgba(255,255,255,.65)">scored sources</text>
+    <text x="476" y="222" font-size="13" fill="rgba(255,255,255,.65)">verified links</text>
+
+    <text x="654" y="176" font-size="16" font-weight="700">Console</text>
+    <text x="654" y="202" font-size="13" fill="rgba(255,255,255,.65)">interactive</text>
+    <text x="654" y="222" font-size="13" fill="rgba(255,255,255,.65)">query builder</text>
+
+    <text x="826" y="176" font-size="16" font-weight="700">Snippets</text>
+    <text x="826" y="202" font-size="13" fill="rgba(255,255,255,.65)">saved requests</text>
+    <text x="826" y="222" font-size="13" fill="rgba(255,255,255,.65)">profiles</text>
+  </g>
+
+  <path d="M60 92c130-52 300-52 430 0 160 66 320 70 430 4" stroke="url(#g)" stroke-width="4" stroke-linecap="round" opacity=".60"/>
+</svg>

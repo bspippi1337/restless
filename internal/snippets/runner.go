@@ -17,11 +17,17 @@ type RunOptions struct {
 
 func RunSnippet(ctx context.Context, pr profile.Profile, sn Snippet, opt RunOptions) (httpclient.Result, error) {
 	base := pr.BaseURLs[0]
-	if opt.BaseURLOverride != "" { base = opt.BaseURLOverride }
+	if opt.BaseURLOverride != "" {
+		base = opt.BaseURLOverride
+	}
 
 	headers := map[string]string{}
-	for k, v := range pr.Defaults { headers[k] = v }
-	for k, v := range sn.Headers { headers[k] = v }
+	for k, v := range pr.Defaults {
+		headers[k] = v
+	}
+	for k, v := range sn.Headers {
+		headers[k] = v
+	}
 
 	if strings.ToLower(pr.AuthType) == "bearer" && headers["Authorization"] == "" {
 		if tok := os.Getenv(pr.AuthEnv); tok != "" {
@@ -40,7 +46,9 @@ func RunSnippet(ctx context.Context, pr profile.Profile, sn Snippet, opt RunOpti
 
 	if _, ok := ctx.Deadline(); !ok {
 		ts := pr.TimeoutS
-		if opt.TimeoutSeconds > 0 { ts = opt.TimeoutSeconds }
+		if opt.TimeoutSeconds > 0 {
+			ts = opt.TimeoutSeconds
+		}
 		c, cancel := context.WithTimeout(ctx, time.Duration(ts)*time.Second)
 		defer cancel()
 		return httpclient.Do(c, req)

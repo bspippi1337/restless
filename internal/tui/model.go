@@ -1,6 +1,7 @@
 package tui
 
 import (
+	coremodel "github.com/bspippi1337/restless/internal/core/model"
 	"context"
 	"fmt"
 	"strings"
@@ -62,7 +63,7 @@ type model struct {
 
 type tickMsg time.Time
 type discoverMsg struct {
-	finding discovery.Finding
+	finding coremodel.Finding
 	err     error
 }
 

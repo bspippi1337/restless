@@ -1,0 +1,53 @@
+project_name: restless
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: restless
+    main: ./cmd/uac
+    binary: restless
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w
+
+archives:
+  - id: default
+    builds: [restless]
+    format: tar.gz
+    name_template: "restless_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE*
+      - README*
+      - README.npm.md
+
+checksum:
+  name_template: "checksums.txt"
+
+# Homebrew formula publishing via a tap repository.
+# Create a tap repo first, e.g.:
+#   https://github.com/blckswan1337/homebrew-tap
+# Then users can install via:
+#   brew tap blckswan1337/tap
+#   brew install restless
+brews:
+  - name: restless
+    description: "restless: Universal API Client (Go CLI)"
+    homepage: "https://github.com/blckswan1337/restless"
+    license: "MIT"
+    repository:
+      owner: blckswan1337
+      name: homebrew-tap
+      branch: main
+    directory: Formula
+    install: |
+      bin.install "restless"
+    test: |
+      system "#{bin}/restless", "--help"
+
+release:
+  github:
+    owner: blckswan1337
+    name: restless

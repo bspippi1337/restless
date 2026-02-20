@@ -16,7 +16,8 @@ build:
 build-all:
 	mkdir -p dist
 	GOOS=linux   GOARCH=amd64 go build -o dist/restless_linux_amd64   ./cmd/restless
-	GOOS=darwin  GOARCH=amd64 go build -o dist/restless_darwin_amd64  ./cmd/restless
+	GOOS=linux   GOARCH=arm64 go build -o dist/restless_linux_arm64 ./cmd/restless
+        GOOS=darwin  GOARCH=amd64 go build -o dist/restless_darwin_amd64  ./cmd/restless
 	GOOS=windows GOARCH=amd64 go build -o dist/restless_windows_amd64.exe ./cmd/restless
 
 clean:

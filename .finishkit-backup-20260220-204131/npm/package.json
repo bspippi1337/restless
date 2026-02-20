@@ -1,0 +1,20 @@
+{
+  "name": "restless-uac",
+  "version": "0.1.0",
+  "description": "restless (Go CLI) packaged for npm (downloads GitHub Release binary on install)",
+  "license": "MIT",
+  "bin": {
+    "restless": "bin/restless.js"
+  },
+  "files": [
+    "bin/",
+    "install/",
+    "README.md"
+  ],
+  "scripts": {
+    "postinstall": "node install/install.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

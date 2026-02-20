@@ -1,49 +1,29 @@
-# restless (v2 alpha)
+# Restless
 
-A **CLI-first** API client that can learn an API from **one input**: a domain.
+**Domain-first API discovery and interaction engine**  
+Evidence-driven CLI + interactive TUI (Beta)
 
-Type `bankid.no`, press discover, and Restless does the boring part:
-- finds docs (OpenAPI, developer portals, doc pages)
-- extracts endpoints
-- fuzzes *only from seeds* (safe, disciplined)
-- verifies endpoints (GET/HEAD/OPTIONS)
-- seeds your next request
+[![Go Report Card](https://goreportcard.com/badge/github.com/bspippi1337/restless)](https://goreportcard.com/report/github.com/bspippi1337/restless)
+[![Latest Release](https://img.shields.io/github/v/release/bspippi1337/restless?color=green)](https://github.com/bspippi1337/restless/releases)
+[![License](https://img.shields.io/github/license/bspippi1337/restless)](LICENSE)
 
-## Install
-### Build from source
+Restless automatically explores real APIs starting from a single domain — no OpenAPI spec required.  
+It verifies endpoints, fuzzes lightly for hidden resources, respects budgets (time/pages), saves profiles, and lets you jump into an interactive console to build, test, replay, and save request snippets.
+
+Perfect for:
+
+- Security researchers / bug bounty hunters probing undocumented APIs
+- Reverse engineers analyzing mobile/web backends
+- Developers quickly exploring third-party services without docs
+- Pentesters building request chains fast
+
+No Electron bloat. No YAML hell. Just fast, terminal-native discovery and interaction.
+
+## Quickstart
+
+Install the latest release (or build from source — see below):
+
 ```bash
-go mod tidy
-make build
-./bin/restless
-```
-
-### Get a prebuilt app (recommended)
-This repo includes GitHub Actions to build release binaries for Windows/Linux/macOS.
-- Go to **Actions** → latest run → download artifacts
-- Or tag a release (e.g. `v0.2.0-alpha`) and download assets
-
-## Run
-```bash
-restless
-```
-- In the wizard: enter a domain (e.g. `openai.com`)
-- Press **Ctrl+D** to discover endpoints
-- Press `?` for the built-in help tab
-
-## Commands
-```bash
-restless discover bankid.no --json
-restless doctor
-restless help
-```
-
-## Safety by default
-- No brute force
-- No auth bypass
-- No write calls by default
-- Hard budgets
-
-See: `docs/SECURITY.md` and `docs/RFC-0002-domain-first-discovery.md`
-
-## License
-MIT
+# Example: Linux/macOS (amd64/arm64)
+curl -L https://github.com/bspippi1337/restless/releases/latest/download/restless_Linux_x86_64.tar.gz | tar xz
+sudo mv restless /usr/local/bin/

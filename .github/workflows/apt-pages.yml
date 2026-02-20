@@ -1,0 +1,60 @@
+name: Publish APT repo (GitHub Pages)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  apt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y reprepro dpkg-dev
+
+      # If your project is Go, this builds ./dist/restless by default.
+      # If not Go, replace this step with your own build output into ./dist/<name>.
+      - name: Build binary (Go)
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          if [[ -f "go.mod" ]]; then
+            # Adjust ./cmd/<app> to your layout
+            GOOS=linux GOARCH=amd64 go build -o dist/restless ./cmd/restless || \
+            GOOS=linux GOARCH=amd64 go build -o dist/restless .
+          else
+            echo "No go.mod found. Provide a binary at dist/restless (or edit workflow)."
+            exit 1
+          fi
+
+      - name: Build .deb
+        run: |
+          chmod +x scripts/build-deb.sh
+          PKG_NAME=restless \
+          PKG_VERSION="${GITHUB_SHA::7}" \
+          PKG_ARCH=amd64 \
+          PKG_DESCRIPTION="Restless universal API client" \
+          PKG_HOMEPAGE="https://github.com/${GITHUB_REPOSITORY}" \
+          scripts/build-deb.sh dist/restless
+
+      - name: Publish APT repo to gh-pages
+        env:
+          APT_ORIGIN: "restless"
+          APT_LABEL: "restless APT"
+          APT_CODENAME: "stable"
+          APT_COMPONENT: "main"
+          APT_ARCHS: "amd64 all"
+          APT_BRANCH: "gh-pages"
+        run: |
+          chmod +x scripts/publish-apt-ghpages.sh
+          scripts/publish-apt-ghpages.sh dist/*.deb

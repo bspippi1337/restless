@@ -1,52 +1,26 @@
-# Restless
-**Domain-first API discovery and interaction engine**  
-Evidence-driven **CLI** + interactive **TUI** (Beta)
+## Install
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/bspippi1337/restless)](https://goreportcard.com/report/github.com/bspippi1337/restless)
-[![Latest Release](https://img.shields.io/github/v/release/bspippi1337/restless?color=green)](https://github.com/bspippi1337/restless/releases)
-[![License](https://img.shields.io/github/license/bspippi1337/restless)](LICENSE)
+### Option A: Prebuilt binaries (recommended)
+Restless is built by GitHub Actions. Grab the latest build artifacts here:
 
-Restless automatically explores **real** APIs starting from a **single domain**.  
-No OpenAPI spec required.
+- **Latest workflow run artifacts:**  
+  https://github.com/bspippi1337/restless/actions
 
-It maps what actually exists by probing safely, verifying responses, and collecting evidence you can replay later.
+Or, if you prefer tagged releases:
 
----
+- **Latest release page:**  
+  https://github.com/bspippi1337/restless/releases/latest
 
-## What Restless does
-Restless is built for the moment where you have **a domain** and **questions**, but no docs.
+- **Current tagged release (v420):**  
+  https://github.com/bspippi1337/restless/releases/tag/v420
 
-- **Discovers endpoints from a domain**
-- **Verifies** endpoints with real requests (not guesses on paper)
-- **Light fuzzing** to tease out hidden resources (without going full chaos)
-- **Budgets**: time/page limits so it stays controlled
-- **Profiles**: saves discovery results and reuse them later
-- **Interactive console / TUI** to build, test, replay, and save request snippets
-- **Terminal-native**: fast, minimal, and automation-friendly
+> Note: Direct `/releases/latest/download/...` links only work when the release assets exist with matching filenames.
+> Use the release page or Actions artifacts to avoid dead links.
 
-> No Electron bloat. No YAML hell.  
-> Just a sharp tool that lives where you work: the terminal.
-
----
-
-## Who it’s for
-Perfect for:
-
-- Security researchers / bug bounty hunters probing undocumented APIs
-- Reverse engineers analyzing mobile or web backends
-- Developers quickly exploring third-party services without docs
-- Pentesters building request chains and proofs fast
-
----
-
-## Quickstart
-
-### 1) Install
-Grab a prebuilt release from GitHub Releases:
-- https://github.com/bspippi1337/restless/releases
-
-Example install (Linux/macOS):
+### Option B: Build from source
 ```bash
-curl -L https://github.com/bspippi1337/restless/releases/latest/download/restless_Linux_x86_64.tar.gz | tar xz
-sudo mv restless /usr/local/bin/
-restless --version
+git clone https://github.com/bspippi1337/restless.git
+cd restless
+go mod tidy
+make build
+./bin/restless --help

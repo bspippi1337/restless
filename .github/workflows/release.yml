@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build binaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+
+          build() {
+            local goos="$1" goarch="$2" out="$3"
+            echo "==> $goos/$goarch -> $out"
+            GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 \
+              go build -trimpath -ldflags="-s -w" -o "$out" ./cmd/restless
+          }
+
+          build linux   amd64 dist/restless_linux_amd64
+          build darwin  amd64 dist/restless_darwin_amd64
+          build windows amd64 dist/restless_windows_amd64.exe
+
+          build android arm64 dist/restless_android_arm64
+          build android arm   dist/restless_android_arm
+          build android amd64 dist/restless_android_amd64
+          build android 386   dist/restless_android_386
+
+          (cd dist && sha256sum * > SHA256SUMS.txt)
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: restless-${{ github.ref_name }}
+          path: dist/*
+          retention-days: 14
+
+      - name: Create GitHub Release + upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

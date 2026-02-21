@@ -25,7 +25,11 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 	if domain == "" {
 		return Finding{}, errors.New("domain is empty")
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(max(10,opt.BudgetSeconds))*time.Second)
+
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		time.Duration(max(10, opt.BudgetSeconds))*time.Second,
+	)
 	defer cancel()
 
 	hosts := HostCandidates(domain)
@@ -35,36 +39,44 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 	endpoints := []Endpoint{}
 	base := ""
 
+	// 1) OpenAPI
 	for _, h := range hosts {
 		oas, urls, err := docparse.TryOpenAPI(ctx, h)
 		if err == nil && oas != nil && len(oas.Paths) > 0 {
-			if base == "" { base = h }
+			if base == "" {
+				base = h
+			}
 			docURLs = append(docURLs, urls...)
-			eps := docparse.EndpointsFromOpenAPI(oas)
-			for i := range eps {
-				eps[i].FullURL = h + eps[i].Path
-				eps[i].Evidences = append(eps[i].Evidences, Evidence{
+
+			lite := docparse.EndpointsFromOpenAPI(oas)
+			for _, le := range lite {
+				e := Endpoint{Method: le.Method, Path: le.Path}
+				e.FullURL = h + e.Path
+				e.Evidences = append(e.Evidences, Evidence{
 					Source: SourceOpenAPI,
 					URL:    urls[0],
 					Note:   "OpenAPI (json/yaml)",
 					When:   time.Now(),
 					Score:  95,
 				})
-				endpoints = append(endpoints, eps[i])
+				endpoints = append(endpoints, e)
 			}
 			break
 		}
 	}
 
-	if base == "" { base = hosts[0] }
+	if base == "" {
+		base = hosts[0]
+	}
 
+	// 2) Sitemap hints
 	smURLs, smPaths := scrape.SitemapDocs(ctx, base, max(12, opt.BudgetPages*3))
 	if len(smURLs) > 0 {
 		docURLs = append(docURLs, smURLs...)
 		for _, p := range smPaths {
 			endpoints = append(endpoints, Endpoint{
-				Method: "GET",
-				Path:   p,
+				Method:  "GET",
+				Path:    p,
 				FullURL: base + p,
 				Evidences: []Evidence{{
 					Source: SourceSitemap,
@@ -77,14 +89,17 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 		}
 	}
 
-	scrHits, scrVisited := scrape.LightDocsScrape(ctx, base, max(1,opt.BudgetPages))
+	// 3) Light docs scrape
+	scrHits, scrVisited := scrape.LightDocsScrape(ctx, base, max(1, opt.BudgetPages))
 	docURLs = append(docURLs, scrVisited...)
 	for _, hit := range scrHits {
 		url := ""
-		if len(scrVisited) > 0 { url = scrVisited[0] }
+		if len(scrVisited) > 0 {
+			url = scrVisited[0]
+		}
 		endpoints = append(endpoints, Endpoint{
-			Method: hit.Method,
-			Path:   hit.Path,
+			Method:  hit.Method,
+			Path:    hit.Path,
 			FullURL: base + hit.Path,
 			Evidences: []Evidence{{
 				Source: SourceHTML,
@@ -96,10 +111,19 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 		})
 	}
 
+	// 4) Fuzz expansion
 	if opt.Fuzz {
 		seed := dedupe(endpoints)
-		exp := fuzzer.Expand(seed, fuzzer.Options{MaxExtra: 60})
-		for _, e := range exp {
+
+		seedLite := make([]fuzzer.EndpointLite, 0, len(seed))
+		for _, e := range seed {
+			seedLite = append(seedLite, fuzzer.EndpointLite{Method: e.Method, Path: e.Path})
+		}
+
+		expLite := fuzzer.ExpandLite(seedLite, fuzzer.Options{MaxExtra: 60})
+		for _, le := range expLite {
+			e := Endpoint{Method: le.Method, Path: le.Path}
+			e.FullURL = base + e.Path
 			e.Evidences = append(e.Evidences, Evidence{
 				Source: SourceFuzzer,
 				URL:    base,
@@ -107,13 +131,13 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 				When:   time.Now(),
 				Score:  40,
 			})
-			e.FullURL = base + e.Path
 			endpoints = append(endpoints, e)
 		}
 	}
 
 	endpoints = dedupe(endpoints)
 
+	// 5) Verify (safe)
 	if opt.Verify {
 		verified := []Endpoint{}
 		for _, e := range endpoints {
@@ -135,6 +159,7 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 	}
 
 	endpoints = dedupe(endpoints)
+
 	sort.Slice(endpoints, func(i, j int) bool {
 		if endpoints[i].Path == endpoints[j].Path {
 			return endpoints[i].Method < endpoints[j].Method
@@ -146,6 +171,7 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 	find.DocURLs = uniq(docURLs, 24)
 	find.Endpoints = endpoints
 	find.Notes = append(find.Notes, "Domain-first discovery: docs → scrape → fuzz → verify (safe).")
+
 	return find, nil
 }
 
@@ -170,11 +196,18 @@ func HostCandidates(domain string) []string {
 func dedupe(in []Endpoint) []Endpoint {
 	type k struct{ m, p string }
 	seen := map[k]Endpoint{}
+
 	for _, e := range in {
 		mm := strings.ToUpper(strings.TrimSpace(e.Method))
 		pp := strings.TrimSpace(e.Path)
-		if mm == "" { mm = "GET" }
-		if pp == "" || !strings.HasPrefix(pp, "/") { continue }
+
+		if mm == "" {
+			mm = "GET"
+		}
+		if pp == "" || !strings.HasPrefix(pp, "/") {
+			continue
+		}
+
 		kk := k{mm, pp}
 		if ex, ok := seen[kk]; ok {
 			ex.Evidences = append(ex.Evidences, e.Evidences...)
@@ -184,22 +217,35 @@ func dedupe(in []Endpoint) []Endpoint {
 			seen[kk] = e
 		}
 	}
+
 	out := make([]Endpoint, 0, len(seen))
-	for _, v := range seen { out = append(out, v) }
+	for _, v := range seen {
+		out = append(out, v)
+	}
 	return out
 }
 
 func uniq(in []string, maxN int) []string {
 	seen := map[string]bool{}
 	out := []string{}
+
 	for _, s := range in {
 		s = strings.TrimSpace(s)
-		if s == "" || seen[s] { continue }
+		if s == "" || seen[s] {
+			continue
+		}
 		seen[s] = true
 		out = append(out, s)
-		if maxN > 0 && len(out) >= maxN { break }
+		if maxN > 0 && len(out) >= maxN {
+			break
+		}
 	}
 	return out
 }
 
-func max(a, b int) int { if a>b { return a }; return b }
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}

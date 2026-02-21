@@ -5,11 +5,11 @@ import "time"
 type SourceType string
 
 const (
-	SourceOpenAPI   SourceType = "openapi"
-	SourceSitemap   SourceType = "sitemap"
-	SourceHTML      SourceType = "html"
-	SourceFuzzer    SourceType = "fuzzer"
-	SourceProbe     SourceType = "probe"
+	SourceOpenAPI SourceType = "openapi"
+	SourceSitemap SourceType = "sitemap"
+	SourceHTML    SourceType = "html"
+	SourceFuzzer  SourceType = "fuzzer"
+	SourceProbe   SourceType = "probe"
 )
 
 type Evidence struct {

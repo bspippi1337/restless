@@ -33,14 +33,17 @@ func Run(args []string, stdin, stdout, stderr *os.File) int {
 	var mode string
 	fs.StringVar(&mode, "mode", "auto", "Mode: auto|tui")
 	fs.StringVar(&mode, "m", "auto", "Alias for --mode")
+
 	var quiet bool
 	fs.BoolVar(&quiet, "quiet", false, "Disable animations and extra UI flair")
+
 	var showVersion bool
 	fs.BoolVar(&showVersion, "version", false, "Print version and exit")
 
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
+
 	if showVersion {
 		fmt.Fprintln(stdout, "restless", version)
 		return 0
@@ -61,18 +64,23 @@ func Run(args []string, stdin, stdout, stderr *os.File) int {
 func cmdDiscover(args []string, stdout, stderr *os.File) int {
 	fs := flag.NewFlagSet("restless discover", flag.ContinueOnError)
 	fs.SetOutput(stderr)
+
 	var asJSON bool
 	fs.BoolVar(&asJSON, "json", false, "Print findings as JSON")
+
 	var verify bool
 	fs.BoolVar(&verify, "verify", true, "Safe verify endpoints (GET/HEAD/OPTIONS)")
+
 	var seconds int
 	fs.IntVar(&seconds, "seconds", 15, "Time budget in seconds")
+
 	var pages int
 	fs.IntVar(&pages, "pages", 6, "Doc pages budget")
 
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
+
 	domain := ""
 	if fs.NArg() > 0 {
 		domain = strings.TrimSpace(fs.Arg(0))
@@ -100,12 +108,14 @@ func cmdDiscover(args []string, stdout, stderr *os.File) int {
 	}
 
 	fmt.Fprintf(stdout, "Base: %s\n", find.BaseURL)
+
 	if len(find.DocURLs) > 0 {
 		fmt.Fprintln(stdout, "Docs:")
 		for _, u := range find.DocURLs {
-			fmt.Fprintf(stdout, "  - %s\n", u)
+			fmt.Fprintf(stdout, " - %s\n", u)
 		}
 	}
+
 	fmt.Fprintf(stdout, "Endpoints (%d):\n", len(find.Endpoints))
 	max := 20
 	if len(find.Endpoints) < max {
@@ -113,24 +123,29 @@ func cmdDiscover(args []string, stdout, stderr *os.File) int {
 	}
 	for i := 0; i < max; i++ {
 		e := find.Endpoints[i]
-		fmt.Fprintf(stdout, "  %s %s\n", e.Method, e.Path)
+		fmt.Fprintf(stdout, " %s %s\n", e.Method, e.Path)
 	}
+
 	if len(find.Notes) > 0 {
 		fmt.Fprintln(stdout, "Notes:")
 		for _, n := range find.Notes {
-			fmt.Fprintf(stdout, "  - %s\n", n)
+			fmt.Fprintf(stdout, " - %s\n", n)
 		}
 	}
+
 	return 0
 }
 
 func cmdDoctor(args []string, stdout, stderr *os.File) int {
 	fs := flag.NewFlagSet("restless doctor", flag.ContinueOnError)
 	fs.SetOutput(stderr)
+
 	var rootDir string
 	fs.StringVar(&rootDir, "root", ".", "Project root to clean (default: current dir)")
+
 	var dry bool
 	fs.BoolVar(&dry, "dry-run", false, "Print actions without deleting")
+
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -140,6 +155,7 @@ func cmdDoctor(args []string, stdout, stderr *os.File) int {
 		fmt.Fprintln(stderr, "doctor:", err)
 		return 1
 	}
+
 	fmt.Fprintln(stdout, rep)
 	return 0
 }
@@ -154,14 +170,13 @@ Usage:
   restless doctor
 
 Flags:
-  --mode tui        Run terminal UI (default auto)
-  --quiet           Disable animations and extra UI flair
-  --version         Print version and exit
-  --help            Show this help
+  --mode tui     Run terminal UI (default auto)
+  --quiet        Disable animations and extra UI flair
+  --version      Print version and exit
+  --help         Show this help
 
 Quick start:
   restless
-  # In "Connect & Discover", type a domain and press Ctrl+D
 
 Tips:
   - Ctrl+D runs discovery in the wizard

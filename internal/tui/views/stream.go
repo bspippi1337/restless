@@ -7,8 +7,8 @@ import (
 
 type Stream struct{ w, h int }
 
-func NewStream() Stream { return Stream{} }
-func (s *Stream) SetSize(w, h int) { s.w, s.h = w, h }
+func NewStream() Stream                               { return Stream{} }
+func (s *Stream) SetSize(w, h int)                    { s.w, s.h = w, h }
 func (s Stream) Update(msg tea.Msg) (Stream, tea.Cmd) { return s, nil }
 
 func (s Stream) View() string {

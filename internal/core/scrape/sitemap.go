@@ -36,11 +36,17 @@ func SitemapDocs(ctx context.Context, base string, maxURLs int) ([]string, []str
 
 	paths := []string{}
 	for _, it := range xs.URLs {
-		if len(paths) >= maxURLs { break }
+		if len(paths) >= maxURLs {
+			break
+		}
 		loc := strings.TrimSpace(it.Loc)
-		if loc == "" { continue }
+		if loc == "" {
+			continue
+		}
 		pu, err := url.Parse(loc)
-		if err != nil || pu.Path == "" { continue }
+		if err != nil || pu.Path == "" {
+			continue
+		}
 		p := pu.Path
 		if strings.Contains(p, "/api") || strings.HasPrefix(p, "/v1/") || strings.Contains(p, "/swagger") || strings.Contains(p, "/openapi") {
 			paths = append(paths, p)

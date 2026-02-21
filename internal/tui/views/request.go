@@ -9,7 +9,7 @@ import (
 )
 
 type Request struct {
-	w, h int
+	w, h   int
 	method textinput.Model
 	url    textinput.Model
 }

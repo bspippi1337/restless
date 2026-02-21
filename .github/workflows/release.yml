@@ -40,9 +40,6 @@ jobs:
           build darwin  amd64 dist/restless_darwin_amd64
           build windows amd64 dist/restless_windows_amd64.exe
 
-          build android arm64 dist/restless_android_arm64
-          build android amd64 dist/restless_android_amd64
-          build android 386   dist/restless_android_386
 
           (cd dist && sha256sum * > SHA256SUMS.txt)
 

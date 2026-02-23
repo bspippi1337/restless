@@ -1,26 +1,34 @@
-.PHONY: tidy test run build build-all clean doctor
+BINARY := restless
+PKG := ./cmd/restless
+PREFIX ?= /usr/local
+BINDIR := $(PREFIX)/bin
+DIST := dist
 
-tidy:
-	go mod tidy
+.PHONY: all build run test install uninstall clean release
+
+all: build
+
+build:
+	CGO_ENABLED=0 go build -o $(BINARY) $(PKG)
+
+run:
+	CGO_ENABLED=0 go run $(PKG)
 
 test:
 	go test ./...
 
-run:
-	go run ./cmd/restless
+install: build
+	mkdir -p $(BINDIR)
+	install -m 0755 $(BINARY) $(BINDIR)/$(BINARY)
 
-build:
-	mkdir -p bin
-	CGO_ENABLED=0 go build -o bin/restless ./cmd/restless
-
-build-all:
-	mkdir -p dist
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dist/restless_linux_amd64 ./cmd/restless
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o dist/restless_darwin_amd64 ./cmd/restless
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o dist/restless_windows_amd64.exe ./cmd/restless
+uninstall:
+	rm -f $(BINDIR)/$(BINARY)
 
 clean:
-	rm -rf bin dist build logs
+	rm -f $(BINARY)
+	rm -rf $(DIST)
 
-doctor:
-	go run ./cmd/restless doctor
+release:
+	mkdir -p $(DIST)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $(DIST)/$(BINARY)_linux_amd64 $(PKG)
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o $(DIST)/$(BINARY)_darwin_amd64 $(PKG)

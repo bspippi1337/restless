@@ -7,44 +7,45 @@
 body{background:#0d1117;color:#c9d1d9;font-family:monospace;padding:30px}
 #term{background:#161b22;padding:20px;border-radius:8px;height:420px;overflow:auto}
 input{width:100%;background:#0d1117;color:#58a6ff;border:none;outline:none;font-family:monospace;padding:10px}
-.btn{display:inline-block;background:#238636;color:white;padding:12px 18px;border-radius:6px;text-decoration:none;margin-bottom:20px}
 </style>
 </head>
 <body>
 
 <h1>🚀 Restless Live Demo</h1>
-
-<div id="term">
-<div>Restless adaptive demo environment</div>
-</div>
-
+<div id="term"></div>
 <input id="cmd" placeholder="Type: probe https://api.example.com">
 
+<script src="wasm_exec.js"></script>
 <script>
-const term=document.getElementById("term");
-const input=document.getElementById("cmd");
+const go = new Go();
+WebAssembly.instantiateStreaming(fetch("restless.wasm"), go.importObject)
+.then(result => {
+go.run(result.instance);
+});
 
-function respond(cmd){
- if(cmd.startsWith("probe")){
-  return JSON.stringify({
-    url:"https://api.example.com",
-    methods:["GET","POST"],
-    content_type:"application/json"
-  },null,2);
- }
- if(cmd.startsWith("smart")){
-  return "[ Probing... ] ██████████ 100%\nReady.";
- }
- return "Demo command executed.";
+const term = document.getElementById("term");
+const input = document.getElementById("cmd");
+
+function print(text){
+term.innerHTML += "<pre>"+text+"</pre>";
+term.scrollTop = term.scrollHeight;
 }
 
-input.addEventListener("keydown",e=>{
- if(e.key==="Enter"){
-   term.innerHTML+="<div>&gt; "+input.value+"</div>";
-   term.innerHTML+="<pre>"+respond(input.value)+"</pre>";
-   input.value="";
-   term.scrollTop=term.scrollHeight;
- }
+input.addEventListener("keydown", e=>{
+if(e.key==="Enter"){
+const val = input.value;
+term.innerHTML += "<div>&gt; "+val+"</div>";
+
+if(val.startsWith("probe")){
+const parts = val.split(" ");
+if(parts.length>1){
+const output = restlessProbe(parts[1]);
+print(output);
+}
+}
+
+input.value="";
+}
 });
 </script>
 

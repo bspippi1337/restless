@@ -1,3 +1,5 @@
+![Restless Live Terminal](assets/restless-terminal.svg)
+
 # Restless
 
 ## 🚀 Live Interactive Demo

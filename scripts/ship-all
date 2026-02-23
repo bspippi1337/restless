@@ -1,0 +1,230 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PKG="restless"
+REPO="bspippi1337/restless"
+PAGES_URL="https://bspippi1337.github.io/restless/"
+APT_CODENAME="${APT_CODENAME:-stable}"
+APT_COMPONENT="${APT_COMPONENT:-main}"
+APT_BRANCH="${APT_BRANCH:-gh-pages}"
+
+# Homebrew: best practice is a separate tap repo, e.g. bspippi1337/homebrew-restless
+TAP_REPO="${TAP_REPO:-bspippi1337/homebrew-restless}"
+
+need() { command -v "$1" >/dev/null 2>&1 || { echo "❌ Missing: $1"; exit 2; }; }
+
+echo "🔍 Checking tools..."
+need git
+need go
+need dpkg-deb
+need reprepro
+need tar
+need shasum
+
+# for brew publish via GitHub release + tap update
+if command -v gh >/dev/null 2>&1; then
+  HAVE_GH=1
+else
+  HAVE_GH=0
+fi
+
+echo "🧪 Tests (CGO disabled)"
+CGO_ENABLED=0 go test ./...
+
+echo "🛠 Build (CGO disabled)"
+mkdir -p dist
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dist/${PKG}_linux_amd64 ./cmd/restless
+
+# Optional: macOS build (for brew bottle-like tarball). Only works if Go supports cross-compile (it does) and no cgo.
+CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o dist/${PKG}_darwin_arm64 ./cmd/restless || true
+CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o dist/${PKG}_darwin_amd64 ./cmd/restless || true
+
+echo "📦 Build .deb"
+WORKDIR="$(mktemp -d)"
+trap 'rm -rf "$WORKDIR"' EXIT
+mkdir -p "$WORKDIR/pkgroot/DEBIAN" "$WORKDIR/pkgroot/usr/bin"
+install -m 0755 dist/${PKG}_linux_amd64 "$WORKDIR/pkgroot/usr/bin/${PKG}"
+
+VERSION="$(git describe --tags --always --dirty)"
+cat > "$WORKDIR/pkgroot/DEBIAN/control" <<CTL
+Package: ${PKG}
+Version: ${VERSION}
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: bspippi1337 <noreply@github.com>
+Homepage: https://github.com/${REPO}
+Description: Restless universal API client
+CTL
+
+DEB="dist/${PKG}_${VERSION}_amd64.deb"
+dpkg-deb --build "$WORKDIR/pkgroot" "$DEB" >/dev/null
+echo "✅ Built: $DEB"
+
+echo "🧼 gofmt"
+go fmt ./...
+
+echo "📦 Git commit/push if changed"
+if [ -n "$(git status --porcelain)" ]; then
+  git add -A
+  git commit -m "smart: adaptive commands + simulator + exporters (build verified)"
+  git push
+else
+  echo "✅ No changes to commit"
+fi
+
+echo "📡 Publish APT repo (GitHub Pages -> gh-pages)"
+mkdir -p apt-repo/conf
+cat > apt-repo/conf/distributions <<DIST
+Origin: restless
+Label: restless APT
+Codename: ${APT_CODENAME}
+Architectures: amd64 all
+Components: ${APT_COMPONENT}
+Description: APT repo for restless
+DIST
+
+reprepro -b apt-repo includedeb "${APT_CODENAME}" "$DEB"
+touch apt-repo/.nojekyll
+
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+git fetch origin "${APT_BRANCH}" >/dev/null 2>&1 || true
+(
+  cd "$TMP"
+  git init -q
+  git remote add origin "$(git remote get-url origin)"
+  if git ls-remote --exit-code --heads origin "${APT_BRANCH}" >/dev/null 2>&1; then
+    git fetch -q origin "${APT_BRANCH}"
+    git checkout -q -B "${APT_BRANCH}" "origin/${APT_BRANCH}"
+  else
+    git checkout -q --orphan "${APT_BRANCH}"
+    rm -rf ./* 2>/dev/null || true
+  fi
+
+  rm -rf ./* 2>/dev/null || true
+  cp -a ../apt-repo/. .
+  git add -A
+  git commit -m "APT publish ${VERSION}" >/dev/null || true
+  git push -q origin "${APT_BRANCH}:${APT_BRANCH}"
+)
+
+echo "✅ APT published: ${PAGES_URL}"
+echo "Install APT:"
+echo "  echo \"deb [trusted=yes] ${PAGES_URL} ${APT_CODENAME} ${APT_COMPONENT}\" | sudo tee /etc/apt/sources.list.d/${PKG}.list"
+echo "  sudo apt-get update && sudo apt-get install ${PKG}"
+
+# --- Homebrew publish ---
+# Approach:
+# 1) create a GitHub Release with tarballs (if gh exists)
+# 2) update tap formula in TAP_REPO to point to the release tarball URL + sha256
+#
+# NOTE: Homebrew formulas should reference stable URLs + sha256 of the tarball.
+echo "🍺 Publish Homebrew (tap: ${TAP_REPO})"
+
+if [ "$HAVE_GH" != "1" ]; then
+  echo "⚠️ gh CLI not installed. Skipping brew publish."
+  echo "   Install: pkg install gh  (Termux) or brew install gh / apt install gh"
+  exit 0
+fi
+
+# create tarballs
+mkdir -p dist/releases
+LINUX_TGZ="dist/releases/${PKG}_${VERSION}_linux_amd64.tar.gz"
+tar -czf "$LINUX_TGZ" -C dist "${PKG}_linux_amd64"
+
+SHA_LINUX="$(shasum -a 256 "$LINUX_TGZ" | awk "{print \$1}")"
+
+# mac optional
+DARWIN_ARM_TGZ="dist/releases/${PKG}_${VERSION}_darwin_arm64.tar.gz"
+DARWIN_AMD_TGZ="dist/releases/${PKG}_${VERSION}_darwin_amd64.tar.gz"
+SHA_DARWIN_ARM=""
+SHA_DARWIN_AMD=""
+
+if [ -f "dist/${PKG}_darwin_arm64" ]; then
+  tar -czf "$DARWIN_ARM_TGZ" -C dist "${PKG}_darwin_arm64"
+  SHA_DARWIN_ARM="$(shasum -a 256 "$DARWIN_ARM_TGZ" | awk "{print \$1}")"
+fi
+if [ -f "dist/${PKG}_darwin_amd64" ]; then
+  tar -czf "$DARWIN_AMD_TGZ" -C dist "${PKG}_darwin_amd64"
+  SHA_DARWIN_AMD="$(shasum -a 256 "$DARWIN_AMD_TGZ" | awk "{print \$1}")"
+fi
+
+TAG="v${VERSION}"
+echo "🏷️ Creating/updating release: ${TAG}"
+# Create tag if missing
+git tag "${TAG}" >/dev/null 2>&1 || true
+git push --tags >/dev/null 2>&1 || true
+
+# Create or update release, upload assets
+gh release view "${TAG}" >/dev/null 2>&1 || gh release create "${TAG}" -t "${TAG}" -n "Restless ${VERSION}"
+gh release upload "${TAG}" "$LINUX_TGZ" --clobber
+[ -n "$SHA_DARWIN_ARM" ] && gh release upload "${TAG}" "$DARWIN_ARM_TGZ" --clobber || true
+[ -n "$SHA_DARWIN_AMD" ] && gh release upload "${TAG}" "$DARWIN_AMD_TGZ" --clobber || true
+
+# Update tap repo
+echo "🧾 Updating tap formula in ${TAP_REPO}"
+TAP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TAP_DIR"' EXIT
+
+git clone "https://github.com/${TAP_REPO}.git" "$TAP_DIR" >/dev/null 2>&1 || {
+  echo "❌ Could not clone tap repo ${TAP_REPO}"
+  echo "   Create it on GitHub first, named: homebrew-restless"
+  exit 1
+}
+
+FORMULA_PATH="${TAP_DIR}/Formula/restless.rb"
+mkdir -p "${TAP_DIR}/Formula"
+
+RELEASE_BASE="https://github.com/${REPO}/releases/download/${TAG}"
+LINUX_URL="${RELEASE_BASE}/$(basename "$LINUX_TGZ")"
+
+cat > "$FORMULA_PATH" <<RUBY
+class Restless < Formula
+  desc "Restless universal API client"
+  homepage "https://github.com/${REPO}"
+  version "${VERSION}"
+
+  on_linux do
+    url "${LINUX_URL}"
+    sha256 "${SHA_LINUX}"
+
+    def install
+      bin.install "restless_linux_amd64" => "restless"
+    end
+  end
+
+  on_macos do
+    if Hardware::CPU.arm?
+      url "${RELEASE_BASE}/$(basename "$DARWIN_ARM_TGZ")"
+      sha256 "${SHA_DARWIN_ARM}"
+      def install
+        bin.install "restless_darwin_arm64" => "restless"
+      end
+    else
+      url "${RELEASE_BASE}/$(basename "$DARWIN_AMD_TGZ")"
+      sha256 "${SHA_DARWIN_AMD}"
+      def install
+        bin.install "restless_darwin_amd64" => "restless"
+      end
+    end
+  end
+
+  test do
+    system "#{bin}/restless", "--help"
+  end
+end
+RUBY
+
+(
+  cd "$TAP_DIR"
+  git add -A
+  git commit -m "restless ${VERSION}" >/dev/null || true
+  git push
+)
+
+echo "✅ Brew published."
+echo "Install Brew:"
+echo "  brew tap bspippi1337/restless || true"
+echo "  brew tap ${TAP_REPO}"
+echo "  brew install restless"

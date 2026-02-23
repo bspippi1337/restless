@@ -1,31 +1,38 @@
 package main
 
 import (
-"fmt"
-"os"
+	"context"
+	"fmt"
+	"os"
 
-"github.com/bspippi1337/restless/internal"
+	"github.com/bspippi1337/restless/internal/app"
 )
 
 func main() {
-if len(os.Args) < 2 {
-fmt.Println("Usage: restless <command>")
-os.Exit(1)
-}
+	args := os.Args[1:]
+	mode := app.ModeNormal
 
-switch os.Args[1] {
-case "smart":
-if len(os.Args) < 3 {
-fmt.Println("Usage: restless smart <url>")
-os.Exit(1)
-}
-err := internal.RunSmart(os.Args[2])
-if err != nil {
-fmt.Println("Error:", err)
-os.Exit(1)
-}
-default:
-fmt.Println("Unknown command:", os.Args[1])
-os.Exit(1)
-}
+	// explicit flags override
+	for i := 0; i < len(args); i++ {
+		if args[i] == "--smart" {
+			mode = app.ModeSmart
+			args = append(args[:i], args[i+1:]...)
+			i--
+		} else if args[i] == "--normal" {
+			mode = app.ModeNormal
+			args = append(args[:i], args[i+1:]...)
+			i--
+		}
+	}
+
+	// subcommand
+	if len(args) > 0 && args[0] == "smart" {
+		mode = app.ModeSmart
+		args = args[1:]
+	}
+
+	if err := app.Run(context.Background(), app.Options{Mode: mode, Args: args}); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }

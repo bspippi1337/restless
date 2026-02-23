@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Restless Live Demo</title>
+<style>
+body{background:#0d1117;color:#c9d1d9;font-family:monospace;padding:20px}
+#term{background:#161b22;padding:15px;border-radius:8px;height:420px;overflow:auto}
+input{width:100%;background:#0d1117;color:#58a6ff;border:none;outline:none;font-family:monospace}
+.badge{color:#58a6ff}
+</style>
+</head>
+<body>
+<h2>Restless Live Demo</h2>
+<div id="term">
+<div><span class="badge">Restless</span> adaptive demo environment</div>
+</div>
+<input id="cmd" placeholder="Type command and press Enter">
+
+<script>
+const term = document.getElementById("term");
+const input = document.getElementById("cmd");
+
+function respond(cmd){
+  if(cmd.startsWith("probe")){
+    return JSON.stringify({
+      url:"https://api.example.com",
+      methods:["GET","POST"],
+      content_type:"application/json"
+    },null,2);
+  }
+  if(cmd.startsWith("simulate")){
+    return "Simulation mode: request builder opened";
+  }
+  if(cmd.startsWith("smart")){
+    return "[ Probing... ] ██████████ 100%\n[ Profiling... ] ████████░░ 80%\nReady.";
+  }
+  return "Command executed (demo mode)";
+}
+
+input.addEventListener("keydown", e=>{
+  if(e.key==="Enter"){
+    const val=input.value;
+    term.innerHTML+="<div>&gt; "+val+"</div>";
+    term.innerHTML+="<pre>"+respond(val)+"</pre>";
+    input.value="";
+    term.scrollTop=term.scrollHeight;
+  }
+});
+</script>
+</body>
+</html>

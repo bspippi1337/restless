@@ -2,15 +2,9 @@
 
 ## 🚀 Live Interactive Demo
 
-<iframe src="https://bspippi1337.github.io/restless/demo/"
-        width="100%"
-        height="520"
-        style="border:none;border-radius:8px;">
-</iframe>
+[![Launch Live Demo](https://img.shields.io/badge/Launch-Live_Demo-238636?style=for-the-badge)](https://bspippi1337.github.io/restless/demo/)
 
-If it does not render inside GitHub, open directly:
-
-https://bspippi1337.github.io/restless/demo/
+👉 Click the button above to run Restless in your browser.
 
 ---
 
@@ -24,10 +18,16 @@ sudo apt install restless
 
 ---
 
-## Example
+## Example Usage
 
 ```bash
 restless probe https://api.example.com
 restless simulate https://api.example.com
 restless smart https://api.example.com
 ```
+
+---
+
+## Architecture
+
+smartcmd → discover → engine → simulator → export → app

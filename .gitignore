@@ -1,26 +1,29 @@
-# Build
-bin/
-dist/
-build/
+# Binaries
+/dist/
+/build/
+/bin/
+restless
 
-# Go
-*.exe
-*.test
-*.out
-coverage.out
+# Logs
+*.log
 
-# OS
+# OS junk
 .DS_Store
 Thumbs.db
 
-# IDE
+# Editors
 .vscode/
 .idea/
 
-# Local runtime data
-.snapshots/
-.history/
-.cache/
+# Backup files
+*.bak*
+*~
 
-# Legacy
-legacy/
+# Packages / releases
+*.deb
+*.apk
+*.tar.gz
+*.zip
+
+# Termux runtime junk
+data/

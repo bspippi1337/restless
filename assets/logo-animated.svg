@@ -3,7 +3,7 @@
   <rect width="100%" height="100%" fill="#0B0F14"/>
   <text x="30" y="90" font-family="Inter, Arial" font-size="72" font-weight="700" fill="#FFFFFF">
     Restless
-    <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite"/>
   </text>
   <line x1="30" y1="110" x2="460" y2="110" stroke="#00C8FF" stroke-width="3">
     <animate attributeName="x2" from="30" to="460" dur="2s" repeatCount="indefinite"/>

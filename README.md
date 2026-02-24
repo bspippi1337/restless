@@ -2,20 +2,7 @@
 
 Terminal-first API Workbench.
 
-## Build
+## Install
 
-go build ./cmd/restless
-
-## Run
-
-./restless run GET https://api.github.com
-
-## Features
-
-- Unified request engine
-- CLI + TUI
-- History & replay
-- Snapshot & diff
-- Chain workflows
-- Plugin-ready architecture
-
+```bash
+go install github.com/bspippi1337/restless/cmd/restless@latest

@@ -1,4 +1,4 @@
-# Binaries
+# Build outputs
 bin/
 dist/
 build/
@@ -16,6 +16,9 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Restless
+# Snapshots & history
 .snapshots/
 .history/
+
+# Legacy
+legacy/

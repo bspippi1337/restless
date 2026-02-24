@@ -1,35 +1,18 @@
-![Restless Live Terminal](assets/restless-terminal.svg)
+# Restless ⚡
 
-# Restless
+Universal API blade: discover, probe, simulate, and export.
 
-## 🚀 Live Interactive Demo
+## Install (Debian / Ubuntu)
 
-[![Launch Live Demo](https://img.shields.io/badge/Launch-Live_Demo-238636?style=for-the-badge)](https://bspippi1337.github.io/restless/demo/)
-
-👉 Click the button above to run Restless in your browser.
-
----
-
-## Install (Debian)
-
-```bash
 echo "deb [trusted=yes] https://bspippi1337.github.io/restless/ ./" | sudo tee /etc/apt/sources.list.d/restless.list
 sudo apt update
 sudo apt install restless
-```
 
----
+## Quickstart
 
-## Example Usage
+restless probe https://api.github.com
+restless simulate https://api.github.com
+restless smart https://api.github.com
 
-```bash
-restless probe https://api.example.com
-restless simulate https://api.example.com
-restless smart https://api.example.com
-```
-
----
-
-## Architecture
-
+Architecture:
 smartcmd → discover → engine → simulator → export → app

@@ -1,5 +1,7 @@
 package openapi
 
+import "path/filepath"
+
 import (
 	"errors"
 	"fmt"
@@ -152,4 +154,17 @@ func ValidatePathParams(path string, params map[string]string) error {
 
 func strictEnabled() bool {
 	return os.Getenv("RESTLESS_STRICT") == "1"
+}
+
+// SPEC_LOADER_START
+
+// --- DISK LOADER PATCH ---
+
+func loadSpecFromDisk(openapiDir, id string) ([]byte, error) {
+	specPath := filepath.Join(openapiDir, id+".json")
+	raw, err := os.ReadFile(specPath)
+	if err != nil {
+		return nil, fmt.Errorf("spec: failed to read stored spec: %w", err)
+	}
+	return raw, nil
 }

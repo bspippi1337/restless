@@ -1,0 +1,13 @@
+Package: restless
+Version: 4.0.4+git8.ge51b87c.dirty
+Architecture: amd64
+Maintainer: bspippi1337
+Filename: pool/main/r/restless/restless_4.0.4+git8.ge51b87c.dirty_amd64.deb
+Size: 4399344
+MD5sum: 05d721609d4684946cd70deb043d12ac
+SHA1: 05007c07cef99beeb8e7c4c0d29af876e051f9e4
+SHA256: 13d8af8a95208d38b76ab0c4a4c1de870d1108557ece0028ec0b0877dd4d7afd
+Section: utils
+Priority: optional
+Description: Terminal-first API Workbench
+

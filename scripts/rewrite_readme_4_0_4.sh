@@ -1,10 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+VERSION="4.0.4"
+
+echo "==> Rewriting README for v$VERSION"
+
+cat > README.md <<EOT
 # Restless ⚡
 
 **Terminal-First API Workbench**
 
 Restless is a modular, OpenAPI-aware execution engine built for developers who live in the shell.
 
-Version: **4.0.4**
+Version: **$VERSION**
 
 ---
 
@@ -29,13 +37,13 @@ Version: **4.0.4**
 
 ### From source
 
-```bash
+\`\`\`bash
 go build -o restless ./cmd/restless
-```
+\`\`\`
 
 ### Download binary
 
-See GitHub Releases → v4.0.4
+See GitHub Releases → v$VERSION
 
 ---
 
@@ -43,43 +51,43 @@ See GitHub Releases → v4.0.4
 
 ### Import spec
 
-```bash
+\`\`\`bash
 restless openapi import petstore.json
-```
+\`\`\`
 
 ### List specs
 
-```bash
+\`\`\`bash
 restless openapi ls
-```
+\`\`\`
 
 ### List endpoints
 
-```bash
+\`\`\`bash
 restless openapi endpoints <id>
-```
+\`\`\`
 
 ---
 
 ## ▶ Run endpoint
 
-```bash
+\`\`\`bash
 restless openapi run <id> GET /pets
-```
+\`\`\`
 
 Path parameters auto-prompt if missing.
 
 With explicit param:
 
-```bash
+\`\`\`bash
 restless openapi run <id> GET /pets/{petId} -p petId=7
-```
+\`\`\`
 
 Generate curl:
 
-```bash
+\`\`\`bash
 restless openapi run <id> GET /pets --curl
-```
+\`\`\`
 
 ---
 
@@ -87,32 +95,34 @@ restless openapi run <id> GET /pets --curl
 
 Set base URL:
 
-```bash
+\`\`\`bash
 restless profile set dev base=https://petstore3.swagger.io/api/v3
 restless profile use dev
-```
+\`\`\`
 
 List profiles:
 
-```bash
+\`\`\`bash
 restless profile ls
-```
+\`\`\`
 
 ---
 
 ## 🔐 Session variables
 
-```bash
-restless openapi run <id> GET /secure   -H "Authorization: Bearer {{token}}"   -set token=abc123
-```
+\`\`\`bash
+restless openapi run <id> GET /secure \
+  -H "Authorization: Bearer {{token}}" \
+  -set token=abc123
+\`\`\`
 
 ---
 
 ## 📈 Benchmark
 
-```bash
+\`\`\`bash
 restless -url https://httpbin.org/get -bench
-```
+\`\`\`
 
 Includes latency percentiles and histogram.
 
@@ -122,9 +132,9 @@ Includes latency percentiles and histogram.
 
 Fail hard for CI:
 
-```bash
+\`\`\`bash
 export RESTLESS_STRICT=1
-```
+\`\`\`
 
 ---
 
@@ -156,7 +166,7 @@ A composable execution engine.
 
 ## 🏷 Release
 
-This repository currently tracks version **4.0.4**.
+This repository currently tracks version **$VERSION**.
 
 See GitHub Releases for binaries and checksums.
 
@@ -165,3 +175,6 @@ See GitHub Releases for binaries and checksums.
 ## 📜 License
 
 MIT
+EOT
+
+echo "==> README updated"

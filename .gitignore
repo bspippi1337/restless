@@ -1,12 +1,13 @@
-# Build outputs
+# Build
 bin/
 dist/
 build/
 
 # Go
-*.test
 *.exe
+*.test
 *.out
+coverage.out
 
 # OS
 .DS_Store
@@ -16,9 +17,10 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Snapshots & history
+# Local runtime data
 .snapshots/
 .history/
+.cache/
 
 # Legacy
 legacy/

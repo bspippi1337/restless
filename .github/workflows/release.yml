@@ -1,26 +1,37 @@
-name: Release
+name: Restless Release
+
 on:
   push:
     tags:
-      - "v*"
-permissions:
-  contents: write
+      - 'v*'
+
 jobs:
   build-release:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22.x"
-      - run: |
-          mkdir -p dist
-          GOOS=linux GOARCH=amd64 go build -o dist/restless_linux_amd64 ./cmd/restless
-          GOOS=darwin GOARCH=amd64 go build -o dist/restless_darwin_amd64 ./cmd/restless
-          GOOS=windows GOARCH=amd64 go build -o dist/restless_windows_amd64.exe ./cmd/restless
-      - run: |
-          cd dist
-          sha256sum * > checksums.txt
-      - uses: softprops/action-gh-release@v2
+          go-version: '1.22'
+
+      - name: Install Debian tools
+        run: sudo apt update && sudo apt install -y dpkg-dev apt-utils gnupg
+
+      - name: Import GPG key
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          gpg --list-keys
+
+      - name: Build everything
+        run: make release-all
+        env:
+          APT_KEY: ${{ secrets.GPG_KEY_ID }}
+
+      - name: Upload release artifacts
+        uses: softprops/action-gh-release@v2
         with:
-          files: dist/*
+          files: |
+            dist/*
+            *.deb

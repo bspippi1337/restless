@@ -1,57 +1,26 @@
 name: Release
-
 on:
   push:
     tags:
       - "v*"
-  workflow_dispatch:
-
 permissions:
   contents: write
-
 jobs:
-  build-and-release:
+  build-release:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Go
-        uses: actions/setup-go@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
-          cache: true
-
-      - name: Build binaries
-        shell: bash
-        run: |
-          set -euo pipefail
+          go-version: "1.22.x"
+      - run: |
           mkdir -p dist
-
-          build() {
-            local goos="$1" goarch="$2" out="$3"
-            echo "==> $goos/$goarch -> $out"
-            GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 \
-              go build -trimpath -ldflags="-s -w" -o "$out" ./cmd/restless
-          }
-
-          build linux   amd64 dist/restless_linux_amd64
-          build darwin  amd64 dist/restless_darwin_amd64
-          build windows amd64 dist/restless_windows_amd64.exe
-
-
-          (cd dist && sha256sum * > SHA256SUMS.txt)
-
-      - name: Upload workflow artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: restless-${{ github.ref_name }}
-          path: dist/*
-          retention-days: 14
-
-      - name: Create GitHub Release + upload assets
-        uses: softprops/action-gh-release@v2
+          GOOS=linux GOARCH=amd64 go build -o dist/restless_linux_amd64 ./cmd/restless
+          GOOS=darwin GOARCH=amd64 go build -o dist/restless_darwin_amd64 ./cmd/restless
+          GOOS=windows GOARCH=amd64 go build -o dist/restless_windows_amd64.exe ./cmd/restless
+      - run: |
+          cd dist
+          sha256sum * > checksums.txt
+      - uses: softprops/action-gh-release@v2
         with:
           files: dist/*
-          generate_release_notes: true

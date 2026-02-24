@@ -1,11 +1,10 @@
 package main
 
 import (
-	"os"
-
-	"github.com/bspippi1337/restless/internal/app"
+    "github.com/bspippi1337/restless/internal/ui/cli"
 )
 
 func main() {
-	os.Exit(app.Main(os.Args[1:], os.Stdin, os.Stdout))
+    root := cli.NewRootCmd()
+    root.Execute()
 }

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"github.com/bspippi1337/restless/internal/ui/term"
 	"os"
 	"strings"
 
@@ -99,7 +101,7 @@ func handleOpenAPI(args []string) {
 			os.Exit(1)
 		}
 
-		fmt.Printf("status: %d (dur=%dms)\n", resp.StatusCode, resp.DurationMs)
+		fmt.Println(term.Status(resp.StatusCode), "(dur=", resp.DurationMs, "ms)")
 		fmt.Println(string(resp.Body))
 
 		if ra.SaveAsName != "" {
@@ -258,4 +260,49 @@ func splitHeader(s string) (k, v string, ok bool) {
 		}
 	}
 	return "", "", false
+}
+
+func promptMissingPathParams(path string, params map[string]string) (map[string]string, error) {
+	// Find {param} occurrences
+	missing := []string{}
+	s := path
+	for {
+		i := strings.Index(s, "{")
+		if i == -1 {
+			break
+		}
+		j := strings.Index(s[i:], "}")
+		if j == -1 {
+			break
+		}
+		key := s[i+1 : i+j]
+		if _, ok := params[key]; !ok && key != "" {
+			missing = append(missing, key)
+		}
+		s = s[i+j+1:]
+	}
+
+	if len(missing) == 0 {
+		return params, nil
+	}
+
+	// If not interactive, fail loudly
+	if !term.IsTTY() {
+		return nil, fmt.Errorf("missing path params: %v (non-interactive, pass -p key=value)", missing)
+	}
+
+	in := bufio.NewReader(os.Stdin)
+	for _, k := range missing {
+		fmt.Printf("Enter %s: ", k)
+		val, err := in.ReadString('\n')
+		if err != nil {
+			return nil, err
+		}
+		val = strings.TrimSpace(val)
+		if val == "" {
+			return nil, fmt.Errorf("empty value for path param: %s", k)
+		}
+		params[k] = val
+	}
+	return params, nil
 }

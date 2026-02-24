@@ -1,13 +1,13 @@
 Package: restless
-Version: 4.0.4+git11.ga0e3c6d.dirty-1
+Version: 4.0.4+git12.g0206f37.dirty-1
 Architecture: amd64
 Maintainer: bspippi1337
 Depends: libc6 (>= 2.31)
-Filename: pool/main/r/restless/restless_4.0.4+git11.ga0e3c6d.dirty-1_amd64.deb
-Size: 4399016
-MD5sum: acb39183f1d950f2c04b87e90e55bece
-SHA1: c6366f3ff8c076476b01eceb5d5cfe62f5a4b7c8
-SHA256: 064e18f7bad1ec41129abca6e13829bd743ab25b48a00dac14a7ea624dceee69
+Filename: pool/main/r/restless/restless_4.0.4+git12.g0206f37.dirty-1_amd64.deb
+Size: 4399020
+MD5sum: 230cebd08c210e8ac4d18dfa469360af
+SHA1: fbd79e81245ff520e91c7ac34b66603dfb0fdd30
+SHA256: c1565f6e6db859ec595cfaa9c2000981330c89d0e139a1eab896f885ffcaa6b4
 Section: utils
 Priority: optional
 Description: Terminal-first API Workbench

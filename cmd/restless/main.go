@@ -1,5 +1,7 @@
 package main
 
+import "github.com/bspippi1337/restless/internal/teacher"
+
 import (
 	"context"
 	"flag"
@@ -20,6 +22,9 @@ func main() {
 
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
+		case "teacher":
+			teacher.Run()
+			return
 		case "--version":
 			fmt.Println("restless", version.Version)
 			return

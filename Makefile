@@ -30,3 +30,6 @@ clean:
 
 doctor: tidy fmt test build
 	@echo "Doctor OK"
+
+teacher:
+	./restless teacher

@@ -18,12 +18,12 @@ import (
 
 func main() {
 	var (
-		method = flag.String("X", "GET", "HTTP method")
-		url    = flag.String("url", "", "Request URL")
-		body   = flag.String("d", "", "Body string")
-		hdrK   = flag.String("Hk", "", "Header key (single)")
-		hdrV   = flag.String("Hv", "", "Header value (single)")
-		setVar = flag.String("set", "", "Set session var: key=value")
+		method  = flag.String("X", "GET", "HTTP method")
+		url     = flag.String("url", "", "Request URL")
+		body    = flag.String("d", "", "Body string")
+		hdrK    = flag.String("Hk", "", "Header key (single)")
+		hdrV    = flag.String("Hv", "", "Header value (single)")
+		setVar  = flag.String("set", "", "Set session var: key=value")
 		doBench = flag.Bool("bench", false, "Run bench mode")
 		c       = flag.Int("c", 10, "Bench concurrency")
 		dur     = flag.Duration("dur", 5*time.Second, "Bench duration")

@@ -1,29 +1,21 @@
 # Binaries
-/dist/
-/build/
-/bin/
-restless
+bin/
+dist/
+build/
 
-# Logs
-*.log
+# Go
+*.test
+*.exe
+*.out
 
-# OS junk
+# OS
 .DS_Store
 Thumbs.db
 
-# Editors
+# IDE
 .vscode/
 .idea/
 
-# Backup files
-*.bak*
-*~
-
-# Packages / releases
-*.deb
-*.apk
-*.tar.gz
-*.zip
-
-# Termux runtime junk
-data/
+# Restless
+.snapshots/
+.history/

@@ -1,34 +1,21 @@
-# Restless ⚡
+# Restless v2 ⚡
 
-<p align="center">
-<b>Universal API Client for the Terminal</b><br/>
-Discover • Probe • Simulate • Automate
-</p>
+Terminal-first API Workbench.
 
----
+## Build
 
-## What Is Restless?
+go build ./cmd/restless
 
-Restless is a terminal-first API intelligence engine.
+## Run
 
-It does more than send requests.
+./restless run GET https://api.github.com
 
-It:
+## Features
 
-- Discovers endpoints
-- Probes behavior
-- Simulates workflows
-- Suggests next actions
-- Runs in CLI, TUI, and WASM
+- Unified request engine
+- CLI + TUI
+- History & replay
+- Snapshot & diff
+- Chain workflows
+- Plugin-ready architecture
 
-Built in Go.  
-Fast. Scriptable. Production-ready.
-
----
-
-## Quick Start
-
-```bash
-restless probe https://api.github.com
-restless simulate https://api.github.com
-restless smart https://api.github.com

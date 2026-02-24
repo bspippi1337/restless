@@ -56,7 +56,7 @@ func runRequestMode(args []string) {
 
 	a, err := app.New(mods)
 	if err != nil {
-		fmt.Println("error:", err)
+		fmt.Println("ERROR:", err)
 		os.Exit(1)
 	}
 
@@ -69,7 +69,7 @@ func runRequestMode(args []string) {
 
 	resp, err := a.RunOnce(context.Background(), req)
 	if err != nil {
-		fmt.Println("error:", err)
+		fmt.Println("ERROR:", err)
 		os.Exit(1)
 	}
 

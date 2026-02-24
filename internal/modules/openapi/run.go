@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/bspippi1337/restless/internal/core/types"
@@ -115,4 +116,40 @@ func shellEscape(s string) string {
 	}
 	// Wrap in single quotes; escape embedded single quotes: ' -> '"'"'
 	return "'" + strings.ReplaceAll(s, "'", `'"'"'`) + "'"
+}
+
+// Validate method/path exists
+func ValidateEndpoint(spec Spec, method, path string) error {
+	item, ok := spec.Paths[path]
+	if !ok {
+		return errors.New("path not found in spec")
+	}
+	if _, ok := item[strings.ToLower(method)]; !ok {
+		return errors.New("method not allowed for this path")
+	}
+	return nil
+}
+
+// Check missing path params
+func ValidatePathParams(path string, params map[string]string) error {
+	for {
+		start := strings.Index(path, "{")
+		if start == -1 {
+			break
+		}
+		end := strings.Index(path[start:], "}")
+		if end == -1 {
+			break
+		}
+		key := path[start+1 : start+end]
+		if _, ok := params[key]; !ok {
+			return fmt.Errorf("missing path param: %s", key)
+		}
+		path = path[start+end+1:]
+	}
+	return nil
+}
+
+func strictEnabled() bool {
+	return os.Getenv("RESTLESS_STRICT") == "1"
 }

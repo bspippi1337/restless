@@ -1,7 +1,3 @@
 # Contributing
 
-go test ./...
-go vet ./...
-
-Use small PRs.
-Update docs when changing behavior.
+PRs welcome. Keep it simple. Keep it fast. Keep it terminal-first.

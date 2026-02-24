@@ -1,17 +1,19 @@
-# Restless v2 Architecture
+# Architecture
 
-## Goals
-- Single binary.
-- Modular codebase (compile-time modules).
-- Small, stable core.
-- Modules can evolve fast without breaking the core.
+Restless is structured around modular execution layers:
 
-## Rules
-- `internal/core` MUST NOT import `internal/modules`.
-- `internal/modules` MAY import `internal/core`.
-- UI layers (cli/tui/gui) depend on core + modules, never the other way around.
+cmd/restless        → CLI router
+internal/core/app   → module registry
+internal/modules/
+    openapi         → spec engine
+    session         → templating
+    bench           → load testing
+    export          → artifacts
+internal/version    → version injection
 
-## Layout
-- `internal/core/*`  : stable foundation (config, transport, engine, store, shared types)
-- `internal/modules/*`: feature modules (openapi, sessions, bench, export, ui modules)
-- `internal/ui/*`    : renderers and interaction layers
+Design principles:
+
+- Deterministic execution
+- CI-friendly
+- Static builds
+- Zero external runtime dependencies

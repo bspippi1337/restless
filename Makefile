@@ -1,5 +1,5 @@
 # ==========================================
-# Restless – Clean Production Makefile
+# Restless – Production Makefile
 # ==========================================
 
 APP        := restless
@@ -7,21 +7,37 @@ CMD        := ./cmd/restless
 DIST       := dist
 PKG        := github.com/bspippi1337/restless/internal/version
 
-RAW_VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo 0.0.0)
-VERSION := $(shell echo $(RAW_VERSION) | sed 's/^v//; s/-/+git/; s/-/./g')
 PREFIX     ?= /usr/local
 BINDIR     := $(PREFIX)/bin
 
-APT_KEY    ?= 5EA836A98EB9E38A51466BF6A0CB94CCA7E69627
-APT_DIST   ?= stable
-APT_COMP   ?= main
-APT_ARCH   ?= amd64
+DEB_REV    ?= 1
+ARCH       := $(shell dpkg --print-architecture)
 
-LDFLAGS    := -ldflags "-X $(PKG).Version=$(VERSION)"
+# ------------------------------------------
+# Version logic (Debian correct)
+# ------------------------------------------
 
-.PONY: all build build-all linux darwin windows \
+GIT_TAG    := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "")
+COMMITS_SINCE_TAG := $(shell if [ -n "$(GIT_TAG)" ]; then git rev-list $(GIT_TAG)..HEAD --count; else git rev-list HEAD --count; fi)
+
+BASE_VER   := $(shell echo $(GIT_TAG) | sed 's/^v//')
+ifeq ($(BASE_VER),)
+BASE_VER := 0.0.0
+endif
+
+ifeq ($(COMMITS_SINCE_TAG),0)
+UPSTREAM_VER := $(BASE_VER)
+else
+UPSTREAM_VER := $(BASE_VER)+git$(COMMITS_SINCE_TAG)
+endif
+
+DEB_VERSION := $(UPSTREAM_VER)-$(DEB_REV)
+
+LDFLAGS := -ldflags "-X $(PKG).Version=$(UPSTREAM_VER)"
+
+.PHONY: all build build-all linux darwin windows \
         install uninstall clean test tidy fmt doctor \
-        deb publish-apt version teacher
+        deb publish-apt changelog version
 
 # ------------------------------------------
 # Default
@@ -34,7 +50,7 @@ all: build
 # ------------------------------------------
 
 build:
-	@echo "==> Building $(APP) ($(VERSION))"
+	@echo "==> Building $(APP) $(UPSTREAM_VER)"
 	CGO_ENABLED=0 go build $(LDFLAGS) -o $(APP) $(CMD)
 
 linux:
@@ -52,20 +68,28 @@ windows:
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o $(DIST)/$(APP)_windows_amd64.exe $(CMD)
 
 build-all: linux darwin windows
-	@echo "==> Cross builds complete"
 
 # ------------------------------------------
-# Debian package (proper)
+# Changelog (auto from git)
 # ------------------------------------------
 
-DEB_REV     ?= 1
-ARCH        := $(shell dpkg --print-architecture)
-RAW_VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo 0.0.0)
-BASE_VER    := $(shell echo $(RAW_VERSION) | sed 's/^v//; s/-/+git/; s/-/./g')
-DEB_VERSION := $(BASE_VER)-$(DEB_REV)
+changelog:
+	@echo "==> Generating changelog from git"
+	rm -f build/changelog
+	mkdir -p build
+	echo "$(APP) ($(DEB_VERSION)) unstable; urgency=medium" > build/changelog
+	echo "" >> build/changelog
+	git log --pretty=format:"  * %s" $(GIT_TAG)..HEAD >> build/changelog || true
+	echo "" >> build/changelog
+	echo " -- bspippi1337 <noreply@github.com>  $$(date -R)" >> build/changelog
+	gzip -9 build/changelog
 
-deb: build
-	@echo "==> Building Debian package $(DEB_VERSION) ($(ARCH))"
+# ------------------------------------------
+# Debian package
+# ------------------------------------------
+
+deb: build changelog
+	@echo "==> Building Debian package $(DEB_VERSION)"
 
 	rm -rf build/deb
 	mkdir -p build/deb/DEBIAN
@@ -73,6 +97,7 @@ deb: build
 	mkdir -p build/deb/usr/share/doc/$(APP)
 
 	cp $(APP) build/deb/usr/bin/$(APP)
+	cp build/changelog.gz build/deb/usr/share/doc/$(APP)/changelog.gz
 
 	echo "Package: $(APP)" > build/deb/DEBIAN/control
 	echo "Version: $(DEB_VERSION)" >> build/deb/DEBIAN/control
@@ -83,39 +108,7 @@ deb: build
 	echo "Depends: libc6 (>= 2.31)" >> build/deb/DEBIAN/control
 	echo "Description: Terminal-first API Workbench" >> build/deb/DEBIAN/control
 
-	echo "Restless ($(DEB_VERSION)) unstable; urgency=medium" > build/deb/usr/share/doc/$(APP)/changelog
-	echo "" >> build/deb/usr/share/doc/$(APP)/changelog
-	echo "  * Automated build" >> build/deb/usr/share/doc/$(APP)/changelog
-	echo "" >> build/deb/usr/share/doc/$(APP)/changelog
-	echo " -- bspippi1337 <noreply@github.com>  $$(date -R)" >> build/deb/usr/share/doc/$(APP)/changelog
-
-	gzip -9 build/deb/usr/share/doc/$(APP)/changelog
-
 	dpkg-deb --build build/deb $(APP)_$(DEB_VERSION)_$(ARCH).deb
-# ------------------------------------------
-# Signed APT publish
-# ------------------------------------------
-
-publish-apt: deb
-	@echo "==> Publishing signed APT repository"
-
-	mkdir -p apt/pool/$(APT_COMP)/r/restless
-	mkdir -p apt/dists/$(APT_DIST)/$(APT_COMP)/binary-$(APT_ARCH)
-
-	@DEB=$$(ls -1 $(APP)_*_$(APT_ARCH).deb | sort -V | tail -n1); \
-	mv -f $$DEB apt/pool/$(APT_COMP)/r/restless/
-
-	cd apt && \
-	dpkg-scanpackages pool /dev/null > dists/$(APT_DIST)/$(APT_COMP)/binary-$(APT_ARCH)/Packages && \
-	gzip -9c dists/$(APT_DIST)/$(APT_COMP)/binary-$(APT_ARCH)/Packages > dists/$(APT_DIST)/$(APT_COMP)/binary-$(APT_ARCH)/Packages.gz && \
-	apt-ftparchive release dists/$(APT_DIST) > dists/$(APT_DIST)/Release && \
-	gpg --batch --yes --default-key $(APT_KEY) --clearsign -o dists/$(APT_DIST)/InRelease dists/$(APT_DIST)/Release && \
-	gpg --batch --yes --default-key $(APT_KEY) -abs -o dists/$(APT_DIST)/Release.gpg dists/$(APT_DIST)/Release && \
-	gpg --armor --export $(APT_KEY) > restless.gpg
-
-	git add apt
-	git commit -m "APT: publish $(VERSION)" || true
-	git push
 
 # ------------------------------------------
 # Install
@@ -144,17 +137,8 @@ fmt:
 doctor: tidy fmt test build
 	@echo "Doctor OK"
 
-teacher: build
-	./$(APP) teacher
-
 clean:
-	rm -f $(APP)
-	rm -rf $(DIST)
-	rm -rf build
+	rm -rf build $(DIST) $(APP)
 
 version:
-	@echo $(VERSION)
-.PHONY: release-all
-
-release-all: clean build-all deb publish-apt
-	@echo "==> Full release pipeline complete."
+	@echo $(DEB_VERSION)

@@ -1,3 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "==> Rewriting clean Makefile"
+
+cat > Makefile <<'EOT'
 BINARY := restless
 VERSION ?= 4.0.4
 PKG := github.com/bspippi1337/restless/internal/version
@@ -30,3 +36,6 @@ clean:
 
 doctor: tidy fmt test build
 	@echo "Doctor OK"
+EOT
+
+echo "==> Done"

@@ -14,7 +14,8 @@ type SpecIndex struct {
 	Imported  int64  `json:"imported_unix"`
 	Title     string `json:"title"`
 	Version   string `json:"version"`
-	RawPath   string `json:"raw_path"` // stored raw file
+	BaseURL   string `json:"base_url"`
+	RawPath   string `json:"raw_path"`
 	IndexPath string `json:"index_path"`
 }
 
@@ -40,6 +41,7 @@ func SaveIndex(idx SpecIndex) error {
 		return err
 	}
 	p := filepath.Join(dir, idx.ID+".json")
+	idx.IndexPath = p
 	b, err := json.MarshalIndent(idx, "", "  ")
 	if err != nil {
 		return err
@@ -61,5 +63,27 @@ func LoadIndex(id string) (SpecIndex, error) {
 	if err := json.Unmarshal(b, &idx); err != nil {
 		return SpecIndex{}, err
 	}
+	idx.IndexPath = p
 	return idx, nil
+}
+
+func ListIndexFiles() ([]string, error) {
+	dir, err := cacheDir()
+	if err != nil {
+		return nil, err
+	}
+	ents, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	var out []string
+	for _, e := range ents {
+		if e.IsDir() {
+			continue
+		}
+		if filepath.Ext(e.Name()) == ".json" {
+			out = append(out, filepath.Join(dir, e.Name()))
+		}
+	}
+	return out, nil
 }

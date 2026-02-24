@@ -10,7 +10,6 @@ import (
 	"github.com/bspippi1337/restless/internal/modules/export"
 	"github.com/bspippi1337/restless/internal/modules/openapi"
 	"github.com/bspippi1337/restless/internal/modules/session"
-	"github.com/bspippi1337/restless/internal/profile"
 )
 
 func handleOpenAPI(args []string) {
@@ -49,7 +48,7 @@ func handleOpenAPI(args []string) {
 		}
 
 	case "run":
-
+		// run <id> <METHOD> <PATH> [--base URL] [-p k=v]... [-q k=v]... [-H 'K: V']... [-d BODY] [-F @file] [--curl] [--save name] [-set k=v]...
 		ra, sessSets, err := parseOpenAPIRunArgs(args[1:])
 		if err != nil {
 			fmt.Println("run error:", err)
@@ -57,6 +56,7 @@ func handleOpenAPI(args []string) {
 			os.Exit(1)
 		}
 
+		// Build App with session + export (templating + save)
 		sess := session.New()
 		for k, v := range sessSets {
 			sess.Set(k, v)
@@ -67,10 +67,9 @@ func handleOpenAPI(args []string) {
 			openapi.New(),
 			export.New(),
 		}
-
 		a, err := app.New(mods)
 		if err != nil {
-			fmt.Println("error:", err)
+			fmt.Println("ERROR:", err)
 			os.Exit(1)
 		}
 
@@ -79,36 +78,24 @@ func handleOpenAPI(args []string) {
 			fmt.Println("index error:", err)
 			os.Exit(1)
 		}
-
 		spec, err := openapi.LoadSpecFromFile(idx.RawPath)
 		if err != nil {
-			fmt.Println("spec error:", err)
+			fmt.Println("ERROR: spec:", err)
 			os.Exit(1)
-		}
-
-		// Inject profile base if not provided
-		if ra.BaseOverride == "" {
-			cfg, _ := profile.Load()
-			if cfg.Active != "" {
-				if p, ok := cfg.Profiles[cfg.Active]; ok {
-					ra.BaseOverride = p.Base
-				}
-			}
 		}
 
 		req, curl, err := openapi.BuildRequest(idx, spec, ra)
 		if err != nil {
-			fmt.Println("build error:", err)
+			fmt.Println("ERROR: build:", err)
 			os.Exit(1)
 		}
-
 		if ra.ShowCurl && curl != "" {
 			fmt.Println(curl)
 		}
 
 		resp, err := a.RunOnce(context.Background(), req)
 		if err != nil {
-			fmt.Println("request error:", err)
+			fmt.Println("ERROR: request:", err)
 			os.Exit(1)
 		}
 
@@ -123,6 +110,7 @@ func handleOpenAPI(args []string) {
 			}
 			fmt.Println("saved:", p)
 		}
+
 	default:
 		fmt.Println("unknown openapi command")
 		os.Exit(1)

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -19,28 +18,25 @@ import (
 )
 
 type Engine struct {
-	Client *http.Client
+	Client   *http.Client
 	LastJSON any
-	LastURL string
+	LastURL  string
 }
 
 func NewEngine() *Engine {
-	return &Engine{
-		Client: &http.Client{Timeout: 25 * time.Second},
-	}
+	return &Engine{Client: &http.Client{Timeout: 25 * time.Second}}
 }
 
-func (e *Engine) Request(method, target string) (string, string, []string, error) {
+func (e *Engine) Request(method, target string) (string, string, []string, []string, error) {
 	req, err := http.NewRequest(method, target, nil)
 	if err != nil {
-		return "", "", nil, err
+		return "", "", nil, nil, err
 	}
-
 	req.Header.Set("Accept", "application/json, */*")
 
 	resp, err := e.Client.Do(req)
 	if err != nil {
-		return "", "", nil, err
+		return "", "", nil, nil, err
 	}
 	defer resp.Body.Close()
 
@@ -48,50 +44,98 @@ func (e *Engine) Request(method, target string) (string, string, []string, error
 	body := string(bodyBytes)
 
 	var parsed any
+	var smart []string
+
 	if json.Unmarshal(bodyBytes, &parsed) == nil {
 		e.LastJSON = parsed
 		e.LastURL = target
-	} else {
-		e.LastJSON = nil
+		smart = extractSmart(parsed, target)
 	}
 
-	hints := buildHints(target, body)
+	rawLinks := extractRawLinks(body)
 
-	return resp.Status, body, hints, nil
+	return resp.Status, body, rawLinks, smart, nil
 }
 
-func buildHints(currentURL, body string) []string {
-	var hints []string
-
+func extractRawLinks(body string) []string {
+	var out []string
 	reURL := regexp.MustCompile(`https?://[^\s"'<>]+`)
 	for _, m := range reURL.FindAllString(body, 20) {
-		hints = appendUnique(hints, m)
+		out = append(out, m)
 	}
-
-	u, err := url.Parse(currentURL)
-	if err == nil {
-		parent := *u
-		parent.Path = "/"
-		hints = appendUnique(hints, parent.String())
-	}
-
-	return hints
+	return unique(out)
 }
 
-func appendUnique(list []string, val string) []string {
-	for _, v := range list {
-		if v == val {
-			return list
+func extractSmart(v any, baseURL string) []string {
+	var out []string
+	u, _ := url.Parse(baseURL)
+
+	switch t := v.(type) {
+
+	case map[string]any:
+		for k, val := range t {
+			keyLower := strings.ToLower(k)
+
+			if keyLower == "id" || strings.HasSuffix(keyLower, "_id") {
+				switch vv := val.(type) {
+				case float64:
+					out = append(out, joinPath(u, strconv.Itoa(int(vv))))
+				case string:
+					out = append(out, joinPath(u, vv))
+				}
+			}
+
+			switch vv := val.(type) {
+			case string:
+				out = append(out, addQuery(u, k, vv))
+			case float64:
+				out = append(out, addQuery(u, k, strconv.Itoa(int(vv))))
+			case bool:
+				out = append(out, addQuery(u, k, strconv.FormatBool(vv)))
+			}
+		}
+
+	case []any:
+		if len(t) > 0 {
+			return extractSmart(t[0], baseURL)
 		}
 	}
-	return append(list, val)
+
+	return unique(out)
+}
+
+func joinPath(u *url.URL, segment string) string {
+	uu := *u
+	uu.RawQuery = ""
+	uu.Path = strings.TrimRight(u.Path, "/") + "/" + segment
+	return uu.String()
+}
+
+func addQuery(u *url.URL, key, value string) string {
+	uu := *u
+	q := uu.Query()
+	q.Set(key, value)
+	uu.RawQuery = q.Encode()
+	return uu.String()
+}
+
+func unique(in []string) []string {
+	seen := map[string]bool{}
+	var out []string
+	for _, v := range in {
+		if !seen[v] {
+			seen[v] = true
+			out = append(out, v)
+		}
+	}
+	return out
 }
 
 func main() {
 	a := app.New()
 	a.Settings().SetTheme(theme.DarkTheme())
 
-	w := a.NewWindow("LazyFyne Brain")
+	w := a.NewWindow("LazyFyne Brain++")
 	w.Resize(fyne.NewSize(1300, 800))
 
 	engine := NewEngine()
@@ -105,37 +149,34 @@ func main() {
 	responseBox := widget.NewMultiLineEntry()
 	responseBox.Wrapping = fyne.TextWrapWord
 
-	var hints []string
-	var keyHints []string
+	var rawLinks []string
+	var smart []string
 
-	hintsList := widget.NewList(
-		func() int { return len(hints) },
+	rawList := widget.NewList(
+		func() int { return len(rawLinks) },
 		func() fyne.CanvasObject { return widget.NewLabel("") },
 		func(i widget.ListItemID, o fyne.CanvasObject) {
-			o.(*widget.Label).SetText(hints[i])
+			o.(*widget.Label).SetText(rawLinks[i])
 		},
 	)
 
-	hintsList.OnSelected = func(id widget.ListItemID) {
-		urlEntry.SetText(hints[id])
-	}
-
-	keyList := widget.NewList(
-		func() int { return len(keyHints) },
+	smartList := widget.NewList(
+		func() int { return len(smart) },
 		func() fyne.CanvasObject { return widget.NewLabel("") },
 		func(i widget.ListItemID, o fyne.CanvasObject) {
-			o.(*widget.Label).SetText(keyHints[i])
+			o.(*widget.Label).SetText(smart[i])
 		},
 	)
 
-	keyList.OnSelected = func(id widget.ListItemID) {
-		key := keyHints[id]
-		urlEntry.SetText(generateFromKey(engine.LastURL, key))
+	smartList.OnSelected = func(id widget.ListItemID) {
+		urlEntry.SetText(smart[id])
 		methodSelect.SetSelected("GET")
 	}
 
 	sendBtn := widget.NewButton("Send", func() {
-		status, body, newHints, err := engine.Request(methodSelect.Selected, urlEntry.Text)
+		status, body, newRaw, newSmart, err :=
+			engine.Request(methodSelect.Selected, urlEntry.Text)
+
 		if err != nil {
 			responseBox.SetText(err.Error())
 			return
@@ -145,17 +186,17 @@ func main() {
 		if json.Unmarshal([]byte(body), &pretty) == nil {
 			b, _ := json.MarshalIndent(pretty, "", "  ")
 			responseBox.SetText(string(b))
-			keyHints = extractKeys(pretty)
-			keyList.Refresh()
 		} else {
 			responseBox.SetText(body)
-			keyHints = nil
-			keyList.Refresh()
 		}
 
-		w.SetTitle("LazyFyne Brain — " + status)
-		hints = newHints
-		hintsList.Refresh()
+		w.SetTitle("LazyFyne Brain++ — " + status)
+
+		rawLinks = newRaw
+		smart = newSmart
+
+		rawList.Refresh()
+		smartList.Refresh()
 	})
 
 	left := container.NewVBox(
@@ -164,11 +205,11 @@ func main() {
 		methodSelect,
 		sendBtn,
 		widget.NewSeparator(),
-		widget.NewLabel("Next Endpoints"),
-		container.NewVScroll(hintsList),
+		widget.NewLabel("Detected Endpoints"),
+		container.NewVScroll(smartList),
 		widget.NewSeparator(),
-		widget.NewLabel("JSON Key Navigation"),
-		container.NewVScroll(keyList),
+		widget.NewLabel("Raw Links"),
+		container.NewVScroll(rawList),
 	)
 
 	right := container.NewVBox(
@@ -181,39 +222,4 @@ func main() {
 
 	w.SetContent(split)
 	w.ShowAndRun()
-}
-
-func extractKeys(v any) []string {
-	var keys []string
-
-	switch t := v.(type) {
-	case map[string]any:
-		for k := range t {
-			keys = append(keys, k)
-		}
-	case []any:
-		if len(t) > 0 {
-			return extractKeys(t[0])
-		}
-	}
-	return keys
-}
-
-func generateFromKey(baseURL, key string) string {
-	u, err := url.Parse(baseURL)
-	if err != nil {
-		return baseURL
-	}
-
-	keyLower := strings.ToLower(key)
-
-	if keyLower == "id" || strings.HasSuffix(keyLower, "_id") {
-		return u.String() + "/1"
-	}
-
-	q := u.Query()
-	q.Set(key, "true")
-	u.RawQuery = q.Encode()
-
-	return u.String()
 }

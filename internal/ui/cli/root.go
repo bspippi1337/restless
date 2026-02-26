@@ -1,41 +1,49 @@
 package cli
 
 import (
-	"context"
 	"fmt"
-	"github.com/bspippi1337/restless/internal/adapters/http"
-	"github.com/bspippi1337/restless/internal/app"
-	"github.com/bspippi1337/restless/internal/core/engine"
+
 	"github.com/spf13/cobra"
 )
 
 func NewRootCmd() *cobra.Command {
+	state := NewState()
+
 	cmd := &cobra.Command{
-		Use: "restless",
+		Use:           "restless",
+		Short:         "Terminal-first API workbench",
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return state.Load()
+		},
 	}
 
-	cmd.AddCommand(newRunCmd())
+	cmd.PersistentFlags().StringVar(&state.SessionName, "session", "default", "Session name")
+	cmd.PersistentFlags().BoolVar(&state.NoHeader, "no-header", false, "Disable header output")
+
+	cmd.AddCommand(newProbeCmd(state))
+	cmd.AddCommand(newListCmd(state))
+	cmd.AddCommand(newRunCmd(state))
+	cmd.AddCommand(newSessionCmd(state))
+
+	cmd.SetHelpTemplate(helpTemplate())
+
 	return cmd
 }
 
-func newRunCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "run [method] [url]",
-		Short: "Run a request using v2 engine",
-		Args:  cobra.ExactArgs(2),
-		Run: func(cmd *cobra.Command, args []string) {
-			transport := &httpadapter.HTTPTransport{}
-			eng := &engine.Engine{Transport: transport}
-			runner := &app.Runner{Engine: eng}
+func helpTemplate() string {
+	return fmt.Sprintf(`{{with or .Long .Short }}{{. | trimTrailingWhitespaces}}{{end}}
 
-			res := runner.Run(context.Background(), args[0], args[1])
-			if res.Err != nil {
-				fmt.Println("Error:", res.Err)
-				return
-			}
+Usage:
+  {{.UseLine}}
 
-			fmt.Println("Status:", res.Status)
-			fmt.Println(string(res.Body))
-		},
-	}
+Commands:
+{{range .Commands}}{{if (and .IsAvailableCommand (not .IsHelpCommand))}}  {{rpad .Name .NamePadding }} {{.Short}}
+{{end}}{{end}}
+
+Flags:
+{{.Flags.FlagUsages | trimTrailingWhitespaces}}
+
+`)
 }

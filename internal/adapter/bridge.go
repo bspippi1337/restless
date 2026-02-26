@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"strings"
 	"context"
 	"net/http"
 	"time"
@@ -32,6 +33,12 @@ func RunRequest(cfg RequestConfig) error {
 	a, err := app.New(mods)
 	if err != nil {
 		return err
+	}
+
+	if !strings.HasPrefix(cfg.URL, "http://") && !strings.HasPrefix(cfg.URL, "https://") {
+
+		cfg.URL = "https://" + cfg.URL
+
 	}
 
 	req := types.Request{

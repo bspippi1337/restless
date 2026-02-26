@@ -16,6 +16,7 @@ import (
 	"github.com/bspippi1337/restless/internal/modules/export"
 	"github.com/bspippi1337/restless/internal/modules/openapi"
 	"github.com/bspippi1337/restless/internal/modules/session"
+	"github.com/bspippi1337/restless/internal/validate"
 )
 
 func main() {
@@ -33,6 +34,10 @@ func main() {
 			return
 		case "profile":
 			handleProfile(os.Args[2:])
+			return
+
+		case "validate":
+			handleValidate(os.Args[2:])
 			return
 		}
 	}
@@ -84,4 +89,43 @@ func runRequestMode(args []string) {
 
 	fmt.Printf("status: %d (dur=%dms)\n", resp.StatusCode, resp.DurationMs)
 	fmt.Println(string(resp.Body))
+}
+
+func handleValidate(args []string) {
+	fs := flag.NewFlagSet("validate", flag.ExitOnError)
+
+	spec := fs.String("spec", "", "Path to OpenAPI spec")
+	base := fs.String("base", "", "Base URL")
+	strict := fs.Bool("strict", false, "Strict mode")
+	jsonOut := fs.Bool("json", false, "JSON output")
+
+	fs.Parse(args)
+
+	if *spec == "" || *base == "" {
+		fmt.Println("missing --spec or --base")
+		fs.Usage()
+		os.Exit(1)
+	}
+
+	ctx := context.Background()
+
+	rep, err := validate.Run(ctx, validate.Options{
+		SpecPath:   *spec,
+		BaseURL:    *base,
+		StrictLive: *strict,
+	})
+	if err != nil {
+		fmt.Println("ERROR:", err)
+		os.Exit(1)
+	}
+
+	if *jsonOut {
+		validate.PrintJSON(rep, os.Stdout)
+	} else {
+		validate.PrintHuman(rep, os.Stdout)
+	}
+
+	if !rep.OK {
+		os.Exit(1)
+	}
 }

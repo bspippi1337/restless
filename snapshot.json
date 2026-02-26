@@ -1,0 +1,16 @@
+{
+  "kind": "restless.snapshot.v1",
+  "createdAt": "2026-02-26T01:52:12Z",
+  "baseUrl": "https://api.github.com",
+  "specPath": "",
+  "checked": 1,
+  "failed": 0,
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/",
+      "actualCode": 200
+    }
+  ],
+  "fingerprint": "8788999c18018f996fe4211731ab74653cca8121c48c962bc7982cceb5a79deb"
+}

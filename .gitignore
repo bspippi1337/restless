@@ -1,15 +1,29 @@
-/bin/
+# Binaries
 /dist/
 /build/
-/logs/
-.fixall-logs/
+/bin/
+restless
+
+# Logs
 *.log
-*.tmp
-*.jks
-*.pfx
-*.pem
-*.key
-*.crt
-*.keystore
+
+# OS junk
 .DS_Store
 Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Backup files
+*.bak*
+*~
+
+# Packages / releases
+*.deb
+*.apk
+*.tar.gz
+*.zip
+
+# Termux runtime junk
+data/

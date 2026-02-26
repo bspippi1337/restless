@@ -1,0 +1,7 @@
+
+<svg width="1280" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#0B0F14"/>
+  <text x="120" y="200" font-family="Inter, Arial, sans-serif" font-size="120" font-weight="700" fill="#FFFFFF">Restless</text>
+  <text x="125" y="260" font-family="Inter, Arial, sans-serif" font-size="32" fill="#00C8FF">Universal API Client</text>
+  <line x1="120" y1="280" x2="1100" y2="280" stroke="#00E676" stroke-width="3"/>
+</svg>

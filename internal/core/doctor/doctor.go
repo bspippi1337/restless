@@ -10,7 +10,9 @@ import (
 
 func Run(root string, dryRun bool) (string, error) {
 	root = strings.TrimSpace(root)
-	if root == "" { root = "." }
+	if root == "" {
+		root = "."
+	}
 	root, _ = filepath.Abs(root)
 
 	start := time.Now()
@@ -29,10 +31,14 @@ func Run(root string, dryRun bool) (string, error) {
 	}
 
 	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
-		if err != nil { return nil }
+		if err != nil {
+			return nil
+		}
 		if d.IsDir() {
 			bn := filepath.Base(path)
-			if bn == ".git" || bn == "node_modules" { return filepath.SkipDir }
+			if bn == ".git" || bn == "node_modules" {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 		if strings.HasSuffix(strings.ToLower(d.Name()), ".log") {

@@ -8,7 +8,6 @@ import (
 
 	"github.com/bspippi1337/restless/internal/core/discovery"
 	"github.com/bspippi1337/restless/internal/tui/views"
-
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -31,7 +30,10 @@ type keymap struct {
 	Help     key.Binding
 }
 
-func (k keymap) ShortHelp() []key.Binding { return []key.Binding{k.Discover, k.Help, k.TabPrev, k.TabNext, k.Quit} }
+func (k keymap) ShortHelp() []key.Binding {
+	return []key.Binding{k.Discover, k.Help, k.TabPrev, k.TabNext, k.Quit}
+}
+
 func (k keymap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Discover, k.Help},
@@ -59,6 +61,7 @@ type model struct {
 }
 
 type tickMsg time.Time
+
 type discoverMsg struct {
 	finding discovery.Finding
 	err     error
@@ -72,7 +75,8 @@ func newModel(quiet bool) model {
 		Discover: key.NewBinding(key.WithKeys("ctrl+d"), key.WithHelp("ctrl+d", "discover")),
 		Help:     key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "help")),
 	}
-	m := model{
+
+	return model{
 		quiet:  quiet,
 		tab:    tabWizard,
 		help:   help.New(),
@@ -83,7 +87,6 @@ func newModel(quiet bool) model {
 		helpv:  views.NewHelp(),
 		face:   views.NewFace(quiet),
 	}
-	return m
 }
 
 func (m model) Init() tea.Cmd {
@@ -126,25 +129,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 
-		switch m.tab {
-		case tabWizard:
-			var cmd tea.Cmd
-			m.wizard, cmd = m.wizard.Update(msg)
-			return m, cmd
-		case tabRequest:
-			var cmd tea.Cmd
-			m.req, cmd = m.req.Update(msg)
-			return m, cmd
-		case tabStream:
-			var cmd tea.Cmd
-			m.stream, cmd = m.stream.Update(msg)
-			return m, cmd
-		case tabHelp:
-			var cmd tea.Cmd
-			m.helpv, cmd = m.helpv.Update(msg)
-			return m, cmd
-		}
-
 	case discoverMsg:
 		m.discoverBusy = false
 		if msg.err != nil {
@@ -152,9 +136,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.wizard.SetDiscovery(nil, m.discoverErr)
 			return m, nil
 		}
+
 		m.wizard.SetDiscovery(&msg.finding, "")
 		if len(msg.finding.Endpoints) > 0 {
-			m.req.SetSuggestion(msg.finding.BaseURL, msg.finding.Endpoints[0].Method, msg.finding.Endpoints[0].Path)
+			m.req.SetSuggestion(
+				msg.finding.BaseURL,
+				msg.finding.Endpoints[0].Method,
+				msg.finding.Endpoints[0].Path,
+			)
 		}
 		return m, nil
 
@@ -182,15 +171,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		m.helpv, cmd = m.helpv.Update(msg)
 		return m, cmd
+	default:
+		return m, nil
 	}
-
-	return m, nil
 }
 
 func (m model) runDiscover(domain string) tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), 18*time.Second)
 		defer cancel()
+
+		_ = ctx // beholdt, i tilfelle discovery tar ctx senere
+
 		finding, err := discovery.DiscoverDomain(domain, discovery.Options{
 			BudgetSeconds: 15,
 			BudgetPages:   6,

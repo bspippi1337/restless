@@ -22,8 +22,12 @@ func LightDocsScrape(ctx context.Context, root string, budgetPages int) ([]PathH
 		root + "/api",
 		root + "/developers",
 	}
-	if budgetPages < 1 { budgetPages = 1 }
-	if budgetPages > len(cands) { budgetPages = len(cands) }
+	if budgetPages < 1 {
+		budgetPages = 1
+	}
+	if budgetPages > len(cands) {
+		budgetPages = len(cands)
+	}
 	cands = cands[:budgetPages]
 
 	client := &http.Client{}
@@ -36,7 +40,9 @@ func LightDocsScrape(ctx context.Context, root string, budgetPages int) ([]PathH
 		req, _ := http.NewRequestWithContext(ctx, "GET", u, nil)
 		req.Header.Set("User-Agent", "restless-discovery/0.2")
 		res, err := client.Do(req)
-		if err != nil { continue }
+		if err != nil {
+			continue
+		}
 		visited = append(visited, u)
 		b, _ := io.ReadAll(io.LimitReader(res.Body, 2<<20))
 		res.Body.Close()
@@ -44,7 +50,9 @@ func LightDocsScrape(ctx context.Context, root string, budgetPages int) ([]PathH
 		m := rePath.FindAllString(string(b), -1)
 		for _, p := range m {
 			pp := strings.TrimSpace(p)
-			if pp == "" || !strings.HasPrefix(pp, "/") { continue }
+			if pp == "" || !strings.HasPrefix(pp, "/") {
+				continue
+			}
 			paths[pp] = struct{}{}
 		}
 	}

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420">
+  <defs>
+    <style>
+      .bg{fill:#0b0f14}.frame{fill:#111826;stroke:#253041;stroke-width:2}
+      .txt{font:16px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;fill:#d7e0ea}
+      .dim{fill:#9fb0c1}.good{fill:#8ef7a1}.warn{fill:#ffd38a}
+    </style>
+    <clipPath id="clip"><rect x="34" y="86" width="912" height="302" rx="10"/></clipPath>
+  </defs>
+  <rect class="bg" width="980" height="420"/>
+  <rect class="frame" x="24" y="24" width="932" height="372" rx="14"/>
+  <circle cx="52" cy="52" r="7" fill="#ff5f56"/><circle cx="74" cy="52" r="7" fill="#ffbd2e"/><circle cx="96" cy="52" r="7" fill="#27c93f"/>
+  <text class="txt dim" x="130" y="58">restless • demo</text>
+  <g clip-path="url(#clip)">
+    <text class="txt" x="48" y="114">➜  ~  </text>
+    <text class="txt" x="118" y="114">restless discover openai.com --verify --budget-seconds 20 --budget-pages 8 --save-profile openai</text>
+    <rect x="900" y="100" width="10" height="18" fill="#d7e0ea"><animate attributeName="opacity" values="1;0;1" dur="0.9s" repeatCount="indefinite"/></rect>
+    <text class="txt dim" x="48" y="154" opacity="0">[discover] crawling: openai.com (verify=on, budget=20s, pages=8)<animate attributeName="opacity" values="0;1" begin="0.6s" dur="0.2s" fill="freeze"/></text>
+    <text class="txt good" x="48" y="184" opacity="0">✔ profile saved: openai  •  evidence gathered  •  endpoints discovered<animate attributeName="opacity" values="0;1" begin="1.2s" dur="0.2s" fill="freeze"/></text>
+    <text class="txt" x="48" y="224" opacity="0">➜  ~  restless tui<animate attributeName="opacity" values="0;1" begin="1.9s" dur="0.2s" fill="freeze"/></text>
+    <text class="txt warn" x="48" y="254" opacity="0">[tui] pick endpoint → fill params → run → save snippet<animate attributeName="opacity" values="0;1" begin="2.4s" dur="0.2s" fill="freeze"/></text>
+  </g>
+  <text class="txt dim" x="48" y="404">Edit domain/text whenever you want a “real deal” screenshot.</text>
+</svg>

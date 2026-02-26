@@ -1,0 +1,14 @@
+Package: restless
+Version: 4.0.4+git13.g9ae6d49.dirty-1
+Architecture: amd64
+Maintainer: bspippi1337
+Depends: libc6 (>= 2.31)
+Filename: pool/main/r/restless/restless_4.0.4+git13.g9ae6d49.dirty-1_amd64.deb
+Size: 4399616
+MD5sum: 4905c4a080b5d2a0a2ef2363a7c3d778
+SHA1: 6479cc1c0a5e1e3bf16085dcb98a1af12ab9bc00
+SHA256: 7fa9dfdeff54893c9a2d981c9daacea88204c757c0217606f32cc1abd307e00f
+Section: utils
+Priority: optional
+Description: Terminal-first API Workbench
+

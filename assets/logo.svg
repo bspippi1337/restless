@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 512 512">
+
+  <!-- Centered + optically balanced correction-force mark -->
+  <path d="
+    M210 110
+    L350 110
+    L300 210
+    L350 210
+    L170 380
+    L250 210
+    L170 210
+    Z" fill="currentColor"></path>
+</svg>

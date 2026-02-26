@@ -1,0 +1,29 @@
+# Binaries
+/dist/
+/build/
+/bin/
+restless
+
+# Logs
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Backup files
+*.bak*
+*~
+
+# Packages / releases
+*.deb
+*.apk
+*.tar.gz
+*.zip
+
+# Termux runtime junk
+data/

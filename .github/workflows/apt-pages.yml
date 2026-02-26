@@ -1,0 +1,76 @@
+name: Publish APT (flat) to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  apt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev
+
+      - name: Build binary
+        run: |
+          mkdir -p dist
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dist/restless ./cmd/restless
+          chmod +x dist/restless
+
+      - name: Build .deb
+        run: |
+          VERSION="${GITHUB_SHA::7}"
+          mkdir -p pkg/DEBIAN pkg/usr/bin
+          install -m 0755 dist/restless pkg/usr/bin/restless
+          cat > pkg/DEBIAN/control <<CTL
+Package: restless
+Version: 0.0.0+${VERSION}
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: bspippi1337 <noreply@github.com>
+Description: Restless universal API client
+CTL
+          dpkg-deb --build pkg dist/restless_${VERSION}_amd64.deb
+          rm -rf pkg
+
+      - name: Create flat APT repo
+        run: |
+          mkdir -p apt-repo
+          cp dist/*.deb apt-repo/
+          cd apt-repo
+          dpkg-scanpackages . /dev/null > Packages
+          gzip -k -f Packages
+          cat > Release <<REL
+Origin: restless
+Label: restless APT
+Suite: stable
+Codename: stable
+Architectures: amd64
+Components: main
+Description: APT repo for restless
+REL
+          cd ..
+          touch apt-repo/.nojekyll
+
+      - name: Publish gh-pages
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git fetch origin gh-pages || true
+          git checkout gh-pages || git checkout --orphan gh-pages
+          rm -rf *
+          cp -a apt-repo/. .
+          git add -A
+          git commit -m "APT publish" || true
+          git push origin gh-pages

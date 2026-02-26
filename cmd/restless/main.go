@@ -9,6 +9,7 @@ import (
 	"github.com/bspippi1337/restless/internal/version"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/bspippi1337/restless/internal/core/app"
 	"github.com/bspippi1337/restless/internal/core/types"
@@ -51,6 +52,7 @@ func runRequestMode(args []string) {
 	method := fs.String("X", "GET", "HTTP method")
 	url := fs.String("url", "", "Request URL")
 	body := fs.String("d", "", "Body string")
+	timeout := fs.Int("timeout", 7, "Timeout in seconds")
 
 	fs.Parse(args)
 
@@ -81,7 +83,10 @@ func runRequestMode(args []string) {
 		Body:    []byte(*body),
 	}
 
-	resp, err := a.RunOnce(context.Background(), req)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(*timeout)*time.Second)
+	defer cancel()
+
+	resp, err := a.RunOnce(ctx, req)
 	if err != nil {
 		fmt.Println("ERROR:", err)
 		os.Exit(1)

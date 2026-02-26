@@ -1,4 +1,4 @@
-package main
+package legacy
 
 import "github.com/bspippi1337/restless/internal/teacher"
 

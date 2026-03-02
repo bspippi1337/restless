@@ -61,4 +61,11 @@ Entry point: `cmd/restless/main.go`
 - `run`: run a request (uses session base when available)
 - `session`: shows active session state
 
+## 🧱 Baseline
+
+Current stable core baseline: `baseline-core-stable`
+
+GUI is frozen under `experiments/`.
+Core CLI is the authoritative runtime surface.
+
 Early project. Feedback welcome.

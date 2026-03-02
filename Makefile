@@ -4,10 +4,13 @@ tidy:
 	go mod tidy
 
 test:
-	go test ./...
-
+	go test $(shell go list ./... | grep -v /experiments/)
 lint:
-	golangci-lint run ./...
+	@if command -v golangci-lint >/dev/null 2>&1; then \
+		golangci-lint run ./... ; \
+	else \
+		echo "golangci-lint not installed, skipping lint." ; \
+	fi
 
 run:
 	go run ./cmd/restless

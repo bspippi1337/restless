@@ -2,7 +2,6 @@
 /dist/
 /build/
 /bin/
-restless
 
 # Logs
 *.log
@@ -27,3 +26,4 @@ Thumbs.db
 
 # Termux runtime junk
 data/
+

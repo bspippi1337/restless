@@ -1,0 +1,12 @@
+openapi: 3.0.0
+paths:
+  /users/{id}:
+    get:
+      responses:
+        "200":
+          description: ok
+  /repos/{owner}/{repo}:
+    get:
+      responses:
+        "200":
+          description: ok

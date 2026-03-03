@@ -28,3 +28,9 @@ Thumbs.db
 data/
 
 restless
+
+# Build artifacts
+.apt-build/
+.deb-build/
+apt-repo/
+*.deb

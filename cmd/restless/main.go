@@ -10,6 +10,7 @@ import (
 
 	"github.com/bspippi1337/restless/internal/core"
 	"github.com/bspippi1337/restless/internal/httpx"
+	"github.com/bspippi1337/restless/internal/insight"
 	"github.com/bspippi1337/restless/internal/report"
 )
 
@@ -31,6 +32,7 @@ func main() {
 func runVerify(args []string) {
 	jsonMode := false
 	showLatency := false
+	enableInsights := false
 	base := "https://api.github.com"
 	workers := 1
 
@@ -43,6 +45,9 @@ func runVerify(args []string) {
 
 		case "--latency":
 			showLatency = true
+
+		case "--insights":
+			enableInsights = true
 
 		case "--base":
 			if i+1 < len(args) {
@@ -135,10 +140,20 @@ func runVerify(args []string) {
 
 	result := agg.Build("dev-spec-hash", base)
 
+	if enableInsights {
+		result.Insights = insight.LatencyInsights(result.Results)
+	}
+
 	if jsonMode {
 		report.WriteJSON(os.Stdout, result, report.JSONOptions{Pretty: true})
 	} else {
 		report.WriteText(os.Stdout, result, report.TextOptions{ShowLatency: showLatency})
+	}
+
+	if enableInsights && !jsonMode {
+		for _, i := range result.Insights {
+			fmt.Println("Insight:", i.Message)
+		}
 	}
 
 	if result.Summary.Fail > 0 {

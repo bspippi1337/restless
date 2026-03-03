@@ -23,7 +23,7 @@ func DriftInsights(prev, curr []core.EndpointResult) []core.Insight {
 
 		if old, ok := m[key]; ok && old != r.Status {
 			insights = append(insights, core.Insight{
-				Type: "drift",
+				Type:    "drift",
 				Message: key + " changed from " + string(old) + " to " + string(r.Status),
 			})
 		}

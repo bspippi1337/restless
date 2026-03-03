@@ -54,3 +54,18 @@ restless --help
 ## License
 
 MIT
+
+## Quick demo
+
+Scan for OpenAPI:
+restless scan https://petstore.swagger.io
+
+Verify API:
+restless verify --spec https://petstore.swagger.io/v2/swagger.json
+
+Generate API map:
+restless map examples/example.yaml
+
+Generate SVG diagram:
+restless map examples/example.yaml --svg > api.svg
+

@@ -1,4 +1,4 @@
-module github.com/bspippi1337/restless
+module restless
 
 go 1.22.5
 

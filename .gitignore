@@ -43,3 +43,4 @@ dist/
 *.tar.*
 # autoninja: editor/OS
 *.swp
+restless-dynamic/

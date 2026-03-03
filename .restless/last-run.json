@@ -8,8 +8,8 @@
         "Path": "/pet"
       },
       "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 143884365,
+      "HTTPStatus": 403,
+      "Latency": 53034448,
       "Issues": null
     },
     {
@@ -19,7 +19,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 404,
-      "Latency": 150602383,
+      "Latency": 147107203,
       "Issues": null
     },
     {
@@ -29,7 +29,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 404,
-      "Latency": 148128820,
+      "Latency": 140982358,
       "Issues": null
     },
     {
@@ -38,8 +38,8 @@
         "Path": "/pet/1"
       },
       "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 152196375,
+      "HTTPStatus": 403,
+      "Latency": 50848971,
       "Issues": null
     },
     {
@@ -48,8 +48,8 @@
         "Path": "/pet/1"
       },
       "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 158151447,
+      "HTTPStatus": 403,
+      "Latency": 51326980,
       "Issues": null
     },
     {
@@ -58,8 +58,8 @@
         "Path": "/pet/1/uploadImage"
       },
       "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 144556798,
+      "HTTPStatus": 403,
+      "Latency": 52614840,
       "Issues": null
     },
     {
@@ -68,8 +68,8 @@
         "Path": "/pet/findByStatus"
       },
       "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 141493293,
+      "HTTPStatus": 403,
+      "Latency": 55606762,
       "Issues": null
     },
     {
@@ -78,8 +78,8 @@
         "Path": "/pet/findByTags"
       },
       "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 152630675,
+      "HTTPStatus": 403,
+      "Latency": 53248550,
       "Issues": null
     },
     {
@@ -88,8 +88,8 @@
         "Path": "/store/inventory"
       },
       "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 146628352,
+      "HTTPStatus": 403,
+      "Latency": 50332255,
       "Issues": null
     },
     {
@@ -98,8 +98,8 @@
         "Path": "/store/order"
       },
       "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 151511852,
+      "HTTPStatus": 403,
+      "Latency": 51412509,
       "Issues": null
     },
     {
@@ -109,7 +109,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 404,
-      "Latency": 149999264,
+      "Latency": 140661958,
       "Issues": null
     },
     {
@@ -118,8 +118,8 @@
         "Path": "/store/order/1"
       },
       "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 141387591,
+      "HTTPStatus": 403,
+      "Latency": 52139569,
       "Issues": null
     },
     {
@@ -128,38 +128,8 @@
         "Path": "/user"
       },
       "Status": "warn",
-      "HTTPStatus": 401,
-      "Latency": 150072836,
-      "Issues": null
-    },
-    {
-      "Endpoint": {
-        "Method": "DELETE",
-        "Path": "/user/1"
-      },
-      "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 203422217,
-      "Issues": null
-    },
-    {
-      "Endpoint": {
-        "Method": "GET",
-        "Path": "/user/1"
-      },
-      "Status": "ok",
-      "HTTPStatus": 200,
-      "Latency": 193376856,
-      "Issues": null
-    },
-    {
-      "Endpoint": {
-        "Method": "PUT",
-        "Path": "/user/1"
-      },
-      "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 152678695,
+      "HTTPStatus": 403,
+      "Latency": 204820939,
       "Issues": null
     },
     {
@@ -168,8 +138,8 @@
         "Path": "/user/createWithArray"
       },
       "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 142242531,
+      "HTTPStatus": 403,
+      "Latency": 44816873,
       "Issues": null
     },
     {
@@ -178,8 +148,38 @@
         "Path": "/user/createWithList"
       },
       "Status": "warn",
+      "HTTPStatus": 403,
+      "Latency": 51151301,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "DELETE",
+        "Path": "/user/demo"
+      },
+      "Status": "warn",
       "HTTPStatus": 404,
-      "Latency": 147066664,
+      "Latency": 138580243,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "GET",
+        "Path": "/user/demo"
+      },
+      "Status": "warn",
+      "HTTPStatus": 403,
+      "Latency": 51745399,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "PUT",
+        "Path": "/user/demo"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 152445722,
       "Issues": null
     },
     {
@@ -188,8 +188,8 @@
         "Path": "/user/login"
       },
       "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 170394585,
+      "HTTPStatus": 403,
+      "Latency": 49204213,
       "Issues": null
     },
     {
@@ -198,18 +198,18 @@
         "Path": "/user/logout"
       },
       "Status": "warn",
-      "HTTPStatus": 404,
-      "Latency": 344354320,
+      "HTTPStatus": 403,
+      "Latency": 54392023,
       "Issues": null
     }
   ],
   "Summary": {
-    "OK": 1,
-    "Warn": 19,
+    "OK": 0,
+    "Warn": 20,
     "Fail": 0
   },
   "Meta": {
-    "RateLimitRemaining": 38,
+    "RateLimitRemaining": 0,
     "RateLimitReset": 1772583148
   },
   "Insights": null

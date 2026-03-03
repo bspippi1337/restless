@@ -9,7 +9,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 53034448,
+      "Latency": 239669259,
       "Issues": null
     },
     {
@@ -19,7 +19,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 404,
-      "Latency": 147107203,
+      "Latency": 316441168,
       "Issues": null
     },
     {
@@ -29,7 +29,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 404,
-      "Latency": 140982358,
+      "Latency": 156384879,
       "Issues": null
     },
     {
@@ -39,7 +39,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 50848971,
+      "Latency": 55978138,
       "Issues": null
     },
     {
@@ -49,7 +49,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 51326980,
+      "Latency": 54396348,
       "Issues": null
     },
     {
@@ -59,7 +59,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 52614840,
+      "Latency": 232045432,
       "Issues": null
     },
     {
@@ -69,7 +69,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 55606762,
+      "Latency": 237030589,
       "Issues": null
     },
     {
@@ -79,7 +79,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 53248550,
+      "Latency": 240107539,
       "Issues": null
     },
     {
@@ -89,7 +89,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 50332255,
+      "Latency": 236701088,
       "Issues": null
     },
     {
@@ -99,7 +99,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 51412509,
+      "Latency": 56477496,
       "Issues": null
     },
     {
@@ -109,7 +109,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 404,
-      "Latency": 140661958,
+      "Latency": 325886469,
       "Issues": null
     },
     {
@@ -119,7 +119,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 52139569,
+      "Latency": 236904206,
       "Issues": null
     },
     {
@@ -129,7 +129,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 204820939,
+      "Latency": 270765405,
       "Issues": null
     },
     {
@@ -139,7 +139,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 44816873,
+      "Latency": 271114323,
       "Issues": null
     },
     {
@@ -149,7 +149,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 51151301,
+      "Latency": 54096992,
       "Issues": null
     },
     {
@@ -159,7 +159,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 404,
-      "Latency": 138580243,
+      "Latency": 315080544,
       "Issues": null
     },
     {
@@ -169,7 +169,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 51745399,
+      "Latency": 53419796,
       "Issues": null
     },
     {
@@ -179,7 +179,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 404,
-      "Latency": 152445722,
+      "Latency": 136242051,
       "Issues": null
     },
     {
@@ -189,7 +189,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 49204213,
+      "Latency": 51690490,
       "Issues": null
     },
     {
@@ -199,7 +199,7 @@
       },
       "Status": "warn",
       "HTTPStatus": 403,
-      "Latency": 54392023,
+      "Latency": 52996442,
       "Issues": null
     }
   ],
@@ -210,7 +210,7 @@
   },
   "Meta": {
     "RateLimitRemaining": 0,
-    "RateLimitReset": 1772583148
+    "RateLimitReset": 0
   },
   "Insights": null
 }

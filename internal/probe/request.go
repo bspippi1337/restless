@@ -8,8 +8,14 @@ type Request struct {
 }
 
 func Build(base string, ep core.Endpoint) Request {
+
+	path := FillPath(ep.Path)
+
+	url := base + path
+	url = AddQueryDefaults(url)
+
 	return Request{
 		Method: ep.Method,
-		URL:    base + ep.Path,
+		URL:    url,
 	}
 }

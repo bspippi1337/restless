@@ -20,5 +20,5 @@ func LoadSource(path string) ([]byte, error) {
 		return io.ReadAll(resp.Body)
 	}
 
-	return os.ReadFile(path)
+	return loadSource(path)
 }

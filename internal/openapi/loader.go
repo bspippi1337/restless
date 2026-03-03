@@ -13,7 +13,7 @@ type Spec struct {
 }
 
 func Load(path string) ([]core.Endpoint, error) {
-	data, err := os.ReadFile(path)
+	data, err := loadSource(path)
 	if err != nil {
 		return nil, err
 	}

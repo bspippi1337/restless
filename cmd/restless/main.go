@@ -1,6 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"os"
+)
+
+var version = "dev"
+import (
 
 var version = "dev"
 

@@ -1,12 +1,12 @@
 Package: restless
-Version: 5.2.0-gnu-manual-3-gdb1e913
-Architecture: arm64
+Version: 5.2.0-gnu-manual-3-gdb1e913-1-g86875f3
+Architecture: amd64
 Maintainer: Restless Release <bspippi1337@gmail.com>
-Filename: apt-repo/pool/main/r/restless/restless_5.2.0-gnu-manual-3-gdb1e913_arm64.deb
-Size: 2133000
-MD5sum: 0387f7cb21b994cd4c1553eb8f4ec81b
-SHA1: 77c529d97514f4bed8b4ad1c90f9324c9dcd0ce3
-SHA256: 7074a0fa885fbaaf8195ccb3ea7fc089e4ee059d9c0f19924595aaeaa820a1e2
+Filename: apt-repo/pool/main/r/restless/restless_5.2.0-gnu-manual-3-gdb1e913-1-g86875f3_amd64.deb
+Size: 2521336
+MD5sum: fd5e50ec0e3d1ca170485fdd6adaf894
+SHA1: 83c663abec3e21c0e41bc2fa4eb73fdd9805d799
+SHA256: 98addc18a9d2540a232c119bda2fe15e886637d77877e2064be13eee77b35982
 Section: utils
 Priority: optional
 Homepage: https://github.com/bspippi1337/restless

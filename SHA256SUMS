@@ -1,0 +1,9 @@
+baf8ade6beebbeff78dd434a3c32595a7b4a8a6119540e08f0c54e647320e003  dists/stable/InRelease
+d7d0e0c83badf9c8c2e93174b91d2fd9a8aaf16add436c3e6a4dd3e3e87470a2  dists/stable/main/binary-amd64/Packages
+22e6210e7bc48ba24a73aab79395d193540a0fd1220e782488174eda7ba7b55b  dists/stable/main/binary-amd64/Packages.gz
+d7d0e0c83badf9c8c2e93174b91d2fd9a8aaf16add436c3e6a4dd3e3e87470a2  dists/stable/main/binary-arm64/Packages
+22e6210e7bc48ba24a73aab79395d193540a0fd1220e782488174eda7ba7b55b  dists/stable/main/binary-arm64/Packages.gz
+b6fdab6cbb537af37e8fab083cb6df0c45ab8d9779f2457f557632c35d66596d  dists/stable/Release
+f19883deb9ba3fddd8595507aed02a5c2a4f3005214a22b301e7f6421776df8f  dists/stable/Release.gpg
+98addc18a9d2540a232c119bda2fe15e886637d77877e2064be13eee77b35982  pool/main/r/restless/restless_5.2.0-gnu-manual-3-gdb1e913-1-g86875f3_amd64.deb
+32e7fd13909811cdd51d233be8343d429cce3e95ee15ad608072176b29f0870f  pool/main/r/restless/restless_5.2.0-gnu-manual-3-gdb1e913-1-g86875f3_arm64.deb

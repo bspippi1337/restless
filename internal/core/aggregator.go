@@ -4,6 +4,7 @@ import "sort"
 
 type Aggregator struct {
 	results []EndpointResult
+	meta    Meta
 }
 
 func NewAggregator() *Aggregator {
@@ -14,6 +15,10 @@ func NewAggregator() *Aggregator {
 
 func (a *Aggregator) Add(r EndpointResult) {
 	a.results = append(a.results, r)
+}
+
+func (a *Aggregator) SetMeta(m Meta) {
+	a.meta = m
 }
 
 func (a *Aggregator) Results() []EndpointResult {
@@ -49,5 +54,6 @@ func (a *Aggregator) Build(specHash, baseURL string) VerificationResult {
 		BaseURL:  baseURL,
 		Results:  a.Results(),
 		Summary:  summary,
+		Meta:     a.meta,
 	}
 }

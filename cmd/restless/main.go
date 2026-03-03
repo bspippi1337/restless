@@ -31,6 +31,10 @@ func main() {
 	case "map":
 
 	case "scan":
+
+	case "inspect":
+		runInspect(os.Args[2:])
+
 		runScan(os.Args[2:])
 
 		runMap(os.Args[2:])
@@ -47,7 +51,7 @@ func runVerify(args []string) {
 	showLatency := false
 	enableInsights := false
 	base := "https://api.github.com"
-	workers := 1
+	workers := 10
 	specFile := ""
 
 	for i := 0; i < len(args); i++ {

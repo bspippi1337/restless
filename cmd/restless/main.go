@@ -9,8 +9,12 @@ import (
 	"time"
 
 	"github.com/bspippi1337/restless/internal/core"
+	"github.com/bspippi1337/restless/internal/graph"
+	"github.com/bspippi1337/restless/internal/history"
 	"github.com/bspippi1337/restless/internal/httpx"
 	"github.com/bspippi1337/restless/internal/insight"
+	"github.com/bspippi1337/restless/internal/openapi"
+	"github.com/bspippi1337/restless/internal/probe"
 	"github.com/bspippi1337/restless/internal/report"
 )
 
@@ -21,25 +25,54 @@ func main() {
 	}
 
 	switch os.Args[1] {
+
 	case "verify":
 		runVerify(os.Args[2:])
+
+	case "map":
+		runMap(os.Args[2:])
+
 	default:
 		fmt.Println("unknown command")
 		os.Exit(3)
 	}
 }
 
+func runMap(args []string) {
+
+	if len(args) == 0 {
+		fmt.Println("usage: restless map <spec.yaml>")
+		os.Exit(3)
+	}
+
+	spec := args[0]
+
+	endpoints, err := openapi.Load(spec)
+	if err != nil {
+		fmt.Println("spec load error:", err)
+		os.Exit(3)
+	}
+
+	nodes := graph.Build(endpoints)
+
+	graph.RenderASCII(os.Stdout, nodes)
+}
+
 func runVerify(args []string) {
+
 	jsonMode := false
 	showLatency := false
 	enableInsights := false
 	base := "https://api.github.com"
 	workers := 1
+	specFile := ""
 
 	for i := 0; i < len(args); i++ {
+
 		a := args[i]
 
 		switch a {
+
 		case "--json":
 			jsonMode = true
 
@@ -62,15 +95,36 @@ func runVerify(args []string) {
 				}
 				i++
 			}
+
+		case "--spec":
+			if i+1 < len(args) {
+				specFile = args[i+1]
+				i++
+			}
 		}
 	}
 
 	exec := httpx.NewExecutor(10 * time.Second)
 	agg := core.NewAggregator()
 
-	endpoints := []core.Endpoint{
-		{Method: "GET", Path: "/users/octocat"},
-		{Method: "GET", Path: "/repos/octocat/Hello-World"},
+	var endpoints []core.Endpoint
+
+	if specFile != "" {
+
+		eps, err := openapi.Load(specFile)
+		if err != nil {
+			fmt.Println("spec load error:", err)
+			os.Exit(3)
+		}
+
+		endpoints = probe.Plan(eps)
+
+	} else {
+
+		endpoints = []core.Endpoint{
+			{Method: "GET", Path: "/users/octocat"},
+			{Method: "GET", Path: "/repos/octocat/Hello-World"},
+		}
 	}
 
 	var meta core.Meta
@@ -81,15 +135,28 @@ func runVerify(args []string) {
 	var wg sync.WaitGroup
 
 	for w := 0; w < workers; w++ {
+
 		wg.Add(1)
+
 		go func() {
+
 			defer wg.Done()
 
 			for ep := range jobs {
-				url := base + ep.Path
 
-				resp, err := exec.Do(ep.Method, url)
+				req := probe.Build(base, ep)
+
+				var body []byte
+
+				switch ep.Method {
+				case "POST", "PUT", "PATCH":
+					body = probe.SimpleJSONBody()
+				}
+
+				resp, err := exec.Do(ep.Method, req.URL, body)
+
 				if err != nil {
+
 					results <- core.EndpointResult{
 						Endpoint: ep,
 						Status:   core.StatusFail,
@@ -97,6 +164,7 @@ func runVerify(args []string) {
 							{Message: err.Error()},
 						},
 					}
+
 					continue
 				}
 
@@ -104,6 +172,7 @@ func runVerify(args []string) {
 				meta.RateLimitReset = resp.RateLimitReset
 
 				status := core.StatusOK
+
 				if resp.StatusCode >= 500 {
 					status = core.StatusFail
 				} else if resp.StatusCode >= 400 {
@@ -121,15 +190,20 @@ func runVerify(args []string) {
 	}
 
 	go func() {
+
 		for _, ep := range endpoints {
 			jobs <- ep
 		}
+
 		close(jobs)
+
 	}()
 
 	go func() {
+
 		wg.Wait()
 		close(results)
+
 	}()
 
 	for r := range results {
@@ -141,16 +215,31 @@ func runVerify(args []string) {
 	result := agg.Build("dev-spec-hash", base)
 
 	if enableInsights {
-		result.Insights = insight.LatencyInsights(result.Results)
+
+		result.Insights = insight.Analyze(result.Results)
+
+		if prev, err := history.Load(); err == nil {
+
+			result.Insights = append(
+				result.Insights,
+				insight.DriftInsights(prev.Results, result.Results)...,
+			)
+		}
 	}
 
+	_ = history.Save(result)
+
 	if jsonMode {
+
 		report.WriteJSON(os.Stdout, result, report.JSONOptions{Pretty: true})
+
 	} else {
+
 		report.WriteText(os.Stdout, result, report.TextOptions{ShowLatency: showLatency})
 	}
 
 	if enableInsights && !jsonMode {
+
 		for _, i := range result.Insights {
 			fmt.Println("Insight:", i.Message)
 		}
@@ -159,8 +248,10 @@ func runVerify(args []string) {
 	if result.Summary.Fail > 0 {
 		os.Exit(2)
 	}
+
 	if result.Summary.Warn > 0 {
 		os.Exit(1)
 	}
+
 	os.Exit(0)
 }

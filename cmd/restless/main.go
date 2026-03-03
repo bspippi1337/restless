@@ -51,7 +51,7 @@ func runVerify(args []string) {
 	showLatency := false
 	enableInsights := false
 	base := "https://api.github.com"
-	workers := 10
+	workers := 100
 	specFile := ""
 
 	for i := 0; i < len(args); i++ {

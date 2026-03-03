@@ -1,6 +1,7 @@
 package httpx
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 	"strconv"
@@ -29,10 +30,20 @@ func NewExecutor(timeout time.Duration) *Executor {
 	}
 }
 
-func (e *Executor) Do(method, url string) (*Response, error) {
-	req, err := http.NewRequest(method, url, nil)
+func (e *Executor) Do(method, url string, body []byte) (*Response, error) {
+
+	var reader io.Reader
+	if body != nil {
+		reader = bytes.NewReader(body)
+	}
+
+	req, err := http.NewRequest(method, url, reader)
 	if err != nil {
 		return nil, err
+	}
+
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
 	}
 
 	start := time.Now()
@@ -43,14 +54,12 @@ func (e *Executor) Do(method, url string) (*Response, error) {
 	}
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
-
-	latency := time.Since(start)
+	data, _ := io.ReadAll(resp.Body)
 
 	r := &Response{
 		StatusCode: resp.StatusCode,
-		Body:       body,
-		Latency:    latency,
+		Body:       data,
+		Latency:    time.Since(start),
 		Headers:    resp.Header,
 	}
 

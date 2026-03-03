@@ -2,11 +2,6 @@ package graph
 
 import "github.com/bspippi1337/restless/internal/core"
 
-type Node struct {
-	Path    string
-	Methods []string
-}
-
 func Build(endpoints []core.Endpoint) []Node {
 	m := map[string][]string{}
 
@@ -15,7 +10,6 @@ func Build(endpoints []core.Endpoint) []Node {
 	}
 
 	var nodes []Node
-
 	for p, methods := range m {
 		nodes = append(nodes, Node{
 			Path:    p,

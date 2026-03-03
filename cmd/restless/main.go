@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 )
 
 var version = "dev"
@@ -24,7 +25,10 @@ func main() {
 		runScan(os.Args[2:])
 
 	case "verify":
-		runVerify(os.Args[2:])
+		cmd := exec.Command(os.Args[0], append([]string{"verify"}, os.Args[2:]...)...)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		_ = cmd.Run()
 
 	case "map":
 		runMap(os.Args[2:])

@@ -1,9 +1,9 @@
 package adapter
 
 import (
-	"strings"
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/bspippi1337/restless/internal/core/app"

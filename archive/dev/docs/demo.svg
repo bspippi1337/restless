@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200">
+<text x="20" y="40" font-family="monospace" font-size="16">/users/{id}</text>
+<text x="40" y="58" font-family="monospace" font-size="14">GET</text>
+<text x="20" y="100" font-family="monospace" font-size="16">/repos/{owner}/{repo}</text>
+<text x="40" y="118" font-family="monospace" font-size="14">GET</text>
+</svg>

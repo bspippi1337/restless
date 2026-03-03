@@ -1,8 +1,6 @@
 package discovery
 
-import (
-	"net/http"
-)
+import "net/http"
 
 var candidates = []string{
 	"/swagger.json",

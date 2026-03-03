@@ -1,0 +1,36 @@
+{
+  "SpecHash": "dev-spec-hash",
+  "BaseURL": "https://api.github.com",
+  "Results": [
+    {
+      "Endpoint": {
+        "Method": "GET",
+        "Path": "/repos/1/1"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 172478645,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "GET",
+        "Path": "/users/1"
+      },
+      "Status": "ok",
+      "HTTPStatus": 200,
+      "Latency": 503792667,
+      "Issues": null
+    }
+  ],
+  "Summary": {
+    "OK": 1,
+    "Warn": 1,
+    "Fail": 0
+  },
+  "Meta": {
+    "RateLimitRemaining": 58,
+    "RateLimitReset": 1772583148
+  },
+  "Insights": null
+}

@@ -12,6 +12,7 @@ import (
 	"github.com/bspippi1337/restless/internal/modules/openapi/guard/model"
 	greport "github.com/bspippi1337/restless/internal/modules/openapi/guard/report"
 	gruntime "github.com/bspippi1337/restless/internal/modules/openapi/guard/runtime"
+	"github.com/bspippi1337/restless/internal/modules/openapi/suggest"
 )
 
 func OpenAPI(args []string) error {
@@ -25,6 +26,8 @@ func OpenAPI(args []string) error {
 		return runGuard(args[1:])
 	case "diff":
 		return runDiff(args[1:])
+	case "suggest":
+		return runSuggest(args[1:])
 	default:
 		printOpenAPIHelp()
 		return nil
@@ -35,14 +38,14 @@ func printOpenAPIHelp() {
 	fmt.Println("restless openapi")
 	fmt.Println()
 	fmt.Println("Usage:")
-	fmt.Println("  restless openapi guard <METHOD> <pathTemplate> <status> <contentType> <jsonFile> --spec <specRef>")
+	fmt.Println("  restless openapi guard <METHOD> <pathTemplate|path> <status> <contentType> <jsonFile> --spec <specRef>")
 	fmt.Println("  restless openapi diff <oldSpec> <newSpec>")
+	fmt.Println("  restless openapi suggest <baseURL> [--out <dir>] [--min-count N]")
 }
 
 func runGuard(args []string) error {
-	// guard <METHOD> <pathTemplate> <status> <contentType> <jsonFile> --spec <specRef>
 	if len(args) < 6 {
-		return fmt.Errorf("usage: restless openapi guard <METHOD> <pathTemplate> <status> <contentType> <jsonFile> --spec <specRef>")
+		return fmt.Errorf("usage: restless openapi guard <METHOD> <pathTemplate|path> <status> <contentType> <jsonFile> --spec <specRef>")
 	}
 
 	method := strings.ToUpper(args[0])
@@ -66,6 +69,12 @@ func runGuard(args []string) error {
 	doc, err := gloader.Load(ctx, specRef, gloader.LoadOptions{AllowRemoteRefs: true})
 	if err != nil {
 		return err
+	}
+
+	if doc.Paths != nil && doc.Paths.Find(path) == nil {
+		if tpl, ok := gruntime.MatchPathTemplate(doc, path); ok {
+			path = tpl
+		}
 	}
 
 	v := gruntime.NewValidator(doc)
@@ -122,8 +131,42 @@ func runDiff(args []string) error {
 	return nil
 }
 
+func runSuggest(args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("usage: restless openapi suggest <baseURL> [--out <dir>] [--min-count N]")
+	}
+	baseURL := args[0]
+	outDir := "suggestions"
+	minCount := 3
+
+	if i := indexOf(args, "--out"); i != -1 && i+1 < len(args) {
+		outDir = args[i+1]
+	}
+	if i := indexOf(args, "--min-count"); i != -1 && i+1 < len(args) {
+		minCount = mustAtoi(args[i+1])
+		if minCount < 1 {
+			minCount = 1
+		}
+	}
+
+	rep, err := suggest.Build(baseURL, minCount)
+	if err != nil {
+		return err
+	}
+
+	md, js, plan, err := suggest.Write(rep, outDir)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Wrote:")
+	fmt.Println("  -", md)
+	fmt.Println("  -", js)
+	fmt.Println("  -", plan)
+	return nil
+}
+
 func mustAtoi(s string) int {
-	// keep it minimal and dependency-free
 	var n int
 	_, _ = fmt.Sscanf(s, "%d", &n)
 	return n

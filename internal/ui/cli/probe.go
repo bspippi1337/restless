@@ -131,7 +131,7 @@ func detectSpec(ctx context.Context, base string) (string, bool) {
 		}
 		// quick fingerprint
 		s := string(b)
-                if strings.Contains(s, `"openapi"`) || strings.Contains(s, `"swagger"`) {
+		if strings.Contains(s, `"openapi"`) || strings.Contains(s, `"swagger"`) {
 			return u, true
 		}
 	}
@@ -159,7 +159,7 @@ func extractSpecEndpoints(ctx context.Context, specURL string) ([]Endpoint, erro
 	paths := make(map[string]bool)
 
 	// Find the "paths" object region (best-effort).
-        idx := strings.Index(b, "\"paths\"")
+	idx := strings.Index(b, "\"paths\"")
 	if idx < 0 {
 		return nil, nil
 	}
@@ -169,7 +169,7 @@ func extractSpecEndpoints(ctx context.Context, specURL string) ([]Endpoint, erro
 	if len(limit) > 120000 {
 		limit = limit[:120000]
 	}
-        for _, tok := range strings.Split(limit, "\"") {
+	for _, tok := range strings.Split(limit, "\"") {
 		if strings.HasPrefix(tok, "/") && len(tok) <= 200 && !strings.Contains(tok, " ") {
 			paths[tok] = true
 		}

@@ -26,7 +26,7 @@ func loadSource(src string) ([]byte, error) {
 			return nil, err
 		}
 
-		# detect HTML response
+		// detect HTML response
 		if strings.HasPrefix(strings.TrimSpace(string(data)), "<") {
 			return nil, errors.New("received HTML instead of OpenAPI spec")
 		}

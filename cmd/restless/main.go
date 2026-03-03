@@ -2,6 +2,8 @@ package main
 
 var version = "v6.0.0"
 
+var version = "v6.0.0"
+
 import (
 	"fmt"
 	"os"

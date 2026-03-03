@@ -7,42 +7,37 @@ import (
 
 func RenderSVG(w io.Writer, nodes []Node) {
 
-	height := len(nodes)*70 + 40
 	width := 600
+	height := 80 + len(nodes)*60
 
-	fmt.Fprintf(w, `<?xml version="1.0" encoding="UTF-8"?>`)
-	fmt.Fprintf(w, `<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">`,
-		width, height, width, height)
-
-	fmt.Fprint(w, `<rect width="100%" height="100%" fill="white"/>`)
+	fmt.Fprintf(w, `<?xml version="1.0" encoding="UTF-8"?>`+"\n")
+	fmt.Fprintf(w, `<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d">`+"\n", width, height)
 
 	y := 40
 
 	for _, n := range nodes {
 
-		fmt.Fprintf(
-			w,
-			`<text x="20" y="%d" font-family="monospace" font-size="16" fill="black">%s</text>`,
+		fmt.Fprintf(w,
+			`<text x="20" y="%d" font-family="monospace" font-size="16">%s</text>`+"\n",
 			y,
 			n.Path,
 		)
 
-		my := y + 20
+		my := y + 18
 
 		for _, m := range n.Methods {
 
-			fmt.Fprintf(
-				w,
-				`<text x="40" y="%d" font-family="monospace" font-size="14" fill="black">%s</text>`,
+			fmt.Fprintf(w,
+				`<text x="40" y="%d" font-family="monospace" font-size="14">%s</text>`+"\n",
 				my,
 				m,
 			)
 
-			my += 18
+			my += 16
 		}
 
-		y += 70
+		y += 60
 	}
 
-	fmt.Fprint(w, `</svg>`)
+	fmt.Fprintln(w, "</svg>")
 }

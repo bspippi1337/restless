@@ -38,25 +38,6 @@ func main() {
 	}
 }
 
-func runMap(args []string) {
-
-	if len(args) == 0 {
-		fmt.Println("usage: restless map <spec.yaml>")
-		os.Exit(3)
-	}
-
-	spec := args[0]
-
-	endpoints, err := openapi.Load(spec)
-	if err != nil {
-		fmt.Println("spec load error:", err)
-		os.Exit(3)
-	}
-
-	nodes := graph.Build(endpoints)
-
-	graph.RenderASCII(os.Stdout, nodes)
-}
 
 func runVerify(args []string) {
 

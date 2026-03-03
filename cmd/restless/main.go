@@ -1,10 +1,10 @@
 package main
 
-var version = "v6.0.0"
 
-var version = "v6.0.0"
 
 import (
+
+var version = "dev"
 	"fmt"
 	"os"
 	"strconv"

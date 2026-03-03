@@ -1,0 +1,475 @@
+2026-03-03  bspippi1337
+
+\t* set -e
+
+2026-03-03  bspippi1337
+
+\t*   chore(audit): add starship-grade release audit script
+
+2026-03-03  bspippi1337
+
+\t* chore(release): reproducible builds + deb packaging + CI automation bundle
+
+2026-03-03  bspippi1337
+
+\t* feat(cli,openapi,manual): contract-aware engine + GNU man integration
+
+2026-03-03  bspippi1337
+
+\t* docs(manual): embed manuals + generate roff man pages; fix openapi help fallback
+
+2026-03-03  bspippi1337
+
+\t* feat(openapi): universal guard + cache (mem+disk) + diff + compat fix
+
+2026-03-03  bspippi1337
+
+\t* feat(openapi): guard + auto discovery + cache (mem+disk) + universal hook
+
+2026-03-03  bspippi1337
+
+\t* Update README.md
+
+2026-03-03  bspippi1337
+
+\t* Update README.md
+
+2026-03-02  Pippi
+
+\t* update readme after v5 milestone
+
+2026-03-02  Pippi
+
+\t* docs: announce v5.0.0 core reset and architectural direction
+
+2026-03-02  Pippi
+
+\t* chore: ignore local build binary
+
+2026-03-02  Pippi
+
+\t* ci: core-only build (exclude experiments)
+
+2026-03-02  Pippi
+
+\t* feat(cli): restore real entrypoint and help surface (core stable)
+
+2026-03-02  Pippi
+
+\t* add string to READM
+
+2026-03-02  Pippi
+
+\t* refactor(core): freeze GUI layer and stabilize build pipeline
+
+2026-02-26  bspippi1337
+
+\t* fix
+
+2026-02-26  bspippi1337
+
+\t* commiting fixes
+
+2026-02-26  bspippi1337
+
+\t* 🔥 Sync: restore working local version as source of truth
+
+2026-02-26  bspippi1337
+
+\t* commit
+
+2026-02-26  bspippi1337
+
+\t* commit
+
+2026-02-26  bspippi1337
+
+\t* commit
+
+2026-02-26  bspippi1337
+
+\t* Merge branch 'optimize/ci-green'
+
+2026-02-26  bspippi1337
+
+\t* v0.2 polish: adaptive discovery + session-aware CLI output
+
+2026-02-26  bspippi1337
+
+\t* v0.2 polish: adaptive discovery + session-aware CLI output
+
+2026-02-26  bspippi1337
+
+\t* commit
+
+2026-02-26  bspippi1337
+
+\t* files updated
+
+2026-02-26  bspippi1337
+
+\t* feat: snapshot + diff (deterministic API drift forensics)
+
+2026-02-26  bspippi1337
+
+\t* feat: add global --timeout flag (default 7s)
+
+2026-02-26  bspippi1337
+
+\t* logofix
+
+2026-02-26  bspippi1337
+
+\t* -0
+
+2026-02-26  bspippi1337
+
+\t* Brand
+
+2026-02-26  bspippi1337
+
+\t* feat(validate): add OpenAPI vs live drift gatekeeper
+
+2026-02-26  bspippi1337
+
+\t* Create zero-to-hero.md
+
+2026-02-26  bspippi1337
+
+\t* Update README.md
+
+2026-02-26  bspippi1337
+
+\t* Add Restless brand pack
+
+2026-02-24  bspippi1337
+
+\t* Restless legs
+
+2026-02-24  bspippi1337
+
+\t* APT: publish 4.0.3+git2.gcb11160
+
+2026-02-24  bspippi1337
+
+\t* Full automation enabled
+
+2026-02-24  bspippi1337
+
+\t* Full automation enabled
+
+2026-02-24  bspippi1337
+
+\t* APT: publish 4.0.4+git13.g9ae6d49.dirty
+
+2026-02-24  bspippi1337
+
+\t* APT: publish 4.0.4+git12.g0206f37.dirty
+
+2026-02-24  bspippi1337
+
+\t* APT: publish 4.0.4+git11.ga0e3c6d.dirty
+
+2026-02-24  bspippi1337
+
+\t* APT: publish 4.0.4+git10.gd14f96b.dirty
+
+2026-02-24  bspippi1337
+
+\t* APT: publish 4.0.4+git9.gacee248.dirty
+
+2026-02-24  bspippi1337
+
+\t* APT: publish 4.0.4+git8.ge51b87c.dirty
+
+2026-02-24  bspippi1337
+
+\t* Restless legs
+
+2026-02-24  bspippi1337
+
+\t* Restless legs
+
+2026-02-24  bspippi1337
+
+\t* Updated the very importance of beeing.
+
+2026-02-24  bspippi1337
+
+\t* fix(openapi): add deterministic disk loader function (manual integration required)
+
+2026-02-24  bspippi1337
+
+\t* docs: add WHY_RESTLESS positioning document
+
+2026-02-24  bspippi1337
+
+\t* docs: advanced examples + workflows + openapi deep dive
+
+2026-02-24  bspippi1337
+
+\t* docs: clean rewrite for v4.0.4 (root + docs only)
+
+2026-02-24  bspippi1337
+
+\t* oh
+
+2026-02-24  bspippi1337
+
+\t* release: v4.0.4
+
+2026-02-24  bspippi1337
+
+\t* chore: v2.0.0 release prep
+
+2026-02-24  bspippi1337
+
+\t* feat: promote v2 as primary CLI (restless)
+
+2026-02-24  bspippi1337
+
+\t* fix: correct term import for UX layer
+
+2026-02-24  bspippi1337
+
+\t* Broke some things for a change. Why all the fixing? LOL
+
+2026-02-24  bspippi1337
+
+\t* chore: hardening sprint stabilized (strict mode deduped)
+
+2026-02-24  bspippi1337
+
+\t* feat(openapi): profiles + operationId + auto profile base + stable run router
+
+2026-02-24  bspippi1337
+
+\t* stabil: v2 core + modules baseline (green build)
+
+2026-02-24  bspippi1337
+
+\t* docs: refresh roadmap for v2 modules + core
+
+2026-02-24  bspippi1337
+
+\t* pease from rest
+
+2026-02-24  bspippi1337
+
+\t* roadmap
+
+2026-02-24  bspippi1337
+
+\t* repo: massive cleanup and restructure
+
+2026-02-24  bspippi1337
+
+\t* Repo cleanup: remove noise, archive legacy, normalize structure
+
+2026-02-24  bspippi1337
+
+\t* does anybody every?
+
+2026-02-24  bspippi1337
+
+\t* Update v2
+
+2026-02-24  bspippi1337
+
+\t* 123
+
+2026-02-24  bspippi1337
+
+\t* cleaner tool
+
+2026-02-24  bspippi1337
+
+\t* Restless v2 architecture cleanup + repo normalization
+
+2026-02-24  bspippi1337
+
+\t* Update
+
+2026-02-24  bspippi1337
+
+\t* repo: massive cleanup and restructure
+
+2026-02-24  bspippi1337
+
+\t* Delete restless-diff.zip
+
+2026-02-24  bspippi1337
+
+\t* repo: massive cleanup and restructure
+
+2026-02-24  bspippi1337
+
+\t* Update README.md
+
+2026-02-24  bspippi1337
+
+\t* README.md
+
+2026-02-24  bspippi1337
+
+\t* typo
+
+2026-02-24  bspippi1337
+
+\t* push
+
+2026-02-24  bspippi1337
+
+\t* 123
+
+2026-02-24  Bill Gates
+
+\t* nologo or logo
+
+2026-02-24  Bill Gates
+
+\t* 0 Merge branch 'chore/repo-polish'
+
+2026-02-24  Bill Gates
+
+\t* Commit? Summit? Plumit! Haha. nerd.
+
+2026-02-24  Bill Gates
+
+\t* README.md
+
+2026-02-24  Bill Gates
+
+\t* i didnt not do it
+
+2026-02-24  Bill Gates
+
+\t* polizei polinein polinope
+
+2026-02-24  Bill Gates
+
+\t* 321 bang
+
+2026-02-24  Bill Gates
+
+\t* Secret is never in the sauce. Never. You only fint dead bodies and pepper in there
+
+2026-02-24  Pippi
+
+\t* removed some saw dust
+
+2026-02-24  Pippi
+
+\t* merge smart into core binary
+
+2026-02-23  Pippi
+
+\t* .
+
+2026-02-23  Pippi
+
+\t* feat: working wasm demo (termux fixed path)
+
+2026-02-23  Pippi
+
+\t* docs: self-animating SVG terminal demo
+
+2026-02-23  Pippi
+
+\t* feat: working live demo via github pages
+
+2026-02-23  Pippi
+
+\t* feat: dynamic README with working web demo
+
+2026-02-23  Pippi
+
+\t* docs+ci: refresh README/MANUAL + ensure APT workflow
+
+2026-02-23  Pippi
+
+\t* medicine
+
+2026-02-23  Pippi
+
+\t* release: v0.2.2-2-gb749d65-dirty (auto build + manual update)
+
+2026-02-23  Pippi
+
+\t* auto: interactive fallback + build verified
+
+2026-02-23  Pippi
+
+\t* Git smells like...
+
+2026-02-21  Bill Gates
+
+\t* ci: remove android builds (cgo linking required)
+
+2026-02-21  Bill Gates
+
+\t* ci: drop android/arm (needs cgo/ndk)
+
+2026-02-21  Bill Gates
+
+\t* Cup cakes are like butter without sauce
+
+2026-02-21  Bill Gates
+
+\t* ci: add release build matrix
+
+2026-02-21  Bill Gates
+
+\t* What ups make come may not come back ever. Like ever.
+
+2026-02-20  bspippi1337
+
+\t* Update README.md
+
+2026-02-20  bspippi1337
+
+\t* Update README.md
+
+2026-02-20  bspippi1337
+
+\t* Update README.md
+
+2026-02-20  bspippi1337
+
+\t* Add files via upload
+
+2026-02-20  bspippi1337
+
+\t* Create static.yml
+
+2026-02-20  bspippi1337
+
+\t* Create index.html
+
+2026-02-20  bspippi1337
+
+\t* Create index.html
+
+2026-02-08  bspippi1337
+
+\t* Update makefile.yml
+
+2026-02-08  bspippi1337
+
+\t* Update makefile.yml
+
+2026-02-08  bspippi1337
+
+\t* Update makefile.yml
+
+2026-02-08  bspippi1337
+
+\t* Update makefile.yml
+
+2026-02-08  bspippi1337
+
+\t* Create makefile.yml
+
+2026-02-08  bspippi1337
+
+\t* Add files via upload

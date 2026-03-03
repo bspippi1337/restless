@@ -11,11 +11,8 @@ func Build(base string, ep core.Endpoint) Request {
 
 	path := FillPath(ep.Path)
 
-	url := base + path
-	url = AddQueryDefaults(url)
-
 	return Request{
 		Method: ep.Method,
-		URL:    url,
+		URL:    base + path,
 	}
 }

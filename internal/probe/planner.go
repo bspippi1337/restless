@@ -6,7 +6,7 @@ func Plan(endpoints []core.Endpoint) []core.Endpoint {
 	var out []core.Endpoint
 
 	for _, ep := range endpoints {
-		ep.Path = ResolvePath(ep.Path)
+		ep.Path = FillPath(ep.Path)
 		out = append(out, ep)
 	}
 

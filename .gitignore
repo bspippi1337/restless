@@ -34,3 +34,12 @@ restless
 .deb-build/
 apt-repo/
 *.deb
+# autoninja: local build artifacts
+build/
+dist/
+*.changes
+*.buildinfo
+*.dsc
+*.tar.*
+# autoninja: editor/OS
+*.swp

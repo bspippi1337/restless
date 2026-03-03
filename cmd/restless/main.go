@@ -1,5 +1,7 @@
 package main
 
+var version = "v6.0.0"
+
 import (
 	"fmt"
 	"os"
@@ -24,6 +26,11 @@ func main() {
 	}
 
 	switch os.Args[1] {
+
+case "version":
+	fmt.Println(version)
+	return
+
 
 	case "verify":
 		runVerify(os.Args[2:])

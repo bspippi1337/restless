@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"restless/internal/core"
+	"github.com/bspippi1337/restless/internal/core"
 )
 
 type TextOptions struct {

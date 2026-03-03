@@ -1,0 +1,14 @@
+Package: restless
+Version: 5.2.0-gnu-manual-3-gdb1e913
+Architecture: arm64
+Maintainer: Restless Release <bspippi1337@gmail.com>
+Filename: apt-repo/pool/main/r/restless/restless_5.2.0-gnu-manual-3-gdb1e913_arm64.deb
+Size: 2133000
+MD5sum: 0387f7cb21b994cd4c1553eb8f4ec81b
+SHA1: 77c529d97514f4bed8b4ad1c90f9324c9dcd0ce3
+SHA256: 7074a0fa885fbaaf8195ccb3ea7fc089e4ee059d9c0f19924595aaeaa820a1e2
+Section: utils
+Priority: optional
+Homepage: https://github.com/bspippi1337/restless
+Description: Contract-aware API inspection engine
+

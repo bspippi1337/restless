@@ -29,6 +29,10 @@ func main() {
 		runVerify(os.Args[2:])
 
 	case "map":
+
+	case "scan":
+		runScan(os.Args[2:])
+
 		runMap(os.Args[2:])
 
 	default:

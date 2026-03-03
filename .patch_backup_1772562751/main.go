@@ -48,10 +48,6 @@ func main() {
 			os.Exit(1)
 		}
 	case "openapi":
-		if len(args) == 1 {
-			_ = entry.OpenAPI([]string{})
-			return
-		}
 		if err := entry.OpenAPI(args[1:]); err != nil {
 			os.Exit(1)
 		}

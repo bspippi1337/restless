@@ -17,15 +17,15 @@ func mapSchemaError(opID, method, path string, status int, contentType string, e
 	}
 
 	out = append(out, model.Finding{
-		OpID: opID,
-		Method: strings.ToUpper(method),
-		Path: path,
-		Status: status,
+		OpID:        opID,
+		Method:      strings.ToUpper(method),
+		Path:        path,
+		Status:      status,
 		ContentType: contentType,
-		Kind: model.KindSchemaViolation,
-		Severity: model.SevHigh,
-		JSONPath: "$",
-		Message: err.Error(),
+		Kind:        model.KindSchemaViolation,
+		Severity:    model.SevHigh,
+		JSONPath:    "$",
+		Message:     err.Error(),
 	})
 
 	return out
@@ -62,15 +62,15 @@ func flattenValidationError(
 	}
 
 	*out = append(*out, model.Finding{
-		OpID: opID,
-		Method: strings.ToUpper(method),
-		Path: path,
-		Status: status,
+		OpID:        opID,
+		Method:      strings.ToUpper(method),
+		Path:        path,
+		Status:      status,
 		ContentType: contentType,
-		Kind: kind,
-		Severity: sev,
-		JSONPath: jp,
-		Message: msg,
+		Kind:        kind,
+		Severity:    sev,
+		JSONPath:    jp,
+		Message:     msg,
 	})
 
 	for _, c := range ve.Causes {

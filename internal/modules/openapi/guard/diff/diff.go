@@ -153,7 +153,9 @@ func schemaType(op *openapi3.Operation, code string) string {
 	if mt == nil || mt.Schema == nil || mt.Schema.Value == nil {
 		return ""
 	}
-	if mt.Schema.Value.Type != nil && len(*mt.Schema.Value.Type) > 0 { return (*mt.Schema.Value.Type)[0] }
+	if mt.Schema.Value.Type != nil && len(*mt.Schema.Value.Type) > 0 {
+		return (*mt.Schema.Value.Type)[0]
+	}
 	return ""
 }
 

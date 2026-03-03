@@ -10,20 +10,27 @@ import (
 
 func PrintHuman(res model.GuardResult) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "Contract Drift Index: %.3f
 
-", res.CDI)
-	for _, f := range res.Findings {
-		fmt.Fprintf(&b, "%s %s %d %s [%s/%s]
-  %s
+	fmt.Fprintf(&b, "Contract Drift Index: %.3f\n\n", res.CDI)
 
-",
-			f.Method, f.Path, f.Status, f.JSONPath, f.Kind, f.Severity, f.Message)
-	}
 	if len(res.Findings) == 0 {
-		b.WriteString("No contract violations detected.
-")
+		b.WriteString("No contract violations detected.\n")
+		return b.String()
 	}
+
+	for _, f := range res.Findings {
+		fmt.Fprintf(&b,
+			"%s %s %d %s [%s/%s]\n  %s\n\n",
+			f.Method,
+			f.Path,
+			f.Status,
+			f.JSONPath,
+			f.Kind,
+			f.Severity,
+			f.Message,
+		)
+	}
+
 	return b.String()
 }
 

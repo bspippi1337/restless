@@ -13,11 +13,7 @@ import (
 )
 
 // MaybeValidateResponse validates JSON responses against cached OpenAPI contracts.
-// Call this from your HTTP engine after you have status, content-type, and body.
-//
-// baseURL: e.g. https://api.example.com (scheme+host, no trailing slash preferred)
-// pathTemplate: OpenAPI template if known (e.g. /users/{id}); if you only have the concrete path,
-// you can pass it as-is for now (exact match needed).
+// Safe no-op if no spec is discoverable.
 func MaybeValidateResponse(
 	ctx context.Context,
 	baseURL string,
@@ -30,8 +26,9 @@ func MaybeValidateResponse(
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	// Fast filters
+
 	ct := strings.ToLower(contentType)
+
 	if !strings.Contains(ct, "json") {
 		return
 	}
@@ -57,9 +54,9 @@ func MaybeValidateResponse(
 		FinishedAt:    time.Now(),
 		Findings:      findings,
 	}
+
 	res.CDI = gruntime.ComputeCDI(findings, gruntime.DefaultWeights())
 
-	fmt.Printf("OpenAPI contract drift detected (CDI %.3f)
-", res.CDI)
+	fmt.Printf("OpenAPI contract drift detected (CDI %.3f)\n", res.CDI)
 	fmt.Print(greport.PrintHuman(res))
 }

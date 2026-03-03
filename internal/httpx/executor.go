@@ -3,6 +3,7 @@ package httpx
 import (
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -11,6 +12,9 @@ type Response struct {
 	Body       []byte
 	Latency    time.Duration
 	Headers    http.Header
+
+	RateLimitRemaining int
+	RateLimitReset     int64
 }
 
 type Executor struct {
@@ -43,10 +47,24 @@ func (e *Executor) Do(method, url string) (*Response, error) {
 
 	latency := time.Since(start)
 
-	return &Response{
+	r := &Response{
 		StatusCode: resp.StatusCode,
 		Body:       body,
 		Latency:    latency,
 		Headers:    resp.Header,
-	}, nil
+	}
+
+	if v := resp.Header.Get("X-RateLimit-Remaining"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			r.RateLimitRemaining = n
+		}
+	}
+
+	if v := resp.Header.Get("X-RateLimit-Reset"); v != "" {
+		if n, err := strconv.ParseInt(v, 10, 64); err == nil {
+			r.RateLimitReset = n
+		}
+	}
+
+	return r, nil
 }

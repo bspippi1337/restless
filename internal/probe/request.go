@@ -8,9 +8,7 @@ type Request struct {
 }
 
 func Build(base string, ep core.Endpoint) Request {
-
 	path := FillPath(ep.Path)
-
 	return Request{
 		Method: ep.Method,
 		URL:    base + path,

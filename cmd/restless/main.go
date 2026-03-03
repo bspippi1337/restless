@@ -41,7 +41,6 @@ func main() {
 	}
 }
 
-
 func runVerify(args []string) {
 
 	jsonMode := false

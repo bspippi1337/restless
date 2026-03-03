@@ -4,32 +4,212 @@
   "Results": [
     {
       "Endpoint": {
-        "Method": "GET",
-        "Path": "/repos/1/1"
+        "Method": "POST",
+        "Path": "/pet"
       },
       "Status": "warn",
       "HTTPStatus": 404,
-      "Latency": 172478645,
+      "Latency": 143884365,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "PUT",
+        "Path": "/pet"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 150602383,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "DELETE",
+        "Path": "/pet/1"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 148128820,
       "Issues": null
     },
     {
       "Endpoint": {
         "Method": "GET",
-        "Path": "/users/1"
+        "Path": "/pet/1"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 152196375,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "POST",
+        "Path": "/pet/1"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 158151447,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "POST",
+        "Path": "/pet/1/uploadImage"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 144556798,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "GET",
+        "Path": "/pet/findByStatus"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 141493293,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "GET",
+        "Path": "/pet/findByTags"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 152630675,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "GET",
+        "Path": "/store/inventory"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 146628352,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "POST",
+        "Path": "/store/order"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 151511852,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "DELETE",
+        "Path": "/store/order/1"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 149999264,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "GET",
+        "Path": "/store/order/1"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 141387591,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "POST",
+        "Path": "/user"
+      },
+      "Status": "warn",
+      "HTTPStatus": 401,
+      "Latency": 150072836,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "DELETE",
+        "Path": "/user/1"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 203422217,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "GET",
+        "Path": "/user/1"
       },
       "Status": "ok",
       "HTTPStatus": 200,
-      "Latency": 503792667,
+      "Latency": 193376856,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "PUT",
+        "Path": "/user/1"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 152678695,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "POST",
+        "Path": "/user/createWithArray"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 142242531,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "POST",
+        "Path": "/user/createWithList"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 147066664,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "GET",
+        "Path": "/user/login"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 170394585,
+      "Issues": null
+    },
+    {
+      "Endpoint": {
+        "Method": "GET",
+        "Path": "/user/logout"
+      },
+      "Status": "warn",
+      "HTTPStatus": 404,
+      "Latency": 344354320,
       "Issues": null
     }
   ],
   "Summary": {
     "OK": 1,
-    "Warn": 1,
+    "Warn": 19,
     "Fail": 0
   },
   "Meta": {
-    "RateLimitRemaining": 58,
+    "RateLimitRemaining": 38,
     "RateLimitReset": 1772583148
   },
   "Insights": null

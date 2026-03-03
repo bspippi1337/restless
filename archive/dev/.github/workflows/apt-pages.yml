@@ -1,0 +1,43 @@
+name: apt-pages
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev apt-utils gnupg
+
+      - name: Import GPG key
+        env:
+          APT_GPG_PRIVATE: ${{ secrets.APT_GPG_PRIVATE }}
+        run: |
+          test -n "$APT_GPG_PRIVATE"
+          echo "$APT_GPG_PRIVATE" | gpg --batch --import
+          gpg --list-secret-keys --keyid-format LONG
+
+      - name: Build + sign APT repo
+        env:
+          GPG_KEY: ${{ secrets.APT_GPG_KEY_FPR }}
+        run: |
+          chmod +x scripts/apt_starship_secure.sh
+          ./scripts/apt_starship_secure.sh build
+
+      - name: Publish to gh-pages
+        env:
+          GPG_KEY: ${{ secrets.APT_GPG_KEY_FPR }}
+        run: |
+          ./scripts/apt_starship_secure.sh publish

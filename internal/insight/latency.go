@@ -27,14 +27,14 @@ func LatencyInsights(results []core.EndpointResult) []core.Insight {
 
 	if p95 > p50*3 {
 		insights = append(insights, core.Insight{
-			Type: "latency_variance",
+			Type:    "latency_variance",
 			Message: "high latency variance detected",
 		})
 	}
 
 	insights = append(insights, core.Insight{
-		Type: "latency_summary",
-		Message: "p50=" + strconv.FormatInt(p50,10) + "ms p95=" + strconv.FormatInt(p95,10) + "ms",
+		Type:    "latency_summary",
+		Message: "p50=" + strconv.FormatInt(p50, 10) + "ms p95=" + strconv.FormatInt(p95, 10) + "ms",
 	})
 
 	return insights

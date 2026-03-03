@@ -8,15 +8,18 @@ var candidates = []string{
 	"/v3/api-docs",
 	"/api-docs",
 	"/swagger/v1/swagger.json",
+	"/v2/swagger.json",
 }
 
 func Find(base string) (string, bool) {
+
+	client := &http.Client{}
 
 	for _, p := range candidates {
 
 		u := base + p
 
-		resp, err := http.Get(u)
+		resp, err := client.Get(u)
 		if err != nil {
 			continue
 		}

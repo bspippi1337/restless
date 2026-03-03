@@ -3,7 +3,6 @@ package openapi
 import (
 	"io"
 	"net/http"
-	"os"
 	"strings"
 )
 

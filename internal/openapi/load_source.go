@@ -14,7 +14,14 @@ func loadSource(src string) ([]byte, error) {
 
 		client := &http.Client{}
 
-		resp, err := client.Get(src)
+		req, err := http.NewRequest("GET", src, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Set("Accept", "application/json, application/yaml, */*")
+
+		resp, err := client.Do(req)
 		if err != nil {
 			return nil, err
 		}
@@ -26,8 +33,10 @@ func loadSource(src string) ([]byte, error) {
 			return nil, err
 		}
 
-		// detect HTML response
-		if strings.HasPrefix(strings.TrimSpace(string(data)), "<") {
+		body := strings.TrimSpace(string(data))
+
+		// hvis HTML, prøv fallback uten petstore redirect
+		if strings.HasPrefix(body, "<") {
 			return nil, errors.New("received HTML instead of OpenAPI spec")
 		}
 

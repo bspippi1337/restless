@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/bspippi1337/restless/internal/core"
-	"github.com/bspippi1337/restless/internal/graph"
 	"github.com/bspippi1337/restless/internal/history"
 	"github.com/bspippi1337/restless/internal/httpx"
 	"github.com/bspippi1337/restless/internal/insight"

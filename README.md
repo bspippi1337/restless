@@ -1,71 +1,131 @@
-# Restless
+# restless ⚡
 
-Deterministic reduction of complex system state.
+**Restless** is a fast CLI for exploring and validating REST APIs from their OpenAPI / Swagger specs.
 
----
+It can:
 
-## Standalone
+- discover OpenAPI specs from a target
+- probe endpoints automatically
+- generate API topology maps
+- export diagrams (SVG)
+- run fast verification of APIs
 
-```bash
-restless explain POST:/orders --input failing.json
-```
-
-Reduce a failing API interaction to its minimal, verifiable cause.
-
----
-
-## Unix-native
-
-```bash
-jq -c . failing.json | restless explain POST:/orders
-```
-
-Insert `restless` into your pipeline to turn normalized input into structured explanation.
+Think of it as a small **API reconnaissance + validation toolkit**.
 
 ---
 
 ## Install
 
-```bash
-git clone https://github.com/<you>/restless.git
-cd restless
-./install.sh
-```
+Clone and run directly with Go:
+
+go run ./cmd/restless <command>
+
+or build the binary:
+
+go build -o restless ./cmd/restless
 
 ---
 
-## Usage
+## Commands
 
-```bash
-restless --help
-```
+scan a target for OpenAPI specs
+
+restless scan https://target
+
+verify an API from a spec
+
+restless verify --spec openapi.yaml
+
+verify directly from remote spec
+
+restless verify --spec https://petstore.swagger.io/v2/swagger.json
+
+map API topology
+
+restless map openapi.yaml
+
+generate SVG diagram
+
+restless map openapi.yaml --svg > api-map.svg
+
+run full pipeline (discover + verify)
+
+restless inspect https://petstore.swagger.io
 
 ---
 
-## Principles
+## Example
 
-- Deterministic output
-- Minimal surface area
-- Composable by design
-- Readable by humans
+restless inspect https://petstore.swagger.io
+
+Typical output:
+
+OK    GET    /pet/1
+OK    GET    /store/inventory
+WARN  POST   /pet
+
+Summary:
+OK   5
+WARN 14
+FAIL 0
+
+---
+
+## API topology
+
+Generate a diagram:
+
+restless map https://petstore.swagger.io/v2/swagger.json --svg > api.svg
+
+Embed it in docs:
+
+![API Map](docs/demo.svg)
+
+---
+
+## Features
+
+OpenAPI / Swagger discovery  
+automatic path parameter generation  
+HTTP probing with latency measurement  
+ASCII API topology map  
+SVG API diagrams  
+CLI-first workflow  
+
+---
+
+## Project layout
+
+restless
+├─ cmd/restless        CLI
+├─ internal/core       core data types
+├─ internal/httpx      HTTP executor
+├─ internal/openapi    spec loader
+├─ internal/probe      request generation
+├─ internal/graph      API map builder
+├─ internal/discovery  swagger detection
+├─ internal/report     output formatting
+├─ examples            sample specs
+└─ docs                generated diagrams
+
+---
+
+## Development
+
+format code
+
+go fmt ./...
+
+run tests
+
+go test ./...
+
+build binary
+
+go build ./cmd/restless
 
 ---
 
 ## License
 
 MIT
-
-## Quick demo
-
-Scan for OpenAPI:
-restless scan https://petstore.swagger.io
-
-Verify API:
-restless verify --spec https://petstore.swagger.io/v2/swagger.json
-
-Generate API map:
-restless map examples/example.yaml
-
-Generate SVG diagram:
-restless map examples/example.yaml --svg > api.svg
-

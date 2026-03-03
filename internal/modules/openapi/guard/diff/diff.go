@@ -136,7 +136,7 @@ func schemaType(op *openapi3.Operation, code string) string {
 	if code == "default" {
 		rr = op.Responses.Default()
 	} else {
-		rr = op.Responses.Get(code)
+		rr = op.Responses.Map()[code]
 	}
 	if rr == nil || rr.Value == nil || rr.Value.Content == nil {
 		return ""
@@ -153,7 +153,8 @@ func schemaType(op *openapi3.Operation, code string) string {
 	if mt == nil || mt.Schema == nil || mt.Schema.Value == nil {
 		return ""
 	}
-	return mt.Schema.Value.Type
+	if mt.Schema.Value.Type != nil && len(*mt.Schema.Value.Type) > 0 { return (*mt.Schema.Value.Type)[0] }
+	return ""
 }
 
 func recommend(breaking, nonBreaking []string) model.SemverBump {

@@ -3,7 +3,6 @@ package loader
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -19,51 +18,51 @@ type LoadOptions struct {
 func Load(ctx context.Context, ref string, opt LoadOptions) (*openapi3.T, error) {
 	ldr := openapi3.NewLoader()
 	ldr.IsExternalRefsAllowed = opt.AllowRemoteRefs
+	ldr.Context = ctx
 
-	ldr.ReadFromURIFunc = func(_ *openapi3.Loader, uri *openapi3.URI) ([]byte, error) {
-		u := uri.String()
-		switch {
-		case strings.HasPrefix(u, "http://") || strings.HasPrefix(u, "https://"):
-			req, err := http.NewRequestWithContext(ctx, "GET", u, nil)
-			if err != nil {
-				return nil, err
-			}
-			resp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				return nil, err
-			}
-			defer resp.Body.Close()
-			if resp.StatusCode < 200 || resp.StatusCode > 299 {
-				return nil, fmt.Errorf("openapi fetch failed: %s", resp.Status)
-			}
-			return io.ReadAll(resp.Body)
-		default:
-			path := strings.TrimPrefix(u, "file://")
-			if !filepath.IsAbs(path) {
-				if abs, err := filepath.Abs(path); err == nil {
-					path = abs
-				}
-			}
-			return os.ReadFile(path)
+	if strings.HasPrefix(ref, "http://") || strings.HasPrefix(ref, "https://") {
+		resp, err := http.Get(ref)
+		if err != nil {
+			return nil, err
 		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode < 200 || resp.StatusCode > 299 {
+			return nil, fmt.Errorf("openapi fetch failed: %s", resp.Status)
+		}
+
+		tmp, err := os.CreateTemp("", "restless-openapi-*.json")
+		if err != nil {
+			return nil, err
+		}
+		defer os.Remove(tmp.Name())
+
+		if _, err := tmp.ReadFrom(resp.Body); err != nil {
+			return nil, err
+		}
+		tmp.Close()
+
+		doc, err := ldr.LoadFromFile(tmp.Name())
+		if err != nil {
+			return nil, err
+		}
+		if err := doc.Validate(ctx); err != nil {
+			return nil, err
+		}
+		return doc, nil
 	}
 
-	doc, err := ldr.LoadFromURI(refToURI(ref))
+	if !filepath.IsAbs(ref) {
+		ref, _ = filepath.Abs(ref)
+	}
+
+	doc, err := ldr.LoadFromFile(ref)
 	if err != nil {
 		return nil, err
 	}
 	if err := doc.Validate(ctx); err != nil {
-		return nil, fmt.Errorf("openapi spec invalid: %w", err)
+		return nil, err
 	}
-	return doc, nil
-}
 
-func refToURI(ref string) *openapi3.URI {
-	if strings.HasPrefix(ref, "http://") || strings.HasPrefix(ref, "https://") || strings.HasPrefix(ref, "file://") {
-		u, _ := openapi3.NewURI(ref)
-		return u
-	}
-	abs, _ := filepath.Abs(ref)
-	u, _ := openapi3.NewURI("file://" + abs)
-	return u
+	return doc, nil
 }

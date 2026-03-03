@@ -104,11 +104,11 @@ func pickResponse(op *openapi3.Operation, status int) *openapi3.ResponseRef {
 		return nil
 	}
 	code := fmt.Sprintf("%d", status)
-	if rr := op.Responses.Get(code); rr != nil {
+	if rr := op.Responses.Map()[code]; rr != nil {
 		return rr
 	}
 	class := fmt.Sprintf("%dXX", status/100)
-	if rr := op.Responses.Get(class); rr != nil {
+	if rr := op.Responses.Map()[class]; rr != nil {
 		return rr
 	}
 	if rr := op.Responses.Default(); rr != nil {

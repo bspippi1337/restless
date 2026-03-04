@@ -1,0 +1,30 @@
+DATE: 2026-03-04T01:41:48+01:00
+HOST: Linux debian 6.18.15+deb14-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.18.15-1 (2026-02-27) x86_64 GNU/Linux
+
+GO:
+go version go1.26.0 linux/amd64
+
+GIT:
+475795ae15a70a2cde92eea6d102886216ae1af4
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   README.md
+	modified:   go.mod
+	modified:   go.sum
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	hn_material/
+	internal/topology/
+	internal/ui/scope_stub.go
+	internal/ui/scope_tui.go
+	scripts/collect_hn_material.sh
+	scripts/test_scope.sh
+	scripts/test_topology.sh
+	tools/
+
+no changes added to commit (use "git add" and/or "git commit -a")

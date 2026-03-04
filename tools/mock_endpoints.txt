@@ -1,0 +1,8 @@
+GET /v1/users
+GET /v1/users/{id}
+POST /v1/users
+GET /v1/health
+POST /v1/login
+POST /v1/logout
+GET /v1/admin/stats
+GET /v1/admin/audit

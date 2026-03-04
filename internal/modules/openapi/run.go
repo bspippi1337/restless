@@ -1,12 +1,11 @@
 package openapi
 
-import "path/filepath"
-
 import (
 	"errors"
 	"fmt"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/bspippi1337/restless/internal/core/types"

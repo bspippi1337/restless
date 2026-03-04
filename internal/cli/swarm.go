@@ -1,4 +1,3 @@
-
 package cli
 
 import (
@@ -19,9 +18,9 @@ func NewSwarmCmd() *cobra.Command {
 	var matrix bool
 
 	cmd := &cobra.Command{
-		Use: "swarm <url> [url...]",
+		Use:   "swarm <url> [url...]",
 		Short: "Distributed API probing swarm",
-		Args: cobra.MinimumNArgs(1),
+		Args:  cobra.MinimumNArgs(1),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -34,7 +33,7 @@ func NewSwarmCmd() *cobra.Command {
 
 			if matrix {
 
-				matrixJSON,_ := json.Marshal(args)
+				matrixJSON, _ := json.Marshal(args)
 
 				inputs := map[string]string{
 					"targets_json": string(matrixJSON),
@@ -46,12 +45,12 @@ func NewSwarmCmd() *cobra.Command {
 				}
 
 				fmt.Println("matrix swarm dispatched")
-				fmt.Println("targets:", strings.Join(args,", "))
+				fmt.Println("targets:", strings.Join(args, ", "))
 
 				return nil
 			}
 
-			for _,t := range args {
+			for _, t := range args {
 
 				inputs := map[string]string{
 					"target_url": t,
@@ -59,21 +58,21 @@ func NewSwarmCmd() *cobra.Command {
 
 				err := client.Dispatch(workflow, ref, inputs)
 				if err != nil {
-					fmt.Println("dispatch failed:",t)
+					fmt.Println("dispatch failed:", t)
 					continue
 				}
 
-				fmt.Println("dispatched:",t)
+				fmt.Println("dispatched:", t)
 			}
 
 			return nil
 		},
 	}
 
-	cmd.Flags().StringVar(&repo,"repo","", "owner/repo")
-	cmd.Flags().StringVar(&workflow,"workflow","mosh-runner.yml","workflow file")
-	cmd.Flags().StringVar(&ref,"ref","main","git ref")
-	cmd.Flags().BoolVar(&matrix,"matrix",false,"dispatch as GitHub Actions matrix job")
+	cmd.Flags().StringVar(&repo, "repo", "", "owner/repo")
+	cmd.Flags().StringVar(&workflow, "workflow", "mosh-runner.yml", "workflow file")
+	cmd.Flags().StringVar(&ref, "ref", "main", "git ref")
+	cmd.Flags().BoolVar(&matrix, "matrix", false, "dispatch as GitHub Actions matrix job")
 
 	return cmd
 }

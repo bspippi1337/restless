@@ -1,4 +1,3 @@
-
 package cli
 
 import (
@@ -19,9 +18,9 @@ func NewSmartCmd() *cobra.Command {
 	var maxDepth string
 
 	cmd := &cobra.Command{
-		Use: "smart <url>",
+		Use:   "smart <url>",
 		Short: "Trigger remote smart probe via GitHub Actions",
-		Args: cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(1),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -35,9 +34,9 @@ func NewSmartCmd() *cobra.Command {
 			client := ghactions.New(repo, token)
 
 			inputs := map[string]string{
-				"target_url": target,
+				"target_url":   target,
 				"max_requests": maxRequests,
-				"max_depth": maxDepth,
+				"max_depth":    maxDepth,
 			}
 
 			err := client.Dispatch(workflow, ref, inputs)
@@ -48,7 +47,7 @@ func NewSmartCmd() *cobra.Command {
 			fmt.Println("workflow dispatched")
 			fmt.Println("target:", target)
 
-			time.Sleep(2*time.Second)
+			time.Sleep(2 * time.Second)
 
 			return nil
 		},

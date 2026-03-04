@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Restless Recon Dashboard</title>
+<style>
+body{font-family:system-ui;background:#0b0f19;color:#eee;padding:40px}
+h1{font-size:28px}
+.card{background:#111;border-radius:8px;padding:16px;margin:10px 0}
+a{color:#7dd3fc}
+</style>
+</head>
+<body>
+
+<h1>⚡ Restless Recon Dashboard</h1>
+
+<div id="content">loading...</div>
+
+<script>
+fetch("index.json")
+.then(r=>r.json())
+.then(data=>{
+
+ let html=""
+
+ for(const host in data.targets){
+
+   const t=data.targets[host]
+
+   html+=`
+   <div class="card">
+     <b>${host}</b><br>
+     latest: ${t.latest}<br>
+     <a href="${t.report}">report</a> |
+     <a href="${t.svg}">topology</a>
+   </div>
+   `
+
+ }
+
+ document.getElementById("content").innerHTML=html
+
+})
+.catch(e=>{
+ document.getElementById("content").innerText="no index.json yet"
+})
+</script>
+
+</body>
+</html>

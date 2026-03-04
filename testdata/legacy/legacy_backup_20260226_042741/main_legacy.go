@@ -1,12 +1,9 @@
 package legacy
 
-import "github.com/bspippi1337/restless/internal/teacher"
-
 import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/bspippi1337/restless/internal/version"
 	"net/http"
 	"os"
 	"time"
@@ -19,7 +16,9 @@ import (
 	"github.com/bspippi1337/restless/internal/modules/openapi"
 	"github.com/bspippi1337/restless/internal/modules/session"
 	"github.com/bspippi1337/restless/internal/snapshot"
+	"github.com/bspippi1337/restless/internal/teacher"
 	"github.com/bspippi1337/restless/internal/validate"
+	"github.com/bspippi1337/restless/internal/version"
 )
 
 func main() {

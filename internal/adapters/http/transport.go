@@ -3,9 +3,10 @@ package httpadapter
 import (
 	"bytes"
 	"context"
-	"github.com/bspippi1337/restless/internal/core/engine"
 	"io"
 	"net/http"
+
+	"github.com/bspippi1337/restless/internal/core/engine"
 )
 
 type HTTPTransport struct{}

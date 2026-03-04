@@ -27,17 +27,6 @@ DOCKER_TAG ?= $(VERSION)
 
 .PHONY: build clean install uninstall completion man release doctor docker docker-run deb aptrepo
 
-build:
-	mkdir -p $(BUILD)
-	CGO_ENABLED=0 go build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(BIN) ./cmd/restless
-
-clean:
-	rm -rf $(BUILD) $(DIST) .deb-build .apt-repo
-
-completion: build
-	mkdir -p $(DIST)/completion
-	$(BIN) completion --out $(DIST)/completion
-
 man: build
 	mkdir -p $(DIST)/man
 	if [ -f docs/man/restless.1.scd ]; then \
@@ -63,16 +52,16 @@ uninstall:
 
 release: clean
 	mkdir -p $(DIST)
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64   go build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(DIST)/$(APP)-linux-amd64 ./cmd/restless
-	CGO_ENABLED=0 GOOS=linux GOARCH=arm64   go build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(DIST)/$(APP)-linux-arm64 ./cmd/restless
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64  go build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(DIST)/$(APP)-darwin-amd64 ./cmd/restless
-	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64  go build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(DIST)/$(APP)-darwin-arm64 ./cmd/restless
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(DIST)/$(APP)-windows-amd64.exe ./cmd/restless
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64   go build -buildvcs=false -buildvcs=false $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(DIST)/$(APP)-linux-amd64 ./cmd/restless
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64   go build -buildvcs=false -buildvcs=false $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(DIST)/$(APP)-linux-arm64 ./cmd/restless
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64  go build -buildvcs=false -buildvcs=false $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(DIST)/$(APP)-darwin-amd64 ./cmd/restless
+	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64  go build -buildvcs=false -buildvcs=false $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(DIST)/$(APP)-darwin-arm64 ./cmd/restless
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -buildvcs=false -buildvcs=false $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(DIST)/$(APP)-windows-amd64.exe ./cmd/restless
 
 doctor:
 	@echo "Go: $$(go version)"
 	@echo "Git version: $(VERSION)"
-	go build ./...
+	go build -buildvcs=false -buildvcs=false ./...
 	go test ./... || true
 
 docker:
@@ -86,3 +75,34 @@ deb: build
 
 aptrepo: deb
 	./scripts/build_apt_repo.sh $(VERSION)
+
+
+VERSION ?= dev
+
+.PHONY: build clean completion
+
+
+VERSION ?= dev
+
+.PHONY: build clean completion
+
+
+VERSION ?= dev
+
+.PHONY: build clean completion
+
+build:
+	mkdir -p build
+	CGO_ENABLED=0 go build -buildvcs=false -trimpath \
+	-ldflags "-s -w -X github.com/bspippi1337/restless/internal/cli.version=$(VERSION)" \
+	-o build/restless ./cmd/restless
+
+completion: build
+	mkdir -p dist/completion
+	./build/restless completion bash > dist/completion/restless.bash
+	./build/restless completion zsh > dist/completion/_restless
+	./build/restless completion fish > dist/completion/restless.fish
+
+clean:
+	rm -rf build dist .deb-build .apt-repo
+

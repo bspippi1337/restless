@@ -1,0 +1,15 @@
+Apply:
+
+unzip restless_magic_patch.zip -d .
+
+Register commands in internal/cli/root.go:
+
+cmd.AddCommand(NewAutoCmd())
+
+Build:
+
+make build
+
+Usage:
+
+restless auto https://api.github.com   --repo bspippi1337/restless   --matrix

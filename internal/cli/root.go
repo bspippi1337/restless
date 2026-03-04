@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Version info can be injected via -ldflags "-X github.com/bspippi1337/restless/internal/cli.version=vX.Y.Z"
 var version = "dev"
 
 func MustExecute() {
@@ -15,17 +16,19 @@ func MustExecute() {
 }
 
 func NewRootCmd() *cobra.Command {
-
 	cmd := &cobra.Command{
 		Use:   "restless",
-		Short: "Terminal‑first API exploration tool",
+		Short: "Terminal-first API exploration tool",
 	}
 
 	cmd.Version = version
 
-	// core commands
+	// Core workflow
 	cmd.AddCommand(NewDiscoverCmd())
+	cmd.AddCommand(NewMapCmd())
 	cmd.AddCommand(NewGraphCmd())
+
+	// Quality-of-life
 	cmd.AddCommand(NewCompletionCmd(cmd))
 
 	return cmd

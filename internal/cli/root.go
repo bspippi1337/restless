@@ -31,6 +31,9 @@ func NewRootCmd() *cobra.Command {
 	cmd.AddCommand(NewScanCmd())
 	cmd.AddCommand(NewMapCmd())
 	cmd.AddCommand(NewInspectCmd())
+	cmd.AddCommand(NewFuzzCmd())
+	cmd.AddCommand(NewReplayCmd())
+	cmd.AddCommand(NewGraphCmd())
 
 	return cmd
 }

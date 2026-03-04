@@ -3,40 +3,45 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 )
-
-var version = "dev"
 
 func main() {
 
 	if len(os.Args) < 2 {
-		fmt.Println("restless")
-		fmt.Println("commands: scan verify map inspect version")
+		fmt.Println("restless <command>")
+		fmt.Println("")
+		fmt.Println("Commands:")
+		fmt.Println("  scan <url>     discover API")
+		fmt.Println("  map            print endpoint map")
+		fmt.Println("  inspect        inspect API")
 		return
 	}
 
 	switch os.Args[1] {
 
-	case "version":
-		fmt.Println(version)
-
 	case "scan":
-		runScan(os.Args[2:])
-
-	case "verify":
-		cmd := exec.Command(os.Args[0], append([]string{"verify"}, os.Args[2:]...)...)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		_ = cmd.Run()
+		runScan()
 
 	case "map":
-		runMap(os.Args[2:])
+		runMap()
 
 	case "inspect":
-		runInspect(os.Args[2:])
+		runInspect()
 
 	default:
 		fmt.Println("unknown command:", os.Args[1])
 	}
+
+}
+
+func runScan() {
+	fmt.Println("scan: not implemented yet (HN demo stub)")
+}
+
+func runMap() {
+	fmt.Println("map: not implemented yet (HN demo stub)")
+}
+
+func runInspect() {
+	fmt.Println("inspect: not implemented yet (HN demo stub)")
 }

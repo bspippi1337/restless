@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 
@@ -10,39 +11,36 @@ import (
 )
 
 type node struct {
-	Name     string
-	Children map[string]*node
+	name     string
+	children map[string]*node
 }
 
-func newNode(name string) *node {
-	return &node{
-		Name:     name,
-		Children: map[string]*node{},
-	}
+func newNode(n string) *node {
+	return &node{name: n, children: map[string]*node{}}
 }
 
-func buildTree(paths []string) *node {
+func build(paths []string) *node {
+
 	root := newNode("/")
 
 	for _, p := range paths {
 
 		p = strings.TrimPrefix(p, "/")
-
 		parts := strings.Split(p, "/")
 
 		cur := root
 
-		for _, part := range parts {
+		for _, x := range parts {
 
-			if part == "" {
+			if x == "" {
 				continue
 			}
 
-			if cur.Children[part] == nil {
-				cur.Children[part] = newNode(part)
+			if cur.children[x] == nil {
+				cur.children[x] = newNode(x)
 			}
 
-			cur = cur.Children[part]
+			cur = cur.children[x]
 		}
 	}
 
@@ -51,9 +49,9 @@ func buildTree(paths []string) *node {
 
 func printTree(n *node, prefix string) {
 
-	keys := make([]string, 0, len(n.Children))
+	keys := make([]string, 0, len(n.children))
 
-	for k := range n.Children {
+	for k := range n.children {
 		keys = append(keys, k)
 	}
 
@@ -61,27 +59,42 @@ func printTree(n *node, prefix string) {
 
 	for i, k := range keys {
 
-		child := n.Children[k]
+		child := n.children[k]
 
-		connector := "├─"
-		nextPrefix := prefix + "│ "
+		conn := "├─"
+		next := prefix + "│ "
 
 		if i == len(keys)-1 {
-			connector = "└─"
-			nextPrefix = prefix + "  "
+			conn = "└─"
+			next = prefix + "  "
 		}
 
-		fmt.Printf("%s%s %s\n", prefix, connector, child.Name)
+		fmt.Printf("%s%s %s\n", prefix, conn, child.name)
 
-		printTree(child, nextPrefix)
+		printTree(child, next)
 	}
+}
+
+func writeSVG(path string) {
+
+	os.MkdirAll("dist", 0755)
+
+	f, _ := os.Create(path)
+	defer f.Close()
+
+	fmt.Fprintln(f, `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200">`)
+	fmt.Fprintln(f, `<text x="20" y="20" font-family="monospace">Restless API Graph</text>`)
+	fmt.Fprintln(f, `</svg>`)
 }
 
 func NewGraphCmd() *cobra.Command {
 
-	return &cobra.Command{
-		Use:   "graph",
-		Short: "Render API topology graph",
+	var svg bool
+
+	cmd := &cobra.Command{
+
+		Use: "graph",
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			st, _, err := state.Load()
@@ -95,18 +108,21 @@ func NewGraphCmd() *cobra.Command {
 				paths = append(paths, r.Path)
 			}
 
-			if len(paths) == 0 {
-				fmt.Println("No endpoints in state. Run:")
-				fmt.Println("  restless discover <url>")
-				return nil
-			}
-
-			tree := buildTree(paths)
+			root := build(paths)
 
 			fmt.Println("/")
-			printTree(tree, "")
+			printTree(root, "")
+
+			if svg {
+				writeSVG("dist/api-topology.svg")
+				fmt.Println("SVG written to dist/api-topology.svg")
+			}
 
 			return nil
 		},
 	}
+
+	cmd.Flags().BoolVar(&svg, "svg", false, "export svg")
+
+	return cmd
 }

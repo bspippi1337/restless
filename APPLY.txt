@@ -1,0 +1,17 @@
+
+Apply patch:
+
+unzip restless_swarm_matrix_patch.zip -d .
+
+Register commands in internal/cli/root.go:
+
+cmd.AddCommand(NewSmartCmd())
+cmd.AddCommand(NewSwarmCmd())
+
+Build:
+
+make build
+
+Example:
+
+restless swarm https://api.github.com https://example.com   --repo bspippi1337/restless   --matrix

@@ -1,0 +1,4 @@
+# Add / replace this target in your Makefile
+
+deb: build
+	./scripts/build_deb.sh $(VERSION)

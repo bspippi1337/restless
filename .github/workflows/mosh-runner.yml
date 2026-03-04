@@ -1,0 +1,36 @@
+
+name: restless mosh-runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "single target"
+        required: false
+      targets_json:
+        description: "matrix targets"
+        required: false
+
+jobs:
+
+  probe:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        target: ${{ fromJson(inputs.targets_json || '["${{ inputs.target_url }}"]') }}
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-go@v5
+      with:
+        go-version: "1.22"
+
+    - run: |
+        go build -o restless ./cmd/restless
+
+    - run: |
+        ./restless discover ${{ matrix.target }}

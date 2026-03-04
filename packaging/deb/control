@@ -1,0 +1,9 @@
+Package: restless
+Version: 0.0.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: Pippi Tednes
+Homepage: https://github.com/bspippi1337/restless
+Description: Terminal-first API discovery and exploration tool
+ Restless discovers and maps API surfaces, prints a topology graph, and generates shell completion.

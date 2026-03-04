@@ -1,31 +1,21 @@
-Restless Supersolid CLI Patch
-=============================
 
-Drop these files into your repo root and commit.
+Restless merge patch (discover + map + graph + svg + completion)
+=============================================================
 
-Steps:
+Apply:
+  unzip -o restless_merge_patch.zip -d .
 
-1. Extract zip in repo root
-2. Ensure old discovery engine is removed:
-   rm internal/core/discover/discover.go  (if present)
+IMPORTANT: remove legacy discovery engine if present (prevents Graph/Run redeclare):
+  rm -f internal/core/discover/discover.go
 
-3. Build:
+Build:
+  go mod tidy
+  go build -o build/restless ./cmd/restless
 
-   go mod tidy
-   go build -o build/restless ./cmd/restless
-
-4. Test:
-
-   ./build/restless discover https://api.github.com
-   ./build/restless graph
-   ./build/restless graph --svg
-   ./build/restless completion
-
-Completion:
-
-bash:
-source dist/completion/restless.bash
-
-zsh:
-fpath+=(dist/completion)
-autoload -Uz compinit && compinit
+Run:
+  ./build/restless discover https://api.github.com
+  ./build/restless map
+  ./build/restless map --tree=false
+  ./build/restless graph
+  ./build/restless graph --svg
+  ./build/restless completion

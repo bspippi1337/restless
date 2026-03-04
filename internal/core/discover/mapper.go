@@ -9,24 +9,26 @@ import (
 	"time"
 )
 
+// Graph is the result of autonomous discovery.
 type Graph struct {
 	BaseURL   string
 	Endpoints []string
 	Visited   int
 }
 
+// Run crawls a hypermedia-style API surface starting from base URL.
+// It extracts absolute http(s) URLs from JSON responses and follows same-host URLs.
+// Intentionally bounded to avoid runaway crawling.
 func Run(base string) (Graph, error) {
-
 	client := http.Client{Timeout: 10 * time.Second}
 
-	queue := []string{base}
+	queue := []string{strings.TrimRight(base, "/")}
 	seenURL := map[string]bool{}
 	seenPath := map[string]bool{}
 
 	var endpoints []string
 
 	for len(queue) > 0 && len(seenURL) < 80 {
-
 		u := queue[0]
 		queue = queue[1:]
 
@@ -44,63 +46,57 @@ func Run(base string) (Graph, error) {
 		resp.Body.Close()
 
 		var data interface{}
-		json.Unmarshal(body, &data)
+		_ = json.Unmarshal(body, &data)
 
-		urls := extract(data)
+		urls := extractURLs(data)
 
 		for _, s := range urls {
-
-			p, err := url.Parse(s)
+			pu, err := url.Parse(s)
 			if err != nil {
 				continue
 			}
 
-			path := p.Path
-
-			if path != "" && !seenPath[path] {
-				seenPath[path] = true
-				endpoints = append(endpoints, path)
+			if pu.Path != "" && !seenPath[pu.Path] {
+				seenPath[pu.Path] = true
+				endpoints = append(endpoints, pu.Path)
 			}
 
-			if strings.Contains(p.Host, host(base)) {
-				queue = append(queue, s)
+			if strings.Contains(pu.Host, hostOf(base)) {
+				queue = append(queue, pu.String())
 			}
 		}
 	}
 
 	return Graph{
-		BaseURL:   base,
+		BaseURL:   strings.TrimRight(base, "/"),
 		Endpoints: endpoints,
 		Visited:   len(seenURL),
 	}, nil
 }
 
-func extract(v interface{}) []string {
-
+func extractURLs(v interface{}) []string {
 	var out []string
 
 	switch x := v.(type) {
-
 	case map[string]interface{}:
-		for _, v := range x {
-			out = append(out, extract(v)...)
+		for _, vv := range x {
+			out = append(out, extractURLs(vv)...)
 		}
-
 	case []interface{}:
-		for _, v := range x {
-			out = append(out, extract(v)...)
+		for _, vv := range x {
+			out = append(out, extractURLs(vv)...)
 		}
-
 	case string:
-		if strings.HasPrefix(x, "http") {
-			out = append(out, x)
+		s := strings.TrimSpace(x)
+		if strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://") {
+			out = append(out, s)
 		}
 	}
 
 	return out
 }
 
-func host(u string) string {
+func hostOf(u string) string {
 	p, _ := url.Parse(u)
 	return p.Host
 }

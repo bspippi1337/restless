@@ -1,90 +1,39 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-PROJECT="restless"
-ARCH="amd64"
-VERSION="$(git describe --tags --always)"
-MAINTAINER="Pippi <you@example.com>"
-DESCRIPTION="Contract-aware API inspection engine"
+VERSION="${1:-0.0.0}"
+DIST="${DIST:-stable}"
+ARCH="${ARCH:-amd64}"
 
-ROOT="$(pwd)"
-BUILD_DIR="$ROOT/.deb-build"
-APT_DIR="$ROOT/apt-repo"
-DIST="stable"
-COMP="main"
-
-fail() { echo "❌ $1"; exit 1; }
-pass() { echo "✔ $1"; }
-
-echo "== RESTLESS APT BUILDER =="
-
-command -v dpkg-deb >/dev/null || fail "dpkg-deb missing"
-command -v go >/dev/null || fail "go missing"
-
-# Clean
-rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR"
-
-# 1️⃣ Build binary
-echo "Building binary..."
-go build -trimpath -ldflags="-s -w" -o "$BUILD_DIR/$PROJECT" ./cmd/restless || fail "Build failed"
-pass "Binary built"
-
-# 2️⃣ Debian package structure
-PKG_DIR="$BUILD_DIR/${PROJECT}_${VERSION}_${ARCH}"
-mkdir -p "$PKG_DIR/DEBIAN"
-mkdir -p "$PKG_DIR/usr/local/bin"
-
-cp "$BUILD_DIR/$PROJECT" "$PKG_DIR/usr/local/bin/"
-
-# 3️⃣ Control file
-cat > "$PKG_DIR/DEBIAN/control" <<EOF
-Package: $PROJECT
-Version: ${VERSION#v}
-Section: utils
-Priority: optional
-Architecture: $ARCH
-Maintainer: $MAINTAINER
-Description: $DESCRIPTION
-EOF
-
-# 4️⃣ Permissions
-chmod 755 "$PKG_DIR/usr/local/bin/$PROJECT"
-
-# 5️⃣ Build .deb
-echo "Building .deb..."
-dpkg-deb --build "$PKG_DIR" >/dev/null
-DEB_FILE="$BUILD_DIR/${PROJECT}_${VERSION#v}_${ARCH}.deb"
-mv "$BUILD_DIR/${PROJECT}_${VERSION}_${ARCH}.deb" "$DEB_FILE"
-pass ".deb created"
-
-# 6️⃣ APT repo layout
-POOL_DIR="$APT_DIR/pool/$COMP/${PROJECT:0:1}/$PROJECT"
-BIN_DIR="$APT_DIR/dists/$DIST/$COMP/binary-$ARCH"
-
-mkdir -p "$POOL_DIR"
-mkdir -p "$BIN_DIR"
-
-cp "$DEB_FILE" "$POOL_DIR/"
-
-# 7️⃣ Generate Packages
-echo "Generating Packages index..."
-dpkg-scanpackages "$APT_DIR/pool" > "$BIN_DIR/Packages" 2>/dev/null
-gzip -kf "$BIN_DIR/Packages"
-pass "Packages index created"
-
-# 8️⃣ Optional GPG signing
-if command -v gpg >/dev/null; then
-  echo "Signing repository..."
-  gpg --default-key "$MAINTAINER" --output "$APT_DIR/dists/$DIST/Release.gpg" -ba "$BIN_DIR/Packages" || true
+DEB="dist/restless_${VERSION}_${ARCH}.deb"
+if [[ ! -f "$DEB" ]]; then
+  echo "ERR: $DEB missing. Run: make deb"
+  exit 1
 fi
 
-pass "APT repo ready"
+# Minimal apt repo structure (for GitHub Pages / static hosting)
+rm -rf .apt-repo
+mkdir -p ".apt-repo/dists/${DIST}/main/binary-${ARCH}"
+mkdir -p ".apt-repo/pool/main/r/restless"
 
-echo
-echo "🎯 APT repository built at:"
-echo "$APT_DIR"
-echo
-echo "Next steps:"
-echo "1. Push apt-repo/ to GitHub Pages branch"
-echo "2. Configure users to add repo"
+cp "$DEB" ".apt-repo/pool/main/r/restless/"
+
+# Packages index
+PKGDIR=".apt-repo/dists/${DIST}/main/binary-${ARCH}"
+( cd .apt-repo && dpkg-scanpackages -m pool /dev/null ) > "${PKGDIR}/Packages"
+gzip -9c "${PKGDIR}/Packages" > "${PKGDIR}/Packages.gz"
+
+# Release file (unsigned, but works; you can add signing later)
+cat > ".apt-repo/dists/${DIST}/Release" <<REL
+Origin: restless
+Label: restless
+Suite: ${DIST}
+Codename: ${DIST}
+Architectures: ${ARCH}
+Components: main
+Description: Restless APT repo
+Date: $(date -Ru)
+REL
+
+echo "APT repo staged in .apt-repo/"
+echo "Tip: publish .apt-repo/ via GitHub Pages, S3, or nginx."

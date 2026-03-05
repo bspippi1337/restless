@@ -1,0 +1,19 @@
+FROM debian:stable-slim
+
+RUN apt-get update \
+ && apt-get install -y curl wget ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /test
+COPY scripts/run_with_log.sh /usr/local/bin/run_with_log.sh
+
+RUN chmod +x /usr/local/bin/run_with_log.sh
+
+RUN /usr/local/bin/run_with_log.sh bash -c "\
+curl -sSL https://bspippi1337.github.io/restless/install.sh | sh ; \
+wget -qO- https://bspippi1337.github.io/restless/install.sh | sh ; \
+restless --help ; \
+restless discover https://api.github.com || true \
+"
+
+CMD ["restless","--help"]

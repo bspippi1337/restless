@@ -25,7 +25,9 @@ func NewDiscoverCmd() *cobra.Command {
 			fmt.Println("target:", target)
 			fmt.Println()
 
-			engine, err := discovery.NewEngine(target)
+			// using queue crawler v4
+			endpoints := discovery.CrawlQueueV4(target, 8)
+			result := endpoints
 			if err != nil {
 				return err
 			}
@@ -35,15 +37,15 @@ func NewDiscoverCmd() *cobra.Command {
 
 			start := time.Now()
 
-			result := engine.Discover(ctx)
-
 			elapsed := time.Since(start)
 
 			fmt.Println("discovered endpoints:", len(result))
 			fmt.Println("scan time:", elapsed)
 			fmt.Println()
 
-			engine.PrintMap()
+			for _, e := range result {
+				fmt.Println(" ", e.Path)
+			}
 
 			return nil
 		},

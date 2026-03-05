@@ -29,3 +29,8 @@ apt-repo/
 .patch_backup_*
 
 .help_patch_backup_*
+build/
+dist/
+*.tmp
+*.swp
+.restless_state.json

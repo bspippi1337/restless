@@ -1,0 +1,47 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+    background: #0f1115;
+    color: #e6edf3;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #151922;
+}
+
+h1 {
+    font-size: 3rem;
+    margin: 0;
+}
+
+.version {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.3rem 0.8rem;
+    background: #1f6feb;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+section {
+    padding: 3rem 2rem;
+    max-width: 800px;
+    margin: auto;
+}
+
+pre {
+    background: #161b22;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+}
+
+footer {
+    text-align: center;
+    padding: 2rem;
+    background: #151922;
+    font-size: 0.8rem;
+}

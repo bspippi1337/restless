@@ -1,10 +1,10 @@
 package discovery
 
 import (
-	"github.com/bspippi1337/restless/internal/app"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/bspippi1337/restless/internal/app"
 	"io"
 	"net/http"
 	"net/url"
@@ -80,7 +80,7 @@ func (e *Engine) worker(ctx context.Context) {
 			return
 
 		case path := <-e.Queue:
-	app.PublishFinding("discovery","endpoint",path,"discovered path",0.7)
+			app.PublishFinding("discovery", "endpoint", path, "discovered path", 0.7)
 			if e.shouldSkip(path) {
 				continue
 			}
@@ -278,7 +278,7 @@ func normalizePath(base, found string) string {
 
 func (e *Engine) PrintMap() {
 	for path, ep := range e.Endpoints {
-	app.PublishFinding("discovery","endpoint",path,"discovered path",0.7)
+		app.PublishFinding("discovery", "endpoint", path, "discovered path", 0.7)
 		fmt.Println(path)
 
 		for m, info := range ep.Methods {

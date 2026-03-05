@@ -1,52 +1,51 @@
 package cli
 
 import (
-"fmt"
-"os"
+	"fmt"
+	"os"
 
-"github.com/spf13/cobra"
+	"github.com/spf13/cobra"
 )
 
 var (
-version = "v6.0.0"
-commit  = "dev"
-date    = "unknown"
+	version = "v6.0.0"
+	commit  = "dev"
+	date    = "unknown"
 )
 
 func NewRootCmd() *cobra.Command {
 
-cmd := &cobra.Command{
-Use:   "restless",
-Short: "REST API discovery and exploration CLI",
-}
+	cmd := &cobra.Command{
+		Use:   "restless",
+		Short: "REST API discovery and exploration CLI",
+	}
 
-cmd.PersistentFlags().StringP("api", "a", "", "API context")
-cmd.PersistentFlags().StringP("cache", "c", "", "cache directory")
+	cmd.PersistentFlags().StringP("api", "a", "", "API context")
+	cmd.PersistentFlags().StringP("cache", "c", "", "cache directory")
 
-cmd.AddCommand(NewDiscoverCmd())
-cmd.AddCommand(NewLearnCmd())
-cmd.AddCommand(NewShellCmd())
-cmd.AddCommand(NewMapCmd())
-cmd.AddCommand(NewCallCmd())
-cmd.AddCommand(NewInspectCmd())
-cmd.AddCommand(NewCouncilCmd())
+	cmd.AddCommand(NewDiscoverCmd())
+	cmd.AddCommand(NewLearnCmd())
+	cmd.AddCommand(NewShellCmd())
+	cmd.AddCommand(NewMapCmd())
+	cmd.AddCommand(NewCallCmd())
+	cmd.AddCommand(NewInspectCmd())
+	cmd.AddCommand(NewCouncilCmd())
 
-cmd.Run = func(cmd *cobra.Command, args []string) {
-cmd.Help()
-}
+	cmd.Run = func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	}
 
-cmd.SetVersionTemplate("restless {{.Version}}\n")
-cmd.Version = fmt.Sprintf("%s (%s %s)", version, commit, date)
+	cmd.SetVersionTemplate("restless {{.Version}}\n")
+	cmd.Version = fmt.Sprintf("%s (%s %s)", version, commit, date)
 
-
-AddDynamicCommands(cmd)
-return cmd
+	AddDynamicCommands(cmd)
+	return cmd
 }
 
 func Execute() {
-root := NewRootCmd()
-if err := root.Execute(); err != nil {
-fmt.Println(err)
-os.Exit(1)
-}
+	root := NewRootCmd()
+	if err := root.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }

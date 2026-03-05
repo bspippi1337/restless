@@ -2,13 +2,13 @@ package util
 
 import "strings"
 
-func JoinURL(base,path string)string{
+func JoinURL(base, path string) string {
 
-base=strings.TrimRight(base,"/")
+	base = strings.TrimRight(base, "/")
 
-if !strings.HasPrefix(path,"/"){
-path="/"+path
-}
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
 
-return base+path
+	return base + path
 }

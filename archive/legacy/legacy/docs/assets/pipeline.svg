@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="260" viewBox="0 0 980 260">
+  <defs>
+    <style>
+      .bg{fill:#0b0f14}.card{fill:#111826;stroke:#253041;stroke-width:2}
+      .t{font:15px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;fill:#d7e0ea}
+      .d{fill:#9fb0c1}.arrow{stroke:#9fb0c1;stroke-width:3;fill:none}
+    </style>
+    <marker id="m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9fb0c1"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="980" height="260"/>
+  <rect class="card" x="40" y="60" width="190" height="120" rx="14"/>
+  <rect class="card" x="260" y="60" width="190" height="120" rx="14"/>
+  <rect class="card" x="480" y="60" width="190" height="120" rx="14"/>
+  <rect class="card" x="700" y="60" width="240" height="120" rx="14"/>
+  <path class="arrow" marker-end="url(#m)" d="M230 120 L260 120"/>
+  <path class="arrow" marker-end="url(#m)" d="M450 120 L480 120"/>
+  <path class="arrow" marker-end="url(#m)" d="M670 120 L700 120"/>
+  <text class="t" x="78" y="110">discover</text><text class="t d" x="78" y="136">crawl + verify</text><text class="t d" x="78" y="160">save profile</text>
+  <text class="t" x="308" y="110">choose</text><text class="t d" x="308" y="136">tui / fzf</text><text class="t d" x="308" y="160">describe</text>
+  <text class="t" x="536" y="110">run</text><text class="t d" x="536" y="136">params + auth</text><text class="t d" x="536" y="160">json out</text>
+  <text class="t" x="748" y="110">reuse</text><text class="t d" x="748" y="136">snippets</text><text class="t d" x="748" y="160">CI / scripts</text>
+</svg>

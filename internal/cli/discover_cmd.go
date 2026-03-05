@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/bspippi1337/restless/internal/discovery"
+	"github.com/bspippi1337/restless/internal/telemetry"
 )
 
 func NewDiscoverCmd() *cobra.Command {
@@ -26,6 +27,14 @@ func NewDiscoverCmd() *cobra.Command {
 
 			start := time.Now()
 
+			// start telemetry renderer
+			go func() {
+				for {
+					time.Sleep(1 * time.Second)
+					telemetry.Print()
+				}
+			}()
+
 			endpoints := discovery.CrawlQueueV4(target, 8)
 
 			elapsed := time.Since(start)
@@ -33,6 +42,8 @@ func NewDiscoverCmd() *cobra.Command {
 			fmt.Println()
 			fmt.Println("discovered endpoints:", len(endpoints))
 			fmt.Println("scan time:", elapsed)
+			telemetry.Print()
+			fmt.Println()
 			fmt.Println()
 
 			for _, e := range endpoints {

@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"github.com/bspippi1337/restless/internal/app"
 	"net/http"
 	"strings"
 	"time"
@@ -55,6 +56,7 @@ func Discover(base string) (*store.API, error) {
 		if res.StatusCode < 400 {
 
 			path := normalize(p)
+			app.PublishFinding("discovery", "endpoint", path, "discovered endpoint", 0.7)
 
 			if !seen[path] {
 

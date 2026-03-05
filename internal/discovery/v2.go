@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/bspippi1337/restless/internal/progress"
 	"github.com/bspippi1337/restless/internal/status"
+	"github.com/bspippi1337/restless/internal/telemetry"
 	"net/http"
 	"strings"
 	"time"
@@ -29,6 +30,7 @@ var common = []string{
 }
 
 func Discover(base string) (*store.API, error) {
+	telemetry.Start()
 	status.Start()
 	progress := progress.NewDiscoveryProgress()
 	progress.StartTicker()
@@ -48,6 +50,7 @@ func Discover(base string) (*store.API, error) {
 		url := util.JoinURL(base, p)
 
 		req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+		telemetry.IncRequest()
 		status.IncRequest()
 		progress.IncRequest()
 

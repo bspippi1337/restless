@@ -1,5 +1,7 @@
 package council
 
+import status "github.com/bspippi1337/restless/internal/status"
+
 import "fmt"
 
 type Council struct {

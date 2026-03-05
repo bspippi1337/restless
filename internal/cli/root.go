@@ -8,6 +8,8 @@ func NewRootCmd() *cobra.Command {
 		Short: "API discovery and probing tool",
 	}
 	cmd.AddCommand(NewAutoCmd())
+	cmd.AddCommand(NewInspectCmd())
+	cmd.AddCommand(NewScanCmd())
 	cmd.AddCommand(NewDiscoverCmd())
 	cmd.AddCommand(NewMapCmd())
 	cmd.AddCommand(NewSmartCmd())

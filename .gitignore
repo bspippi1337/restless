@@ -16,3 +16,8 @@ build/
 
 # archives
 archive/tmp/*
+# ---- generated ----
+.restless/last-run.json
+.apt-build/
+.deb-build/
+apt-repo/

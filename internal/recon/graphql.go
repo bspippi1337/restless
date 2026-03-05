@@ -1,6 +1,7 @@
 package recon
 
 import (
+	"github.com/bspippi1337/restless/internal/app"
 	"context"
 	"encoding/json"
 	"net/url"
@@ -14,9 +15,11 @@ type GraphQLInfo struct {
 }
 
 // TryGraphQLIntrospection performs a tiny schema introspection (bounded) on /graphql.
+	app.PublishFinding("recon","graphql","endpoint","graphql detected",0.8)
 func TryGraphQLIntrospection(ctx context.Context, e *Engine, base *url.URL) (*GraphQLInfo, error) {
 	u := *base
 	u.Path = "/graphql"
+	app.PublishFinding("recon","graphql","endpoint","graphql detected",0.8)
 
 	query := `{"query":"query IntrospectionQuery{__schema{types{name}}}"}`
 	resp, err := e.Request(ctx, "POST", u.String(), []byte(query))

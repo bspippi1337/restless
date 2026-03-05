@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"github.com/bspippi1337/restless/internal/app"
 "context"
 "net/http"
 "strings"
@@ -54,6 +55,7 @@ res.Body.Close()
 if res.StatusCode < 400 {
 
 path := normalize(p)
+	app.PublishFinding("discovery","endpoint",path,"discovered path",0.7)
 
 if !seen[path] {
 

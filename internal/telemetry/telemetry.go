@@ -66,7 +66,7 @@ func SetWorkers(n int) {
 	T.mu.Unlock()
 }
 
-func print() {
+func Print() {
 
 	T.mu.Lock()
 	defer T.mu.Unlock()
@@ -93,7 +93,7 @@ func Start() {
 		t := time.NewTicker(1 * time.Second)
 
 		for range t.C {
-			print()
+			Print()
 		}
 
 	}()

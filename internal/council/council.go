@@ -36,6 +36,7 @@ func (c *Council) Convene() {
 
 		if len(engines) > 1 && score > 1.2 {
 			fmt.Printf("council consensus: %s (score %.2f)\n", target, score)
+			telemetry.IncConsensus()
 			status.IncConsensus()
 		}
 	}

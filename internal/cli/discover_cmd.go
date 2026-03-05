@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -21,29 +20,22 @@ func NewDiscoverCmd() *cobra.Command {
 
 			target := args[0]
 
-			fmt.Println("restless discovery engine v3")
+			fmt.Println("restless discovery engine v4")
 			fmt.Println("target:", target)
 			fmt.Println()
 
-			// using queue crawler v4
-			endpoints := discovery.CrawlQueueV4(target, 8)
-			result := endpoints
-			if err != nil {
-				return err
-			}
-
-			ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-			defer cancel()
-
 			start := time.Now()
+
+			endpoints := discovery.CrawlQueueV4(target, 8)
 
 			elapsed := time.Since(start)
 
-			fmt.Println("discovered endpoints:", len(result))
+			fmt.Println()
+			fmt.Println("discovered endpoints:", len(endpoints))
 			fmt.Println("scan time:", elapsed)
 			fmt.Println()
 
-			for _, e := range result {
+			for _, e := range endpoints {
 				fmt.Println(" ", e.Path)
 			}
 

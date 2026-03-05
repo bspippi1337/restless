@@ -23,3 +23,9 @@ archive/tmp/*
 apt-repo/
 .restless_state.json
 *.bak
+
+# --- generated / local noise ---
+
+.patch_backup_*
+
+.help_patch_backup_*

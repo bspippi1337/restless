@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"net/url"
+	neturl "net/url"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -69,11 +69,11 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 
 			for j := range queue {
 
-				url := util.JoinURL(base, j.path)
+				endpoint := util.JoinURL(base, j.path)
 
 				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
-				req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+				req, _ := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
 
 				telemetry.IncRequest()
 
@@ -99,8 +99,6 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 					var obj any
 
 					if json.Unmarshal(body, &obj) == nil {
-
-						extract := func(v any) {}
 
 						var walk func(any)
 
@@ -130,7 +128,7 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 
 								if strings.HasPrefix(s, "http") {
 
-									u, err := url.Parse(s)
+									u, err := neturl.Parse(s)
 
 									if err == nil {
 										enqueue(u.Path, j.depth+1)

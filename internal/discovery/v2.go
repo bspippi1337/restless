@@ -30,7 +30,8 @@ func Discover(base string) (*store.API, error) {
 
 	client := httpx.New()
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	api := &store.API{
 		BaseURL: base,

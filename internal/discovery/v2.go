@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"fmt"
 	"github.com/bspippi1337/restless/internal/progress"
 	"github.com/bspippi1337/restless/internal/status"
 	"github.com/bspippi1337/restless/internal/telemetry"
@@ -78,6 +79,10 @@ func Discover(base string) (*store.API, error) {
 
 	}
 
+	telemetry.Print()
+	status.Print()
+	progress.Print()
+	fmt.Println()
 	return api, nil
 }
 

@@ -47,16 +47,16 @@ func Discover(base string) (*store.API, error) {
 		url := util.JoinURL(base, p)
 
 		req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
-	reqCount++
-	if reqCount%10==0 {
-		rate := float64(reqCount)/time.Since(start).Seconds()
-		fmt.Printf("\rdiscover  req:%d  endpoints:%d  rate:%.1f/s", reqCount, endpointCount, rate)
-	}
 		reqCount++
-	if reqCount%10==0 {
-		rate := float64(reqCount)/time.Since(start).Seconds()
-		fmt.Printf("\rdiscover  req:%d  endpoints:%d  rate:%.1f/s", reqCount, endpointCount, rate)
-	}
+		if reqCount%10 == 0 {
+			rate := float64(reqCount) / time.Since(start).Seconds()
+			fmt.Printf("\rdiscover  req:%d  endpoints:%d  rate:%.1f/s", reqCount, endpointCount, rate)
+		}
+		reqCount++
+		if reqCount%10 == 0 {
+			rate := float64(reqCount) / time.Since(start).Seconds()
+			fmt.Printf("\rdiscover  req:%d  endpoints:%d  rate:%.1f/s", reqCount, endpointCount, rate)
+		}
 		if reqCount%10 == 0 {
 			fmt.Printf("[discover] requests=%d\n", reqCount)
 		}
@@ -72,7 +72,7 @@ func Discover(base string) (*store.API, error) {
 
 			path := normalize(p)
 			app.PublishFinding("discovery", "endpoint", path, "discovered endpoint", 0.7)
-	endpointCount++
+			endpointCount++
 
 			if !seen[path] {
 
@@ -98,4 +98,3 @@ func normalize(p string) string {
 
 	return strings.TrimRight(p, "/")
 }
-fmt.Println()

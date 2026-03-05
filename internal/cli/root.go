@@ -17,19 +17,17 @@ func NewRootCmd() *cobra.Command {
 
 cmd := &cobra.Command{
 Use:   "restless",
-Short: "Explore and understand unknown REST APIs",
+Short: "REST API discovery and exploration CLI",
 }
 
 cmd.PersistentFlags().StringP("api", "a", "", "API context")
 cmd.PersistentFlags().StringP("cache", "c", "", "cache directory")
 
 cmd.AddCommand(NewDiscoverCmd())
+cmd.AddCommand(NewLearnCmd())
 cmd.AddCommand(NewMapCmd())
 cmd.AddCommand(NewCallCmd())
 cmd.AddCommand(NewInspectCmd())
-cmd.AddCommand(NewLearnCmd())
-cmd.AddCommand(NewDynamicCmd("users","/users"))
-cmd.AddCommand(NewDynamicCmd("repos","/repos"))
 
 cmd.Run = func(cmd *cobra.Command, args []string) {
 cmd.Help()
@@ -38,6 +36,8 @@ cmd.Help()
 cmd.SetVersionTemplate("restless {{.Version}}\n")
 cmd.Version = fmt.Sprintf("%s (%s %s)", version, commit, date)
 
+
+AddDynamicCommands(cmd)
 return cmd
 }
 

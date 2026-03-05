@@ -25,6 +25,7 @@ cmd.PersistentFlags().StringP("cache", "c", "", "cache directory")
 
 cmd.AddCommand(NewDiscoverCmd())
 cmd.AddCommand(NewLearnCmd())
+cmd.AddCommand(NewShellCmd())
 cmd.AddCommand(NewMapCmd())
 cmd.AddCommand(NewCallCmd())
 cmd.AddCommand(NewInspectCmd())

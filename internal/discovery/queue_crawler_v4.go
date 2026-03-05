@@ -123,6 +123,22 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 								s := strings.TrimSpace(t)
 
 								if strings.HasPrefix(s, "/") {
+									// template expansion
+									if strings.Contains(s, "{") {
+										s = strings.ReplaceAll(s, "{user}", "octocat")
+										s = strings.ReplaceAll(s, "{owner}", "octocat")
+										s = strings.ReplaceAll(s, "{repo}", "Hello-World")
+										s = strings.ReplaceAll(s, "{gist_id}", "1")
+										s = strings.ReplaceAll(s, "{", "")
+										s = strings.ReplaceAll(s, "}", "")
+									}
+									// path mutation
+									if s == "/users" {
+										enqueue("/users/octocat", j.depth+1)
+									}
+									if s == "/repos" {
+										enqueue("/repos/octocat/Hello-World", j.depth+1)
+									}
 									enqueue(s, j.depth+1)
 								}
 

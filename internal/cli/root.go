@@ -16,5 +16,6 @@ func NewRootCmd() *cobra.Command {
 	cmd.AddCommand(NewBlckswanCmd())
 
 	cmd.AddCommand(NewOctoSwanCmd())
+
 	return cmd
 }

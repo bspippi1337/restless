@@ -17,25 +17,24 @@ import (
 	"github.com/bspippi1337/restless/internal/util"
 )
 
+type job struct {
+	path string
+}
+
 func CrawlQueueV4(base string, workers int) []store.Endpoint {
 
 	client := httpx.New()
 
-	type job struct {
-		path  string
-		depth int
-	}
+	queue := make(chan job, 256)
 
 	var endpoints []store.Endpoint
 
 	seen := map[string]bool{}
 	var mu sync.Mutex
 
-	queue := make(chan job, 256)
-
 	var inflight int64
 
-	enqueue := func(p string, depth int) {
+	enqueue := func(p string) {
 
 		if !strings.HasPrefix(p, "/") {
 			p = "/" + p
@@ -52,10 +51,10 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 
 		atomic.AddInt64(&inflight, 1)
 
-		queue <- job{p, depth}
+		queue <- job{p}
 	}
 
-	enqueue("/", 0)
+	enqueue("/")
 
 	var wg sync.WaitGroup
 
@@ -69,11 +68,11 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 
 			for j := range queue {
 
-				endpoint := util.JoinURL(base, j.path)
+				url := util.JoinURL(base, j.path)
 
 				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
-				req, _ := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
+				req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
 
 				telemetry.IncRequest()
 
@@ -123,23 +122,9 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 								s := strings.TrimSpace(t)
 
 								if strings.HasPrefix(s, "/") {
-									// template expansion
-									if strings.Contains(s, "{") {
-										s = strings.ReplaceAll(s, "{user}", "octocat")
-										s = strings.ReplaceAll(s, "{owner}", "octocat")
-										s = strings.ReplaceAll(s, "{repo}", "Hello-World")
-										s = strings.ReplaceAll(s, "{gist_id}", "1")
-										s = strings.ReplaceAll(s, "{", "")
-										s = strings.ReplaceAll(s, "}", "")
-									}
-									// path mutation
-									if s == "/users" {
-										enqueue("/users/octocat", j.depth+1)
-									}
-									if s == "/repos" {
-										enqueue("/repos/octocat/Hello-World", j.depth+1)
-									}
-									enqueue(s, j.depth+1)
+
+									enqueue(s)
+
 								}
 
 								if strings.HasPrefix(s, "http") {
@@ -147,7 +132,7 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 									u, err := neturl.Parse(s)
 
 									if err == nil {
-										enqueue(u.Path, j.depth+1)
+										enqueue(u.Path)
 									}
 
 								}
@@ -188,5 +173,4 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 	wg.Wait()
 
 	return endpoints
-
 }

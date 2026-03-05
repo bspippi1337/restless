@@ -21,3 +21,5 @@ archive/tmp/*
 .apt-build/
 .deb-build/
 apt-repo/
+.restless_state.json
+*.bak

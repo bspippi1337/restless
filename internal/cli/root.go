@@ -27,6 +27,9 @@ cmd.AddCommand(NewDiscoverCmd())
 cmd.AddCommand(NewMapCmd())
 cmd.AddCommand(NewCallCmd())
 cmd.AddCommand(NewInspectCmd())
+cmd.AddCommand(NewLearnCmd())
+cmd.AddCommand(NewDynamicCmd("users","/users"))
+cmd.AddCommand(NewDynamicCmd("repos","/repos"))
 
 cmd.Run = func(cmd *cobra.Command, args []string) {
 cmd.Help()

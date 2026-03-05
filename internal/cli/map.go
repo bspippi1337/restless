@@ -11,7 +11,7 @@ func NewMapCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "map <url>",
 		Short: "generate API topology",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 
 			target := args[0]

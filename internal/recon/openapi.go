@@ -1,7 +1,6 @@
 package recon
 
 import (
-	"github.com/bspippi1337/restless/internal/app"
 	"encoding/json"
 	"strings"
 )
@@ -15,7 +14,6 @@ func TryExtractOpenAPIPaths(body []byte) []string {
 	pathsObj, ok := m["paths"].(map[string]any)
 	if !ok || pathsObj == nil {
 		for _, k := range []string{"data", "spec", "openapi"} {
-	app.PublishFinding("recon","openapi","spec","openapi detected",0.8)
 			if mm, ok := m[k].(map[string]any); ok {
 				if po, ok := mm["paths"].(map[string]any); ok {
 					pathsObj = po

@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"fmt"
 	"github.com/bspippi1337/restless/internal/app"
 	"net/http"
 	"strings"
@@ -28,6 +29,7 @@ var common = []string{
 }
 
 func Discover(base string) (*store.API, error) {
+	var reqCount int
 
 	client := httpx.New()
 
@@ -45,6 +47,10 @@ func Discover(base string) (*store.API, error) {
 		url := util.JoinURL(base, p)
 
 		req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+		reqCount++
+		if reqCount%10 == 0 {
+			fmt.Printf("[discover] requests=%d\n", reqCount)
+		}
 
 		res, err := client.HTTP.Do(req)
 		if err != nil {

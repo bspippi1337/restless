@@ -29,6 +29,7 @@ cmd.AddCommand(NewShellCmd())
 cmd.AddCommand(NewMapCmd())
 cmd.AddCommand(NewCallCmd())
 cmd.AddCommand(NewInspectCmd())
+cmd.AddCommand(NewCouncilCmd())
 
 cmd.Run = func(cmd *cobra.Command, args []string) {
 cmd.Help()

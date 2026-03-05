@@ -1,0 +1,48 @@
+https://api.github.com
+├── api
+├── authorizations
+├── emojis
+├── events
+├── feeds
+  ├── gists/public
+  ├── gists/starred
+  ├── gists{/gist_id}
+├── graphql
+├── health
+├── hub
+├── issues
+├── notifications
+├── openapi.json
+├── orgs
+  ├── orgs/{org}
+    ├── orgs/{org}/repos{
+    ├── orgs/{org}/teams
+├── rate_limit
+├── repos
+    ├── repos/{owner}/{repo}
+├── search
+  ├── search/code
+  ├── search/commits
+  ├── search/issues
+  ├── search/labels
+  ├── search/repositories
+  ├── search/topics
+  ├── search/users
+├── status
+├── swagger.json
+    ├── swagger/v1/swagger.json
+├── user
+  ├── user/emails
+  ├── user/followers
+    ├── user/following{/target}
+  ├── user/keys
+  ├── user/orgs
+  ├── user/repos{
+      ├── user/starred{/owner}{/repo}
+├── users
+  ├── users/{user}
+    ├── users/{user}/repos{
+├── v1
+├── v2
+├── v3
+├── version

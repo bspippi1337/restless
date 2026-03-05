@@ -1,0 +1,3 @@
+{"version": 2, "width": 89, "height": 20, "timestamp": 1772660314, "env": {"SHELL": "/usr/bin/zsh", "TERM": "xterm-kitty"}}
+[0.007769, "o", "⚡ RESTLESS MAGISWARM\r\nrelease the BLCKSWAN swarm\r\n\r\n"]
+[0.179178, "o", "# github.com/bspippi1337/restless/internal/core/magiswarm\r\ninternal/core/magiswarm/report.go:10:6: WriteReportFiles redeclared in this block\r\n\tinternal/core/magiswarm/magiswarm.go:458:6: other declaration of WriteReportFiles\r\n"]

@@ -1,22 +1,8 @@
 package discovery
 
 import (
-<<<<<<< HEAD
 	"context"
 	"net/http"
-	"strings"
-	"time"
-=======
-	"github.com/bspippi1337/restless/internal/app"
-"context"
-"net/http"
-"strings"
-"time"
->>>>>>> parent of 0b706ce (Revert "engine-council: connect discovery, recon and probe engines to blackboard")
-
-	"github.com/bspippi1337/restless/internal/httpx"
-	"github.com/bspippi1337/restless/internal/store"
-	"github.com/bspippi1337/restless/internal/util"
 )
 
 var common = []string{
@@ -103,7 +89,6 @@ res.Body.Close()
 if res.StatusCode < 400 {
 
 path := normalize(p)
-	app.PublishFinding("discovery","endpoint",path,"discovered path",0.7)
 
 if !seen[path] {
 

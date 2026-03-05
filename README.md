@@ -1,333 +1,271 @@
-# ⚡ Restless
+# <svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle"><path fill="black" d="M12 2c-2 2-3 4-3 6 0 2 1 3 2 4-2 1-3 3-3 5 0 3 3 5 6 5s6-2 6-5c0-2-1-4-3-5 1-1 2-2 2-4 0-2-1-4-3-6-1 1-2 2-4 2z"/></svg> Restless
 
-**Discover the real structure of any API.**
+**Find the truth of an API. Fast.**
 
-Restless explores APIs the same way engineers do when documentation fails:  
-by probing them.
+Restless is a terminal-first API reconnaissance tool that **discovers endpoints**, **infers structure**, and **maps topology**.  
+It can also **detect OpenAPI / Swagger automatically** and use that signal to improve discovery.
 
-It discovers endpoints, infers structure, detects schemas, and maps the topology of the API automatically.
+Inspired by tools like `ripgrep`, Restless is built around a simple philosophy:
 
-Think of it as:
+- Minimal friction
+- Immediate output
+- Reality over documentation
 
-- **nmap** — but for APIs  
-- **ripgrep** — but for endpoints  
-- **graphviz** — but automatic  
-
-```
-scan → map → inspect
-```
+Point it at an API and start exploring.
 
 ---
 
-# Why Restless Exists
+## Install
 
-API documentation is often:
+### Build from source
 
-- incomplete
-- outdated
-- partially generated
-- hiding internal endpoints
-- inconsistent with reality
-
-Restless assumes documentation may be wrong.
-
-So it **discovers the API instead.**
-
----
-
-# Terminal Demo
-
-```
-$ restless scan https://api.github.com
-
-discovering endpoints...
-probing routes...
-inferring schema...
-
-✔ 48 endpoints discovered
-✔ pagination pattern detected
-✔ authentication style inferred
-✔ swagger detected
-
-scan complete
-```
-
-Now map the API:
-
-```
-$ restless map
-```
-
-```
-https://api.github.com
-│
-├── /users
-│   ├── /{username}
-│   │   ├── /repos
-│   │   ├── /followers
-│   │   └── /following
-│
-├── /repos
-│   ├── /{owner}/{repo}
-│   │   ├── /issues
-│   │   ├── /pulls
-│   │   └── /actions
-│
-└── /search
-    ├── /repositories
-    └── /issues
-```
-
-Inspect a single endpoint:
-
-```
-$ restless inspect /repos/{owner}/{repo}
-```
-
-```
-METHODS
-  GET
-
-PARAMETERS
-  owner   string
-  repo    string
-
-RETURNS
-  repository object
-```
-
----
-
-# ASCII API Topology
-
-Restless renders API structure directly in the terminal.
-
-```
-$ restless map --ascii
-```
-
-```
-api.company.com
-│
-├─ auth
-│  ├─ login
-│  └─ refresh
-│
-├─ users
-│  ├─ list
-│  └─ profile
-│
-└─ billing
-   ├─ invoices
-   └─ payments
-```
-
-Large APIs become understandable **instantly**.
-
----
-
-# Swagger / OpenAPI Detection
-
-Restless automatically probes for schema definitions:
-
-```
-/swagger.json
-/openapi.json
-/api-docs
-/v1/swagger
-/docs/openapi
-```
-
-Example:
-
-```
-$ restless scan https://service.internal
-
-probing schema endpoints...
-
-✔ openapi detected: /openapi.json
-✔ merging schema with discovered routes
-```
-
-This allows:
-
-- schema inspection
-- endpoint validation
-- documentation drift detection
-
----
-
-# Killer Use Cases
-
-## Reverse engineer an unknown API
-
-```
-restless scan https://api.example.com
-restless map
-```
-
-Understand the API structure instantly.
-
----
-
-## Discover undocumented endpoints
-
-```
-restless scan https://internal.company.com
-```
-
-Find routes that never made it into documentation.
-
----
-
-## Explore microservice gateways
-
-```
-restless scan http://gateway.local
-```
-
-Reveal services hidden behind routing layers.
-
----
-
-## Compare staging vs production
-
-```
-restless scan https://staging.api
-restless scan https://prod.api
-```
-
-Detect API drift before deployments break clients.
-
----
-
-## Generate instant API documentation
-
-```
-restless map > api-topology.txt
-```
-
-Drop it into Slack or a ticket.
-
----
-
-# Installation
-
-Build from source:
-
-```
+```bash
 git clone https://github.com/bspippi1337/restless
 cd restless
 make build
 ```
 
-Binary appears in:
+Binary:
 
-```
-build/restless
+```bash
+./build/restless --help
 ```
 
-Install system-wide:
+Optional install:
 
-```
+```bash
 sudo make install
 ```
 
 ---
 
-# Quickstart
+## Quickstart
+
+```bash
+./build/restless scan https://api.github.com
+./build/restless map https://api.github.com
+./build/restless inspect GET /users/{user}
+```
+
+Restless stores scan state locally:
 
 ```
-restless scan https://api.github.com
-restless map
-restless inspect /users/{username}
+~/.restless_state.json
+```
+
+This means you can scan once and iterate without rescanning.
+
+---
+
+## Terminal demo
+
+### Scan
+
+```bash
+./build/restless scan https://api.github.com
+```
+
+Example output:
+
+```text
+Saved scan → ~/.restless_state.json
+Routes discovered: 1
+OpenAPI detected
 ```
 
 ---
 
-# Commands
+### ASCII API topology
 
+```bash
+./build/restless map https://api.github.com
 ```
-restless scan <url>      discover API endpoints
-restless map             generate endpoint topology
-restless inspect         inspect endpoint details
+
+Example:
+
+```text
+https://api.github.com
+├── users
+│   ├── /{user}
+│   └── /{user}/repos
+├── repos
+│   ├── /{owner}/{repo}
+│   └── /{owner}/{repo}/issues
+└── search
+```
+
+This output is designed to be:
+
+- readable in terminals
+- pasteable into tickets
+- usable in architecture notes
+- usable in incident reports
+
+---
+
+### Inspect an endpoint
+
+```bash
+./build/restless inspect GET /users/{user}
+```
+
+Example output:
+
+```text
+METHOD
+  GET
+
+PATH
+  /users/{user}
+
+SOURCE
+  discovered during scan
 ```
 
 ---
 
-# Architecture
+## OpenAPI / Swagger autodetect
+
+During scanning, Restless probes common schema locations such as:
 
 ```
-cmd/restless
-   │
-   ├── internal/cli
-   ├── internal/core
-   │      ├── scanner
-   │      ├── mapper
-   │      └── inspector
-   │
-   └── internal/ui
+/openapi.json
+/swagger.json
+/api-docs
+/docs/openapi
+/v1/swagger
 ```
 
-Pipeline:
+If a schema is found, Restless uses it to:
+
+- improve endpoint discovery
+- confirm route structure
+- detect documentation drift
+
+This allows Restless to operate effectively even when:
+
+- documentation is incomplete
+- gateways obscure endpoints
+- production APIs differ from spec
+
+---
+
+## Commands
 
 ```
-target API
-   ↓
-endpoint discovery
-   ↓
-structure inference
-   ↓
-topology generation
+restless scan <url>        Discover endpoints and persist scan state
+restless map <url>         Render API topology as an ASCII tree
+restless inspect <M> <P>   Inspect a specific endpoint
+restless discover <url>    Additional discovery mode
+restless swarm <url>       Distributed probing
+restless magiswarm <url>   Recon engine: discover, fuzz, map, report
+restless blckswan <url>    Full recon pipeline
+restless octoswan <url>    Parallel probing + inference
+```
+
+Use:
+
+```
+restless --help
+```
+
+for the currently available commands.
+
+---
+
+## Example use cases
+
+### Explore an unknown API surface
+
+```bash
+./build/restless scan https://internal-api.company
+./build/restless map https://internal-api.company
 ```
 
 ---
 
-# Design Philosophy
+### Visualize an API structure quickly
 
-Restless follows a few simple rules:
-
-- **fast**
-- **single binary**
-- **terminal first**
-- **discover reality**
-
-Documentation can lie.
-
-APIs don't.
+```bash
+./build/restless map https://api.github.com
+```
 
 ---
 
-# Roadmap
+### Investigate a specific endpoint
 
-Planned features:
-
-- SVG topology export
-- Graphviz integration
-- API diff engine
-- authentication plugins
-- fuzzing mode
-- request replay
+```bash
+./build/restless inspect GET /repos/{owner}/{repo}
+```
 
 ---
 
-# Contributing
+## Swagger workflow generator
+
+For teams maintaining OpenAPI schemas, a useful extension is automated schema validation in CI.
+
+Future workflow generator concept:
+
+```bash
+restless workflow github --openapi-guard https://api.example.com
+```
+
+This would generate:
 
 ```
-make test
+.github/workflows/restless-openapi-guard.yml
+```
+
+The workflow could:
+
+- fetch the OpenAPI schema
+- compare against stored snapshots
+- detect undocumented endpoints
+- fail CI on breaking drift
+
+This transforms Restless into an **API integrity guardrail**, not just a mapper.
+
+---
+
+## Project layout
+
+```
+cmd/restless/        CLI entrypoint
+internal/cli/        command definitions
+internal/core/       discovery and probing engine
+docs/                documentation
+examples/            example configurations
+assets/              graphics and demo media
+archive/             legacy experiments and history
+```
+
+---
+
+## Design principles
+
+- Terminal-first interface
+- Fast feedback loops
+- Minimal dependencies
+- Accurate representation of real APIs
+
+---
+
+## Development
+
+Run tests:
+
+```bash
+go test ./...
+```
+
+Build:
+
+```bash
 make build
 ```
 
-Pull requests welcome.
-
 ---
 
-# Author
-
-Pippi Tednes
-
----
-
-# License
+## License
 
 MIT

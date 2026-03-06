@@ -73,3 +73,9 @@ func Start() {
 	}()
 
 }
+
+func IncError() {
+	mu.Lock()
+	errCount++
+	mu.Unlock()
+}

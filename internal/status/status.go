@@ -6,76 +6,62 @@ import (
 	"time"
 )
 
-type GlobalStatus struct {
-	mu        sync.Mutex
-	Start     time.Time
-	Requests  int
-	Endpoints int
-	Probes    int
-	Consensus int
-}
+var mu sync.Mutex
 
-var S = &GlobalStatus{
-	Start: time.Now(),
-}
+var reqCount int
+var epCount int
+var probeCount int
+var consCount int
+var errCount int
+
+var start = time.Now()
 
 func IncRequest() {
-	S.mu.Lock()
-	S.Requests++
-	S.mu.Unlock()
+	mu.Lock()
+	reqCount++
+	mu.Unlock()
 }
 
 func IncEndpoint() {
-	S.mu.Lock()
-	S.Endpoints++
-	S.mu.Unlock()
+	mu.Lock()
+	epCount++
+	mu.Unlock()
 }
 
 func IncProbe() {
-	S.mu.Lock()
-	S.Probes++
-	S.mu.Unlock()
+	mu.Lock()
+	probeCount++
+	mu.Unlock()
 }
 
 func IncConsensus() {
-	S.mu.Lock()
-	S.Consensus++
-	S.mu.Unlock()
-}
-
-func Print() {
-
-	S.mu.Lock()
-	defer S.mu.Unlock()
-
-	rate := float64(S.Requests) / time.Since(S.Start).Seconds()
-
-	fmt.Printf(
-		"\rrestless  req:%d  endpoints:%d  probes:%d  consensus:%d  rate:%.1f/s",
-		S.Requests,
-		S.Endpoints,
-		S.Probes,
-		S.Consensus,
-		rate,
-	)
-}
-
-func Start() {
-
-	go func() {
-
-		t := time.NewTicker(1 * time.Second)
-
-		for range t.C {
-			Print()
-		}
-
-	}()
-
+	mu.Lock()
+	consCount++
+	mu.Unlock()
 }
 
 func IncError() {
 	mu.Lock()
 	errCount++
 	mu.Unlock()
+}
+
+func Print() {
+
+	mu.Lock()
+	req := reqCount
+	ep := epCount
+	probe := probeCount
+	cons := consCount
+	err := errCount
+	mu.Unlock()
+
+	elapsed := time.Since(start).Seconds()
+
+	rate := float64(req) / elapsed
+
+	fmt.Printf(
+		"\rrestless | req:%d ep:%d probe:%d cons:%d err:%d rate:%.1f/s",
+		req, ep, probe, cons, err, rate,
+	)
 }

@@ -1,3 +1,4 @@
+import "github.com/bspippi1337/restless/internal/ui"
 package cli
 
 import (
@@ -20,6 +21,10 @@ func NewDiscoverCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			target := args[0]
+
+ui.PrintGlitch()
+ui.StartStatus()
+
 
 			fmt.Println("restless discovery engine v4")
 			fmt.Println("target:", target)

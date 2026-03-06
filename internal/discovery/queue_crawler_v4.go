@@ -118,7 +118,7 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 								}
 
 							case string:
-								s := strings.TrimSpace(t)
+								s = strings.TrimSpace(t)
 
 								// handle absolute API URLs
 								if strings.HasPrefix(s, "http") {
@@ -136,7 +136,7 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 									enqueue(s)
 								}
 
-								s := strings.TrimSpace(t)
+								s = strings.TrimSpace(t)
 
 								if strings.HasPrefix(s, "/") {
 

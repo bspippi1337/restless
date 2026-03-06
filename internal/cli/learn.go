@@ -19,17 +19,13 @@ func NewLearnCmd() *cobra.Command {
 
 			base := args[0]
 
-			api, err := discovery.Discover(base)
-			if err != nil {
-				return err
+			api := discovery.Discover(base)
 			}
 
 			cacheRoot, _ := cmd.Root().PersistentFlags().GetString("cache")
 			cacheRoot, _ = store.DefaultRoot(cacheRoot)
 
 			_, err = store.Write(cacheRoot, api)
-			if err != nil {
-				return err
 			}
 
 			fmt.Println("API learned:", base)

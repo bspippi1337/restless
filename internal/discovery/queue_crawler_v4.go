@@ -127,7 +127,7 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 
 								}
 
-								if strings.HasPrefix(s, "http") {
+								if strings.HasPrefix(s, base) {
 
 									u, err := neturl.Parse(s)
 

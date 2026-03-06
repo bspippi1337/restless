@@ -1,116 +1,158 @@
 package discovery
 
 import (
+	"context"
 	"encoding/json"
-	"io"
+	"fmt"
 	"net/http"
-	neturl "net/url"
+	"net/url"
 	"strings"
+	"sync"
+	"time"
 
+	"github.com/bspippi1337/restless/internal/httpx"
+	"github.com/bspippi1337/restless/internal/status"
 	"github.com/bspippi1337/restless/internal/store"
-	"github.com/bspippi1337/restless/internal/ui"
 	"github.com/bspippi1337/restless/internal/util"
 )
 
-func Discover(base string) []store.Endpoint {
+type Engine struct {
+	base   string
+	client *httpx.Client
+	seen   map[string]bool
+	mu     sync.Mutex
+}
 
-	client := &http.Client{}
+func NewEngine(base string) (*Engine, error) {
 
-	queue := []string{"/"}
+	_, err := url.Parse(base)
+	if err != nil {
+		return nil, err
+	}
 
-	seen := map[string]bool{}
+	return &Engine{
+		base:   base,
+		client: httpx.New(),
+		seen:   map[string]bool{},
+	}, nil
+}
 
-	var endpoints []store.Endpoint
+func (e *Engine) Discover(ctx context.Context) []store.Endpoint {
 
-	for len(queue) > 0 {
+	queue := make(chan string, 100)
+	results := []store.Endpoint{}
 
-		path := queue[0]
-		queue = queue[1:]
+	var wg sync.WaitGroup
 
-		if seen[path] {
-			continue
-		}
+	workers := 6
 
-		seen[path] = true
+	queue <- "/"
 
-		url := util.JoinURL(base, path)
+	for i := 0; i < workers; i++ {
 
-		ui.IncRequest()
+		wg.Add(1)
 
-		res, err := client.Get(url)
+		go func() {
+			defer wg.Done()
 
-		if err != nil {
-			continue
-		}
+			for {
 
-		body, _ := io.ReadAll(res.Body)
-		res.Body.Close()
+				select {
 
-		if res.StatusCode < 400 {
+				case path := <-queue:
 
-			ui.IncEndpoint()
+					e.mu.Lock()
+					if e.seen[path] {
+						e.mu.Unlock()
+						continue
+					}
+					e.seen[path] = true
+					e.mu.Unlock()
 
-			endpoints = append(endpoints, store.Endpoint{
-				Path: path,
-			})
+					status.IncRequest()
 
-		}
+					full := util.JoinURL(e.base, path)
 
-		var data any
+					req, _ := http.NewRequestWithContext(ctx, "GET", full, nil)
 
-		if json.Unmarshal(body, &data) != nil {
-			continue
-		}
+					res, err := e.client.HTTP.Do(req)
+					if err != nil {
+						status.IncError()
+						continue
+					}
 
-		var walk func(any)
+					status.IncRequest()
 
-		walk = func(v any) {
+					if res.StatusCode >= 400 {
+						res.Body.Close()
+						continue
+					}
 
-			switch t := v.(type) {
+					results = append(results, store.Endpoint{
+						Path: path,
+					})
 
-			case map[string]any:
+					status.IncEndpoint()
 
-				for _, x := range t {
-					walk(x)
-				}
+					var body map[string]interface{}
 
-			case []any:
+					json.NewDecoder(res.Body).Decode(&body)
+					res.Body.Close()
 
-				for _, x := range t {
-					walk(x)
-				}
+					for _, v := range body {
 
-			case string:
+						s, ok := v.(string)
+						if !ok {
+							continue
+						}
 
-				s := strings.TrimSpace(t)
+						if !strings.Contains(s, "/") {
+							continue
+						}
 
-				if strings.HasPrefix(s, "http") {
+						u, err := url.Parse(s)
+						if err != nil {
+							continue
+						}
 
-					u, err := neturl.Parse(s)
+						p := u.Path
 
-					if err == nil {
+						if !strings.HasPrefix(p, "/") {
+							continue
+						}
 
-						if strings.Contains(base, u.Host) {
-
-							queue = append(queue, u.Path)
-
+						select {
+						case queue <- p:
+						default:
 						}
 
 					}
 
-				}
+				case <-ctx.Done():
+					return
 
-				if strings.HasPrefix(s, "/") {
-					queue = append(queue, s)
 				}
 
 			}
-
-		}
-
-		walk(data)
+		}()
 
 	}
 
-	return endpoints
+	time.Sleep(3 * time.Second)
+
+	close(queue)
+
+	wg.Wait()
+
+	return results
+}
+
+func (e *Engine) PrintMap() {
+
+	fmt.Println()
+
+	for p := range e.seen {
+		fmt.Println(" ", p)
+	}
+
 }

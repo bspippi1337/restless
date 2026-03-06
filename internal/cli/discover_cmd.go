@@ -2,59 +2,51 @@ package cli
 
 import (
 	"fmt"
-	"github.com/bspippi1337/restless/internal/ui"
 	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/bspippi1337/restless/internal/discovery"
-	"github.com/bspippi1337/restless/internal/telemetry"
+	"github.com/bspippi1337/restless/internal/ui"
 )
 
 func NewDiscoverCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
+
 		Use:   "discover <url>",
-		Short: "reverse-engineer and map an unknown API",
-		Args:  cobra.ExactArgs(1),
+		Short: "reverse engineer an API",
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			target := args[0]
 
-			ui.PrintGlitch()
-			ui.StartStatus()
+			ui.Banner()
 
-			fmt.Println("restless discovery engine v4")
+			ui.Start()
+
 			fmt.Println("target:", target)
 			fmt.Println()
 
 			start := time.Now()
 
-			// start telemetry renderer
-			go func() {
-				for {
-					time.Sleep(1 * time.Second)
-					telemetry.Print()
-				}
-			}()
-
-			endpoints := discovery.CrawlQueueV4(target, 8)
+			endpoints := discovery.Discover(target)
 
 			elapsed := time.Since(start)
 
 			fmt.Println()
+			fmt.Println()
 			fmt.Println("discovered endpoints:", len(endpoints))
 			fmt.Println("scan time:", elapsed)
-			telemetry.Print()
-			fmt.Println()
-			fmt.Println()
 
 			for _, e := range endpoints {
+
 				fmt.Println(" ", e.Path)
+
 			}
 
 			return nil
+
 		},
 	}
 

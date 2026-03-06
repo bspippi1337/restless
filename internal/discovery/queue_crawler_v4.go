@@ -8,7 +8,6 @@ import (
 	neturl "net/url"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/bspippi1337/restless/internal/httpx"
@@ -32,7 +31,7 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 	seen := map[string]bool{}
 	var mu sync.Mutex
 
-	var inflight int64
+	var wg sync.WaitGroup
 
 	enqueue := func(p string) {
 
@@ -53,38 +52,38 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 		seen[p] = true
 		mu.Unlock()
 
-		atomic.AddInt64(&inflight, 1)
+		wg.Add(1)
 
 		queue <- job{p}
 	}
 
 	enqueue("/")
 
-	var wg sync.WaitGroup
-
 	for i := 0; i < workers; i++ {
-
-		wg.Add(1)
 
 		go func() {
 
-			defer wg.Done()
-
 			for j := range queue {
 
-				url := util.JoinURL(base, j.path)
+				func() {
 
-				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+					defer wg.Done()
 
-				req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+					url := util.JoinURL(base, j.path)
 
-				telemetry.IncRequest()
+					ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
-				res, err := client.HTTP.Do(req)
+					req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
 
-				cancel()
+					telemetry.IncRequest()
 
-				if err == nil {
+					res, err := client.HTTP.Do(req)
+
+					cancel()
+
+					if err != nil {
+						return
+					}
 
 					body, _ := io.ReadAll(res.Body)
 					res.Body.Close()
@@ -101,61 +100,53 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 
 					var obj any
 
-					if json.Unmarshal(body, &obj) == nil {
+					if json.Unmarshal(body, &obj) != nil {
+						return
+					}
 
-						var walk func(any)
+					var walk func(any)
 
-						walk = func(v any) {
+					walk = func(v any) {
 
-							switch t := v.(type) {
+						switch t := v.(type) {
 
-							case map[string]any:
+						case map[string]any:
 
-								for _, x := range t {
-									walk(x)
-								}
+							for _, x := range t {
+								walk(x)
+							}
 
-							case []any:
+						case []any:
 
-								for _, x := range t {
-									walk(x)
-								}
+							for _, x := range t {
+								walk(x)
+							}
 
-							case string:
+						case string:
 
-								s := strings.TrimSpace(t)
+							s := strings.TrimSpace(t)
 
-								// absolute API URLs
-								if strings.HasPrefix(s, "http") {
+							if strings.HasPrefix(s, "http") {
 
-									u, err := neturl.Parse(s)
+								u, err := neturl.Parse(s)
 
-									if err == nil {
-
-										if strings.Contains(base, u.Host) {
-											enqueue(u.Path)
-										}
-
-									}
-
-								}
-
-								// relative paths
-								if strings.HasPrefix(s, "/") {
-									enqueue(s)
+								if err == nil && strings.Contains(base, u.Host) {
+									enqueue(u.Path)
 								}
 
 							}
 
-						}
+							if strings.HasPrefix(s, "/") {
+								enqueue(s)
+							}
 
-						walk(obj)
+						}
 
 					}
 
-				}
+					walk(obj)
 
-				atomic.AddInt64(&inflight, -1)
+				}()
 
 			}
 
@@ -164,18 +155,8 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 	}
 
 	go func() {
-
-		for {
-
-			time.Sleep(100 * time.Millisecond)
-
-			if atomic.LoadInt64(&inflight) == 0 {
-				close(queue)
-				return
-			}
-
-		}
-
+		wg.Wait()
+		close(queue)
 	}()
 
 	wg.Wait()

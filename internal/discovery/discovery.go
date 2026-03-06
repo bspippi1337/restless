@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"net/url"
+	neturl "net/url"
 	"strings"
 	"sync"
 
@@ -22,8 +22,6 @@ func Discover(base string) []store.Endpoint {
 	seen := map[string]bool{}
 
 	var endpoints []store.Endpoint
-
-	var mu sync.Mutex
 
 	for len(queue) > 0 {
 
@@ -89,7 +87,7 @@ func Discover(base string) []store.Endpoint {
 
 				if strings.HasPrefix(s, "http") {
 
-					u, err := url.Parse(s)
+					u, err := neturl.Parse(s)
 
 					if err == nil {
 

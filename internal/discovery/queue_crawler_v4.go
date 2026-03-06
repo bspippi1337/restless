@@ -36,6 +36,10 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 
 	enqueue := func(p string) {
 
+		if p == "" {
+			return
+		}
+
 		if !strings.HasPrefix(p, "/") {
 			p = "/" + p
 		}
@@ -118,40 +122,27 @@ func CrawlQueueV4(base string, workers int) []store.Endpoint {
 								}
 
 							case string:
-								s = strings.TrimSpace(t)
 
-								// handle absolute API URLs
+								s := strings.TrimSpace(t)
+
+								// absolute API URLs
 								if strings.HasPrefix(s, "http") {
+
 									u, err := neturl.Parse(s)
+
 									if err == nil {
-										if u.Host == strings.TrimPrefix(base, "https://") ||
-											u.Host == strings.TrimPrefix(base, "http://") {
+
+										if strings.Contains(base, u.Host) {
 											enqueue(u.Path)
 										}
-									}
-								}
 
-								// handle relative paths
-								if strings.HasPrefix(s, "/") {
-									enqueue(s)
-								}
-
-								s = strings.TrimSpace(t)
-
-								if strings.HasPrefix(s, "/") {
-
-									enqueue(s)
-
-								}
-
-								if strings.HasPrefix(s, base) {
-
-									u, err := neturl.Parse(s)
-
-									if err == nil {
-										enqueue(u.Path)
 									}
 
+								}
+
+								// relative paths
+								if strings.HasPrefix(s, "/") {
+									enqueue(s)
 								}
 
 							}

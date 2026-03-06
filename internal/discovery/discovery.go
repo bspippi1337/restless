@@ -6,7 +6,6 @@ import (
 	"net/http"
 	neturl "net/url"
 	"strings"
-	"sync"
 
 	"github.com/bspippi1337/restless/internal/store"
 	"github.com/bspippi1337/restless/internal/ui"

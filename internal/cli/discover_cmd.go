@@ -1,8 +1,8 @@
-import "github.com/bspippi1337/restless/internal/ui"
 package cli
 
 import (
 	"fmt"
+	"github.com/bspippi1337/restless/internal/ui"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -22,9 +22,8 @@ func NewDiscoverCmd() *cobra.Command {
 
 			target := args[0]
 
-ui.PrintGlitch()
-ui.StartStatus()
-
+			ui.PrintGlitch()
+			ui.StartStatus()
 
 			fmt.Println("restless discovery engine v4")
 			fmt.Println("target:", target)

@@ -3,35 +3,38 @@ package cli
 import (
 	"fmt"
 
-	"github.com/bspippi1337/restless/internal/discovery"
-	"github.com/bspippi1337/restless/internal/store"
 	"github.com/spf13/cobra"
+
+	"github.com/bspippi1337/restless/internal/discovery"
 )
 
 func NewLearnCmd() *cobra.Command {
 
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "learn <url>",
 		Short: "Discover API and store endpoints",
 		Args:  cobra.ExactArgs(1),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			base := args[0]
+			target := args[0]
 
-			api := discovery.Discover(base)
+			fmt.Println("restless learning mode")
+			fmt.Println("target:", target)
+			fmt.Println()
+
+			endpoints := discovery.Discover(target)
+
+			fmt.Println("learned endpoints:", len(endpoints))
+			fmt.Println()
+
+			for _, e := range endpoints {
+				fmt.Println(" ", e.Path)
 			}
-
-			cacheRoot, _ := cmd.Root().PersistentFlags().GetString("cache")
-			cacheRoot, _ = store.DefaultRoot(cacheRoot)
-
-			_, err = store.Write(cacheRoot, api)
-			}
-
-			fmt.Println("API learned:", base)
-			fmt.Println("Endpoints discovered:", len(api.Endpoints))
 
 			return nil
 		},
 	}
+
+	return cmd
 }

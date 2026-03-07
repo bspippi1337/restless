@@ -30,18 +30,25 @@ func NewDiscoverCmd() *cobra.Command {
 
 			start := time.Now()
 
-			endpoints := discovery.Discover(target)
+			res, err := discovery.Discover(target)
+			if err != nil {
+				return err
+			}
+			_ = res.Endpoints
+			if err != nil {
+				return err
+			}
 
 			elapsed := time.Since(start)
 
 			fmt.Println()
 			fmt.Println()
-			fmt.Println("discovered endpoints:", len(endpoints))
+			fmt.Println("discovered endpoints:", len(res.Endpoints))
 			fmt.Println("scan time:", elapsed)
 
-			for _, e := range endpoints {
+			for _, e := range res.Endpoints {
 
-				fmt.Println(" ", e.Path)
+				fmt.Println(" ", e)
 
 			}
 

@@ -23,13 +23,20 @@ func NewLearnCmd() *cobra.Command {
 			fmt.Println("target:", target)
 			fmt.Println()
 
-			endpoints := discovery.Discover(target)
+			res, err := discovery.Discover(target)
+			if err != nil {
+				return err
+			}
+			_ = res.Endpoints
+			if err != nil {
+				return err
+			}
 
-			fmt.Println("learned endpoints:", len(endpoints))
+			fmt.Println("learned endpoints:", len(res.Endpoints))
 			fmt.Println()
 
-			for _, e := range endpoints {
-				fmt.Println(" ", e.Path)
+			for _, e := range res.Endpoints {
+				fmt.Println(" ", e)
 			}
 
 			return nil

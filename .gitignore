@@ -34,3 +34,12 @@ dist/
 *.tmp
 *.swp
 .restless_state.json
+*.svg
+*.dot
+api.github.com.svg
+api.github.com.svg.dot
+api.dot
+api.dot\necho dot
+blckswan_v8_fix/
+restless_blckswan_engine/
+.backup/

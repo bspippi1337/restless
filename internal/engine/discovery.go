@@ -3,7 +3,6 @@ package engine
 import (
 	"net/http"
 	"sort"
-	"strings"
 	"time"
 )
 
@@ -20,20 +19,13 @@ var commonPaths = []string{
 	"/status",
 }
 
-func normalize(target string) string {
-	if strings.HasPrefix(target, "http://") || strings.HasPrefix(target, "https://") {
-		return target
-	}
-	return "https://" + target
-}
-
 func isUsefulStatus(code int) bool {
 	return code == 200 || code == 201 || code == 202 || code == 204 || code == 401 || code == 403
 }
 
 func DiscoverEndpoints(target string) []string {
 
-	target = normalize(target)
+	target = normalizeTarget(target)
 
 	client := &http.Client{
 		Timeout: 4 * time.Second,
@@ -59,6 +51,18 @@ func DiscoverEndpoints(target string) []string {
 		resp.Body.Close()
 	}
 
+	// dynamic crawler discovery
+	crawled := CrawlAPI(target)
+
+	for _, p := range crawled {
+
+		if !seen[p] {
+			seen[p] = true
+			endpoints = append(endpoints, p)
+		}
+	}
+
 	sort.Strings(endpoints)
+
 	return endpoints
 }

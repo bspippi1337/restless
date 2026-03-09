@@ -16,6 +16,12 @@ var (
 func NewRootCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			if maybeAutopilot(args) {
+				return fmt.Errorf("")
+			}
+			return nil
+		},
 		Use:   "restless",
 		Short: "REST API discovery and exploration CLI",
 	}

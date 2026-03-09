@@ -10,6 +10,7 @@ func TopologyToDOT(topology string) string {
 	lines := strings.Split(topology, "\n")
 
 	var edges []string
+	var nodes []string
 	var stack []string
 
 	for _, line := range lines {
@@ -17,8 +18,13 @@ func TopologyToDOT(topology string) string {
 		level := strings.Count(line, "  ")
 		node := strings.TrimSpace(strings.ReplaceAll(line, "└──", ""))
 
-		if node == "" || node == "root" {
+		if node == "" {
+			continue
+		}
+
+		if node == "root" {
 			stack = []string{"root"}
+			nodes = append(nodes, fmt.Sprintf(`"%s" [%s];`, node, nodeStyle(node)))
 			continue
 		}
 
@@ -27,17 +33,23 @@ func TopologyToDOT(topology string) string {
 		}
 
 		parent := stack[len(stack)-1]
-		edges = append(edges, fmt.Sprintf(`"%s" -> "%s"`, parent, node))
+
+		nodes = append(nodes, fmt.Sprintf(`"%s" [%s];`, node, nodeStyle(node)))
+		edges = append(edges, fmt.Sprintf(`"%s" -> "%s";`, parent, node))
 
 		stack = append(stack, node)
 	}
 
 	out := "digraph API {\n"
-	out += "  rankdir=LR;\n"
-	out += "  node [shape=box, style=rounded];\n"
+	out += "rankdir=LR;\n"
+	out += "node [fontname=Helvetica];\n"
+
+	for _, n := range nodes {
+		out += n + "\n"
+	}
 
 	for _, e := range edges {
-		out += "  " + e + ";\n"
+		out += e + "\n"
 	}
 
 	out += "}\n"

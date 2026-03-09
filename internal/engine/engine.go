@@ -11,6 +11,8 @@ type Result struct {
 
 func Run(target string) (*Result, error) {
 
+	target = normalizeTarget(target)
+
 	apiType := DetectAPIType(target)
 
 	endpoints := DiscoverEndpoints(target)

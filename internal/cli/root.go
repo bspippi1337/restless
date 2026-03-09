@@ -24,12 +24,19 @@ func NewRootCmd() *cobra.Command {
 	cmd.PersistentFlags().StringP("cache", "c", "", "cache directory")
 
 	cmd.AddCommand(NewDiscoverCmd())
+	cmd.AddCommand(NewEngineCmd())
 	cmd.AddCommand(NewLearnCmd())
+	cmd.AddCommand(NewEngineCmd())
 	cmd.AddCommand(NewShellCmd())
+	cmd.AddCommand(NewEngineCmd())
 	cmd.AddCommand(NewMapCmd())
+	cmd.AddCommand(NewEngineCmd())
 	cmd.AddCommand(NewCallCmd())
+	cmd.AddCommand(NewEngineCmd())
 	cmd.AddCommand(NewInspectCmd())
+	cmd.AddCommand(NewEngineCmd())
 	cmd.AddCommand(NewCouncilCmd())
+	cmd.AddCommand(NewEngineCmd())
 
 	cmd.Run = func(cmd *cobra.Command, args []string) {
 		cmd.Help()

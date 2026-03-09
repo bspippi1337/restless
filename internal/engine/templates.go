@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-var urlRegex = regexp.MustCompile(`https?://[^"]+`)
+var templateURL = regexp.MustCompile(`https?://[^"]+\{[^"]+\}`)
 
-func CrawlAPI(target string) []string {
+func ExtractTemplatesFromRoot(target string) []string {
 
 	target = normalizeTarget(target)
 
@@ -31,32 +31,11 @@ func CrawlAPI(target string) []string {
 	}
 
 	seen := map[string]bool{}
-	var endpoints []string
+	var templates []string
 
-	extractPaths(body, &endpoints, seen)
+	walkJSON(body, func(s string) {
 
-	return endpoints
-}
-
-func extractPaths(v interface{}, out *[]string, seen map[string]bool) {
-
-	switch val := v.(type) {
-
-	case map[string]interface{}:
-
-		for _, vv := range val {
-			extractPaths(vv, out, seen)
-		}
-
-	case []interface{}:
-
-		for _, vv := range val {
-			extractPaths(vv, out, seen)
-		}
-
-	case string:
-
-		matches := urlRegex.FindAllString(val, -1)
+		matches := templateURL.FindAllString(s, -1)
 
 		for _, m := range matches {
 
@@ -72,9 +51,35 @@ func extractPaths(v interface{}, out *[]string, seen map[string]bool) {
 			}
 
 			if !seen[p] {
+
 				seen[p] = true
-				*out = append(*out, p)
+				templates = append(templates, p)
+
 			}
 		}
+	})
+
+	return templates
+}
+
+func walkJSON(v interface{}, fn func(string)) {
+
+	switch val := v.(type) {
+
+	case map[string]interface{}:
+
+		for _, vv := range val {
+			walkJSON(vv, fn)
+		}
+
+	case []interface{}:
+
+		for _, vv := range val {
+			walkJSON(vv, fn)
+		}
+
+	case string:
+
+		fn(val)
 	}
 }

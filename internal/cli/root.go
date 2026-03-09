@@ -25,18 +25,31 @@ func NewRootCmd() *cobra.Command {
 
 	cmd.AddCommand(NewDiscoverCmd())
 	cmd.AddCommand(NewEngineCmd())
+	cmd.AddCommand(NewGraphCmd())
+
 	cmd.AddCommand(NewLearnCmd())
 	cmd.AddCommand(NewEngineCmd())
+	cmd.AddCommand(NewGraphCmd())
+
 	cmd.AddCommand(NewShellCmd())
 	cmd.AddCommand(NewEngineCmd())
+	cmd.AddCommand(NewGraphCmd())
+
 	cmd.AddCommand(NewMapCmd())
 	cmd.AddCommand(NewEngineCmd())
+	cmd.AddCommand(NewGraphCmd())
+
 	cmd.AddCommand(NewCallCmd())
 	cmd.AddCommand(NewEngineCmd())
+	cmd.AddCommand(NewGraphCmd())
+
 	cmd.AddCommand(NewInspectCmd())
 	cmd.AddCommand(NewEngineCmd())
+	cmd.AddCommand(NewGraphCmd())
+
 	cmd.AddCommand(NewCouncilCmd())
 	cmd.AddCommand(NewEngineCmd())
+	cmd.AddCommand(NewGraphCmd())
 
 	cmd.Run = func(cmd *cobra.Command, args []string) {
 		cmd.Help()

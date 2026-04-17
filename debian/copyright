@@ -1,0 +1,7 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: restless
+Source: https://github.com/bspippi1337/restless
+
+Files: *
+Copyright: 2026 Anders Pippi Tednes
+License: MIT

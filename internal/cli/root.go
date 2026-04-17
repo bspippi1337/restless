@@ -8,57 +8,49 @@ import (
 )
 
 var (
-	version = "v6.0.0"
-	commit  = "dev"
+	version = "dev"
+	commit  = "none"
 	date    = "unknown"
 )
 
 func NewRootCmd() *cobra.Command {
-
 	cmd := &cobra.Command{
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			if maybeAutopilot(args) {
-				return fmt.Errorf("")
-			}
-			return nil
+		Use:           "restless",
+		Short:         "Discover, map, inspect, and call APIs from the terminal",
+		Long:          "Restless is an API reconnaissance CLI for exploring unknown API surfaces, building topology, and turning mystery endpoints into something usable.",
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmd.Help()
 		},
-		Use:   "restless",
-		Short: "REST API discovery and exploration CLI",
 	}
 
-	cmd.PersistentFlags().StringP("api", "a", "", "API context")
+	cmd.PersistentFlags().StringP("api", "a", "", "API context to read from cache-backed workflows")
 	cmd.PersistentFlags().StringP("cache", "c", "", "cache directory")
 
-	cmd.AddCommand(NewDiscoverCmd())
-	cmd.AddCommand(NewEngineCmd())
-	cmd.AddCommand(NewGraphCmd())
+	core := []*cobra.Command{
+		NewDiscoverCmd(),
+		NewLearnCmd(),
+		NewMapCmd(),
+		NewInspectCmd(),
+		NewCallCmd(),
+		NewShellCmd(),
+		NewCompletionCmd(cmd),
+	}
 
-	cmd.AddCommand(NewLearnCmd())
-	cmd.AddCommand(NewEngineCmd())
-	cmd.AddCommand(NewGraphCmd())
+	experimental := []*cobra.Command{
+		NewBlckswanCmd(),
+		NewSmartCmd(),
+		NewEngineCmd(),
+		NewGraphCmd(),
+		NewCouncilCmd(),
+	}
 
-	cmd.AddCommand(NewShellCmd())
-	cmd.AddCommand(NewEngineCmd())
-	cmd.AddCommand(NewGraphCmd())
-
-	cmd.AddCommand(NewMapCmd())
-	cmd.AddCommand(NewEngineCmd())
-	cmd.AddCommand(NewGraphCmd())
-
-	cmd.AddCommand(NewCallCmd())
-	cmd.AddCommand(NewEngineCmd())
-	cmd.AddCommand(NewGraphCmd())
-
-	cmd.AddCommand(NewInspectCmd())
-	cmd.AddCommand(NewEngineCmd())
-	cmd.AddCommand(NewGraphCmd())
-
-	cmd.AddCommand(NewCouncilCmd())
-	cmd.AddCommand(NewEngineCmd())
-	cmd.AddCommand(NewGraphCmd())
-
-	cmd.Run = func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+	for _, sub := range core {
+		cmd.AddCommand(sub)
+	}
+	for _, sub := range experimental {
+		cmd.AddCommand(sub)
 	}
 
 	cmd.SetVersionTemplate("restless {{.Version}}\n")
@@ -71,7 +63,7 @@ func NewRootCmd() *cobra.Command {
 func Execute() {
 	root := NewRootCmd()
 	if err := root.Execute(); err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

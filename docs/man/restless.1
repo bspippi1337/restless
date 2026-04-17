@@ -1,0 +1,56 @@
+.TH RESTLESS 1 "2026-04-17" "restless" "User Commands"
+.SH NAME
+restless \- discover, map, inspect, and call APIs from the terminal
+.SH SYNOPSIS
+.B restless
+.I target-url
+.br
+.B restless
+.I command
+.RI [ options ]
+.SH DESCRIPTION
+.B restless
+is a terminal-native API topology discovery engine. It discovers unknown API surfaces, infers structure, and renders a topology graph directly from a target URL.
+.SH EXAMPLES
+.TP
+.B restless https://api.github.com
+Probe an API target directly, infer structure, and render an SVG topology graph.
+.TP
+.B restless discover https://api.github.com
+Run the explicit discovery subcommand.
+.TP
+.B restless map
+Render cached endpoint topology.
+.TP
+.B restless completion bash
+Generate bash completion to standard output.
+.SH COMMANDS
+.TP
+.B discover
+Discover API endpoints.
+.TP
+.B learn
+Discover and cache endpoints for later commands.
+.TP
+.B map
+Render cached API topology.
+.TP
+.B inspect
+Inspect a cached route.
+.TP
+.B call
+Call an API endpoint.
+.TP
+.B graph
+Render graph output.
+.TP
+.B completion
+Generate shell completion.
+.SH FILES
+.TP
+.B *.svg
+Topology graph output written in the current working directory when running direct target mode.
+.SH AUTHOR
+Anders Pippi Tednes
+.SH LICENSE
+MIT

@@ -1,0 +1,14 @@
+Source: restless
+Section: utils
+Priority: optional
+Maintainer: Anders Pippi Tednes <pippi@example.com>
+Build-Depends: debhelper-compat (= 13), dh-golang, golang-any
+Standards-Version: 4.7.0
+Homepage: https://github.com/bspippi1337/restless
+Rules-Requires-Root: no
+
+Package: restless
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: terminal-native API topology discovery engine
+ Restless discovers unknown API surfaces, infers structure, and renders a topology graph directly from a target URL.

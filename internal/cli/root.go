@@ -4,24 +4,20 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/bspippi1337/restless/internal/version"
 	"github.com/spf13/cobra"
 )
 
-var (
-	version = "v6.0.0"
-	commit  = "dev"
-	date    = "unknown"
-)
-
 func NewRootCmd() *cobra.Command {
-
 	cmd := &cobra.Command{
 		Use:   "restless",
-		Short: "REST API discovery and exploration CLI",
+		Short: "API topology inference CLI",
+		Long: `Restless discovers, models, inspects, and explains API surfaces.
+
+It performs bounded, same-host API discovery using safe HTTP methods and
+stores optional session state for interactive command workflows.`,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			if maybeAutopilot(args) {
-				return fmt.Errorf("")
-			}
+			maybeAutopilot(args)
 			return nil
 		},
 	}
@@ -42,13 +38,15 @@ func NewRootCmd() *cobra.Command {
 	cmd.AddCommand(NewCouncilCmd())
 	cmd.AddCommand(NewEngineCmd())
 	cmd.AddCommand(NewCopilotCmd())
+	cmd.AddCommand(NewVersionCmd())
+	cmd.AddCommand(NewGNUCmd())
 
 	cmd.Run = func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	}
 
-	cmd.SetVersionTemplate("restless {{.Version}}\n")
-	cmd.Version = fmt.Sprintf("%s (%s %s)", version, commit, date)
+	cmd.SetVersionTemplate("{{.Version}}\n")
+	cmd.Version = version.String()
 
 	AddDynamicCommands(cmd)
 	return cmd
@@ -57,7 +55,7 @@ func NewRootCmd() *cobra.Command {
 func Execute() {
 	root := NewRootCmd()
 	if err := root.Execute(); err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

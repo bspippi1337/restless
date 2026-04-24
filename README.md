@@ -1,156 +1,223 @@
 # RESTLESS
 
 <p align="center">
-<svg width="300" height="300" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-<defs>
-<linearGradient id="bolt" x1="0%" y1="0%" x2="100%" y2="100%">
-<stop offset="0%" stop-color="#00eaff"/>
-<stop offset="100%" stop-color="#8a2be2"/>
-</linearGradient>
-<filter id="glow">
-<feGaussianBlur stdDeviation="6" result="blur"/>
-<feMerge>
-<feMergeNode in="blur"/>
-<feMergeNode in="SourceGraphic"/>
-</feMerge>
-</filter>
-</defs>
-<circle cx="200" cy="200" r="170" fill="#0b0f19" stroke="#222" stroke-width="4"/>
-<path d="M210 70 L160 210 L210 210 L170 330 L260 170 L210 170 Z"
-fill="url(#bolt)" filter="url(#glow)"/>
-</svg>
-</p>
-
-<p align="center">
-<b>API reconnaissance framework</b><br>
-Discover • Map • Probe • Understand any API surface
+<b>API topology inference engine</b><br>
+Discover • Model • Inspect • Explain any API surface
 </p>
 
 ---
 
-INSTALL
+## INSTALL
 
+```bash
 curl -sSL https://bspippi1337.github.io/restless/install.sh | sh
+```
 
 eller
 
+```bash
 wget -qO- https://bspippi1337.github.io/restless/install.sh | sh
+```
 
 ---
 
-FIRST RUN
+## QUICK START
 
-restless blckswan https://api.github.com
-
----
-
-WHAT RESTLESS DOES
-
-Restless automatically explores an API surface and builds a structural understanding of it.
-
-Instead of manually browsing endpoints one by one, Restless performs automated reconnaissance.
-
-Workflow:
-
-target
- │
- ▼
-endpoint discovery
- │
- ▼
-probing & fuzzing
- │
- ▼
-documentation detection
- │
- ▼
-topology inference
- │
- ▼
-API insight
-
----
-
-EXAMPLE
-
-Routes discovered: 27
-
-/users
-├── /users/{id}
-│   ├── /repos
-│   └── /followers
-└── /orgs/{org}
-
----
-
-CORE COMMANDS
-
-restless discover
-restless inspect
-restless scan
+```bash
+restless scan https://api.github.com
 restless map
+restless inspect GET /users
+restless graph
+restless teach
+```
 
-restless swarm
-restless magiswarm
-restless octoswan
-
-restless auto
-restless blckswan
-restless smart
+Restless lagrer automatisk siste analyse som session‑state.
+Du trenger normalt ikke oppgi target mer enn én gang.
 
 ---
 
-ARCHITECTURE
+## WHAT RESTLESS IS
 
+Restless er en API‑rekonstruksjonsmotor.
+
+Den:
+
+• finner endpoints
+• analyserer struktur
+• identifiserer relasjoner
+• utleder schema
+• bygger topologi
+• foreslår neste steg
+
+Dette gjør Restless til en "Copilot for APIs" i terminalen.
+
+---
+
+## CORE WORKFLOW
+
+```text
+scan → learn → map → inspect → graph → teach → copilot
+```
+
+Beskrivelse:
+
+| command | role |
+|--------|------|
+| scan | rask endpoint discovery |
+| learn | dokumentasjonsdrevet analyse |
+| map | strukturell oversikt |
+| inspect | endpoint‑analyse |
+| graph | visualiser API‑topologi |
+| teach | forklar API‑struktur |
+| copilot | foreslå neste steg |
+
+---
+
+## EXAMPLE SESSION
+
+```bash
+restless scan api.example.com
+restless map
+```
+
+Output:
+
+```text
+/
+├── users
+├── users/{id}
+│   └── posts
+└── health
+```
+
+Deretter:
+
+```bash
+restless inspect GET /users
+```
+
+Gir:
+
+```text
+FIELDS
+id:number
+name:string
+email:string
+```
+
+---
+
+## DISCOVERY ENGINE
+
+Restless bruker en bounded crawler som:
+
+• følger kun samme host
+• detekterer JSON‑schema
+• identifiserer nested endpoints
+• stopper deterministisk
+• respekterer depth‑grenser
+
+Dette gjør discovery trygg og rask.
+
+---
+
+## GRAPH OUTPUT
+
+```bash
+restless graph
+```
+
+Genererer:
+
+```text
+api.svg
+```
+
+eller DOT‑output:
+
+```bash
+restless graph target --format dot
+```
+
+---
+
+## SESSION STATE
+
+Restless lagrer automatisk:
+
+```text
+~/.restless_state.json
+```
+
+Dette gjør CLI‑workflow interaktiv:
+
+```bash
+scan
+map
+inspect
+teach
+```
+
+uten å oppgi target på nytt.
+
+---
+
+## INTELLIGENCE FEATURES
+
+Restless oppdager automatisk:
+
+• OpenAPI
+• Swagger
+• GraphQL
+• health endpoints
+• metrics endpoints
+• nested resource trees
+• collection patterns
+
+---
+
+## ARCHITECTURE
+
+```text
 CLI
- │
- ├─ application layer
- │
- ├─ core engines
- │   ├─ discovery
- │   ├─ probing
- │   ├─ topology
- │   ├─ swarm engines
- │   └─ fuzzing
- │
- ├─ modules
- │   ├─ OpenAPI intelligence
- │   ├─ export
- │   └─ sessions
- │
- └─ infrastructure
-     ├─ HTTP engine
-     ├─ persistence
-     ├─ logging
-     └─ terminal UI
+ ├ discovery engine
+ ├ topology inference
+ ├ schema detection
+ ├ fuzz heuristics
+ └ session state
+```
+
+Motoren er designet for komponerbar API‑rekonstruksjon.
 
 ---
 
-PHILOSOPHY
+## PROJECT STRUCTURE
 
-Discovery first  
-Assume nothing about an API and learn its structure dynamically.
-
-Graph thinking  
-Treat APIs as connected systems rather than isolated endpoints.
-
-Composable engines  
-Small probing engines combine into powerful reconnaissance pipelines.
-
----
-
-PROJECT STRUCTURE
-
+```text
 cmd/restless
+internal/cli
+internal/discovery
 internal/core
-internal/modules
-internal/swarm
-internal/topology
-docs/
-tools/
+internal/state
+internal/tui
+```
+
+Legacy‑kode ligger isolert i archive/.
 
 ---
 
-LICENSE
+## DESIGN PRINCIPLES
+
+Discovery first
+
+Graph‑based thinking
+
+Composable engines
+
+Session‑aware workflow
+
+---
+
+## LICENSE
 
 MIT

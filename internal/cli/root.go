@@ -16,46 +16,32 @@ var (
 func NewRootCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
+		Use:   "restless",
+		Short: "REST API discovery and exploration CLI",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if maybeAutopilot(args) {
 				return fmt.Errorf("")
 			}
 			return nil
 		},
-		Use:   "restless",
-		Short: "REST API discovery and exploration CLI",
 	}
 
 	cmd.PersistentFlags().StringP("api", "a", "", "API context")
 	cmd.PersistentFlags().StringP("cache", "c", "", "cache directory")
 
+	cmd.AddCommand(NewScanCmd())
 	cmd.AddCommand(NewDiscoverCmd())
-	cmd.AddCommand(NewEngineCmd())
-	cmd.AddCommand(NewGraphCmd())
-
 	cmd.AddCommand(NewLearnCmd())
-	cmd.AddCommand(NewEngineCmd())
-	cmd.AddCommand(NewGraphCmd())
-
-	cmd.AddCommand(NewShellCmd())
-	cmd.AddCommand(NewEngineCmd())
-	cmd.AddCommand(NewGraphCmd())
-
-	cmd.AddCommand(NewMapCmd())
-	cmd.AddCommand(NewEngineCmd())
-	cmd.AddCommand(NewGraphCmd())
-
+	cmd.AddCommand(NewTeachCmd())
 	cmd.AddCommand(NewCallCmd())
-	cmd.AddCommand(NewEngineCmd())
+	cmd.AddCommand(NewShellCmd())
+	cmd.AddCommand(NewMapCmd())
 	cmd.AddCommand(NewGraphCmd())
-
 	cmd.AddCommand(NewInspectCmd())
-	cmd.AddCommand(NewEngineCmd())
-	cmd.AddCommand(NewGraphCmd())
-
+	cmd.AddCommand(NewFuzzCmd())
 	cmd.AddCommand(NewCouncilCmd())
 	cmd.AddCommand(NewEngineCmd())
-	cmd.AddCommand(NewGraphCmd())
+	cmd.AddCommand(NewCopilotCmd())
 
 	cmd.Run = func(cmd *cobra.Command, args []string) {
 		cmd.Help()

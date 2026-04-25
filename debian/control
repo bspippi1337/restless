@@ -1,7 +1,7 @@
 Source: restless
 Section: net
 Priority: optional
-Maintainer: Pippi <pippi@example.invalid>
+Maintainer: Pippi <bspippi1337@gmail.com>
 Build-Depends: debhelper-compat (= 13), dh-golang, golang-any
 Standards-Version: 4.7.0
 Homepage: https://github.com/bspippi1337/restless

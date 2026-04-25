@@ -1,0 +1,50 @@
+.TH restless 1 "Restless CLI"
+.SH NAME
+restless \- API topology inference CLI
+
+.SH SYNOPSIS
+restless [command] [flags]
+
+.SH DESCRIPTION
+Restless discovers, models, inspects and explains API surfaces using bounded traversal and safe HTTP methods.
+
+.SH COMMANDS
+scan        perform endpoint discovery
+map         print structural overview of endpoints
+inspect     inspect an endpoint or method
+graph       render API topology
+learn       documentation-aware discovery
+teach       explain inferred structure
+copilot     suggest next exploration steps
+version     print build metadata
+
+.SH STATE
+Session state is stored using the XDG state directory:
+
+$XDG_STATE_HOME/restless/state.json
+
+Fallback location:
+
+~/.local/state/restless/state.json
+
+Legacy compatibility path:
+
+~/.restless_state.json
+
+.SH NETWORK MODEL
+Restless performs bounded discovery using safe HTTP methods only:
+
+GET
+HEAD
+OPTIONS
+
+Traversal is restricted to the original host.
+
+.SH EXAMPLES
+restless scan https://api.example.com
+restless map
+restless inspect GET /users
+restless graph
+
+.SH AUTHOR
+Restless contributors

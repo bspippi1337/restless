@@ -1,27 +1,66 @@
 # RESTLESS
 
 <p align="center">
-<b>API topology inference engine</b><br>
-Discover • Model • Inspect • Explain any API surface
+<b>API topology inference CLI</b><br>
+Discover • Model • Inspect • Explain API surfaces from the terminal
 </p>
 
 ---
 
-## INSTALL
+## Overview
+
+Restless is a command-line tool for API topology inference. It discovers endpoints, models API structure, detects schema hints, renders graphs, and stores session state so follow-up commands can work without repeating the target.
+
+Restless is designed for developers, maintainers, API reviewers, and security-conscious operators who need transparent, bounded, and reproducible API exploration.
+
+---
+
+## Features
+
+- Bounded same-host API discovery
+- Safe probing with GET, HEAD, and OPTIONS
+- Deterministic command output
+- Session-aware workflows
+- XDG-compliant state storage
+- JSON schema field inference
+- Graph output for topology visualization
+- No telemetry or background analytics
+- Release-build friendly version metadata
+
+---
+
+## Installation
 
 ```bash
 curl -sSL https://bspippi1337.github.io/restless/install.sh | sh
 ```
 
-eller
+or:
 
 ```bash
 wget -qO- https://bspippi1337.github.io/restless/install.sh | sh
 ```
 
+From source:
+
+```bash
+git clone https://github.com/bspippi1337/restless.git
+cd restless
+go build -o restless ./cmd/restless
+```
+
+Release metadata can be injected with Go linker flags:
+
+```bash
+go build -o restless ./cmd/restless \
+  -ldflags "-X github.com/bspippi1337/restless/internal/version.Version=0.4.0 \
+            -X github.com/bspippi1337/restless/internal/version.Commit=$(git rev-parse --short HEAD) \
+            -X github.com/bspippi1337/restless/internal/version.Date=$(date -u +%Y-%m-%d)"
+```
+
 ---
 
-## QUICK START
+## Quick start
 
 ```bash
 restless scan https://api.github.com
@@ -29,58 +68,43 @@ restless map
 restless inspect GET /users
 restless graph
 restless teach
+restless copilot
 ```
 
-Restless lagrer automatisk siste analyse som session‑state.
-Du trenger normalt ikke oppgi target mer enn én gang.
+Restless stores the latest scan as session state. In normal interactive use, you only need to provide the target once.
 
 ---
 
-## WHAT RESTLESS IS
-
-Restless er en API‑rekonstruksjonsmotor.
-
-Den:
-
-• finner endpoints
-• analyserer struktur
-• identifiserer relasjoner
-• utleder schema
-• bygger topologi
-• foreslår neste steg
-
-Dette gjør Restless til en "Copilot for APIs" i terminalen.
-
----
-
-## CORE WORKFLOW
+## Core workflow
 
 ```text
 scan → learn → map → inspect → graph → teach → copilot
 ```
 
-Beskrivelse:
-
-| command | role |
-|--------|------|
-| scan | rask endpoint discovery |
-| learn | dokumentasjonsdrevet analyse |
-| map | strukturell oversikt |
-| inspect | endpoint‑analyse |
-| graph | visualiser API‑topologi |
-| teach | forklar API‑struktur |
-| copilot | foreslå neste steg |
+| Command | Purpose |
+|--------|---------|
+| `scan` | perform fast endpoint discovery |
+| `learn` | run documentation-aware discovery |
+| `map` | print a structural endpoint overview |
+| `inspect` | inspect a method and path from the current session |
+| `graph` | render API topology |
+| `teach` | explain the inferred API structure |
+| `copilot` | suggest useful next commands |
+| `fuzz` | probe common API paths heuristically |
+| `engine` | run the discovery engine directly |
+| `version` | print build and platform metadata |
+| `gnu` | print a free-software friendly greeting |
 
 ---
 
-## EXAMPLE SESSION
+## Example session
 
 ```bash
 restless scan api.example.com
 restless map
 ```
 
-Output:
+Example output:
 
 ```text
 /
@@ -90,134 +114,117 @@ Output:
 └── health
 ```
 
-Deretter:
+Then inspect a route:
 
 ```bash
 restless inspect GET /users
 ```
 
-Gir:
+Example output:
 
 ```text
-FIELDS
-id:number
-name:string
-email:string
+Route found
+Example:
+curl https://api.example.com/users
 ```
 
 ---
 
-## DISCOVERY ENGINE
+## Session state
 
-Restless bruker en bounded crawler som:
-
-• følger kun samme host
-• detekterer JSON‑schema
-• identifiserer nested endpoints
-• stopper deterministisk
-• respekterer depth‑grenser
-
-Dette gjør discovery trygg og rask.
-
----
-
-## GRAPH OUTPUT
-
-```bash
-restless graph
-```
-
-Genererer:
+Restless stores session state using the XDG state directory:
 
 ```text
-api.svg
+$XDG_STATE_HOME/restless/state.json
 ```
 
-eller DOT‑output:
+If `XDG_STATE_HOME` is not set, Restless uses:
 
-```bash
-restless graph target --format dot
+```text
+~/.local/state/restless/state.json
 ```
 
----
-
-## SESSION STATE
-
-Restless lagrer automatisk:
+For compatibility, Restless can still read the legacy state file:
 
 ```text
 ~/.restless_state.json
 ```
 
-Dette gjør CLI‑workflow interaktiv:
+---
+
+## Network model
+
+Restless is intentionally conservative during discovery:
+
+- it only follows links on the original target host
+- it uses bounded traversal depth
+- it limits response reads
+- it does not send mutation requests during discovery
+- it does not perform telemetry or background network calls
+
+Discovery uses safe HTTP methods only:
+
+```text
+GET
+HEAD
+OPTIONS
+```
+
+---
+
+## Graph output
+
+Generate a topology graph:
 
 ```bash
-scan
-map
-inspect
-teach
+restless graph https://api.example.com
 ```
 
-uten å oppgi target på nytt.
+Generate DOT output:
+
+```bash
+restless graph https://api.example.com --format dot
+```
 
 ---
 
-## INTELLIGENCE FEATURES
+## Packaging notes
 
-Restless oppdager automatisk:
+Restless is intended to be distribution-friendly:
 
-• OpenAPI
-• Swagger
-• GraphQL
-• health endpoints
-• metrics endpoints
-• nested resource trees
-• collection patterns
+- no generated binary blobs are required in the source tree
+- version metadata can be injected at build time
+- command output is deterministic where practical
+- session state follows the XDG base directory model
+- offline fixtures can be used for test-oriented workflows
 
 ---
 
-## ARCHITECTURE
+## Project structure
 
 ```text
-CLI
- ├ discovery engine
- ├ topology inference
- ├ schema detection
- ├ fuzz heuristics
- └ session state
+cmd/restless        main command entrypoint
+internal/cli        command definitions
+internal/core       core scan, state, and utility packages
+internal/discovery  topology discovery engine
+internal/version    release metadata
+man/                manual page sources
+testdata/           offline fixtures
 ```
 
-Motoren er designet for komponerbar API‑rekonstruksjon.
+---
+
+## Design principles
+
+- Discovery first
+- User-controlled operation
+- Transparent network behaviour
+- Graph-based API understanding
+- Reproducible command output
+- Free-software friendly defaults
 
 ---
 
-## PROJECT STRUCTURE
-
-```text
-cmd/restless
-internal/cli
-internal/discovery
-internal/core
-internal/state
-internal/tui
-```
-
-Legacy‑kode ligger isolert i archive/.
-
----
-
-## DESIGN PRINCIPLES
-
-Discovery first
-
-Graph‑based thinking
-
-Composable engines
-
-Session‑aware workflow
-
----
-
-## LICENSE
+## License
 
 MIT

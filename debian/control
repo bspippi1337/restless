@@ -1,0 +1,20 @@
+Source: restless
+Section: net
+Priority: optional
+Maintainer: Pippi <pippi@example.invalid>
+Build-Depends: debhelper-compat (= 13), dh-golang, golang-any
+Standards-Version: 4.7.0
+Homepage: https://github.com/bspippi1337/restless
+Vcs-Browser: https://github.com/bspippi1337/restless
+Vcs-Git: https://github.com/bspippi1337/restless.git
+Rules-Requires-Root: no
+XS-Go-Import-Path: github.com/bspippi1337/restless
+
+Package: restless
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: API topology inference CLI
+ Restless discovers, models, inspects, and explains API surfaces from the
+ terminal. It performs bounded, same-host API discovery using safe HTTP
+ methods, infers endpoint structure, stores session state using XDG paths,
+ and supports offline fixture-based inspection for reproducible tests.

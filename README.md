@@ -192,6 +192,10 @@ Designed for long-term reliability in real environments.
 
 ---
 
+## Architecture overview (approximate)
+
+![restless engine](docs/restless-engine.png)
+
 ## Vision
 
 Developers should never start blind.

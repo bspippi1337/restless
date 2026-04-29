@@ -154,15 +154,11 @@ It behaves like a developer’s field tool, not a platform.
 
 ## Installation
 
-Example (adjust for your environment):
-
-    cargo install restless
-
-or clone:
+Clone:
 
     git clone https://github.com/bspippi1337/restless
     cd restless
-    cargo build --release
+    make build
 
 ---
 

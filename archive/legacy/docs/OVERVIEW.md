@@ -1,3 +1,7 @@
+> **LEGACY / HISTORICAL**
+>
+> This document is archived design material. Commands shown here may not exist in the current Restless CLI and are not part of the release contract.
+
 # Restless Overview
 
 Restless is a terminal-first API workbench designed for engineers who prefer precision, automation, and composability over graphical tooling.

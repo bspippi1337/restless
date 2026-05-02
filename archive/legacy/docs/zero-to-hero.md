@@ -1,3 +1,7 @@
+> **LEGACY / HISTORICAL**
+>
+> This document is archived design material. Commands shown here may not exist in the current Restless CLI and are not part of the release contract.
+
 # RESTLESS — Zero to Hero
 
 This guide takes you from:

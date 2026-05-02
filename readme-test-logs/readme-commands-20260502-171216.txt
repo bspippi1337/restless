@@ -1,0 +1,6 @@
+./build/restless map .
+./build/restless scan https://example-api.dev
+./build/restless diff previous.scan current.scan
+make build
+./build/restless scan https://service.internal
+./build/restless diff yesterday.scan today.scan

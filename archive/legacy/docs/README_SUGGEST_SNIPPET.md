@@ -1,3 +1,7 @@
+> **LEGACY / HISTORICAL**
+>
+> This document is archived design material. Commands shown here may not exist in the current Restless CLI and are not part of the release contract.
+
 ## OpenAPI suggestions (adaptive, but contract stays the truth)
 
 After running Restless against a host, it stores an observational snapshot locally and can generate spec improvement suggestions:

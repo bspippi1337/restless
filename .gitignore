@@ -43,3 +43,5 @@ api.dot\necho dot
 blckswan_v8_fix/
 restless_blckswan_engine/
 .backup/
+doc-stress-*/
+test_logs/

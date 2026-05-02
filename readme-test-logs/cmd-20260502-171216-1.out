@@ -1,5 +1,5 @@
 Restless API Discovery Engine
-Scanning: https://petstore.swagger.io/v2/swagger.json
+Scanning: https://.
 
 [1/5] probing API surface
 [2/5] inferring resource model
@@ -7,7 +7,7 @@ Scanning: https://petstore.swagger.io/v2/swagger.json
 
 Fingerprint
 -----------
-API type: REST
+API type: unknown
 
 Endpoints discovered
 --------------------
@@ -37,4 +37,6 @@ root
   └── user
 
 [4/5] generating graph
-exit status 2
+[5/5] complete
+
+Graph written to ..svg

@@ -1,6 +1,9 @@
-kAPP := restless
+APP := restless
 BIN := build
 CMD := ./cmd/restless
+PREFIX ?= $(HOME)/.local
+BINDIR := $(PREFIX)/bin
+MANDIR := $(PREFIX)/share/man/man1
 
 GO := go
 
@@ -8,63 +11,62 @@ VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT  := $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
 DATE    := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
-LDFLAGS := -X main.version=$(VERSION) \
-           -X main.commit=$(COMMIT) \
-           -X main.date=$(DATE)
+LDFLAGS := -X github.com/bspippi1337/restless/internal/cli.buildVersion=$(VERSION) \
+           -X github.com/bspippi1337/restless/internal/cli.buildCommit=$(COMMIT) \
+           -X github.com/bspippi1337/restless/internal/cli.buildDate=$(DATE)
 
 .DEFAULT_GOAL := help
 
-## help: show available targets
+## help
 help:
 	@echo ""
 	@echo "Restless build system"
 	@echo ""
 	@grep -E '^##' $(MAKEFILE_LIST) | sed 's/## //'
 
-## build: compile binary
+## build
 build:
 	mkdir -p $(BIN)
 	$(GO) build -ldflags "$(LDFLAGS)" -o $(BIN)/$(APP) $(CMD)
 
-## run: run without compiling
+## run
 run:
 	$(GO) run $(CMD)
 
-## install: install into go bin
-install:
-	$(GO) install -ldflags "$(LDFLAGS)" $(CMD)
+## man
+man:
+	mkdir -p $(MANDIR)
+	printf ".Dd May 2, 2026\n.Dt RESTLESS 1\n.Os\n.Sh NAME\n.Nm restless\n.Nd unix-style file watcher\n" > $(MANDIR)/$(APP).1
 
-## clean: remove build artifacts
+## install
+install: build man
+	mkdir -p $(BINDIR)
+	cp $(BIN)/$(APP) $(BINDIR)/$(APP)
+	chmod +x $(BINDIR)/$(APP)
+	@echo "Installed → $(BINDIR)/$(APP)"
+	@echo "Run:"
+	@echo "export PATH=\"$(BINDIR):\$$PATH\""
+
+## clean
 clean:
 	rm -rf $(BIN)
 
-## fmt: format code
+## fmt
 fmt:
 	$(GO) fmt ./...
 
-## vet: run go vet
+## vet
 vet:
 	$(GO) vet ./...
 
-## test: run tests
+## test
 test:
 	$(GO) test ./...
 
-## tidy: fix go.mod
+## tidy
 tidy:
 	$(GO) mod tidy
 
-## doctor: full repo health check
+## doctor
 doctor: fmt vet tidy build
 	@echo "repo healthy"
-
-## release: build multi-platform binaries
-release:
-	mkdir -p dist
-	GOOS=linux GOARCH=amd64 $(GO) build -o dist/$(APP)-linux-amd64 $(CMD)
-	GOOS=darwin GOARCH=amd64 $(GO) build -o dist/$(APP)-mac-amd64 $(CMD)
-	GOOS=windows GOARCH=amd64 $(GO) build -o dist/$(APP)-windows-amd64.exe $(CMD)
-
-## docker: run autorest scanner container
-docker:
-	docker build -t restless .

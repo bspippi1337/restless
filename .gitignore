@@ -45,3 +45,15 @@ restless_blckswan_engine/
 .backup/
 doc-stress-*/
 test_logs/
+_attic/
+readme-test-logs/
+*.svg.dot
+current.json
+order.json
+request.har
+resultat.txt
+MAKEFILE_APPEND.mk
+Makefile.deb_patch
+fix_restless_doc_contract.sh
+restless_doc_stress.sh
+restless_readme_unicorn_test.sh

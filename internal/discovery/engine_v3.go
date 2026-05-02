@@ -48,7 +48,7 @@ func NewEngine(raw string) (*Engine, error) {
 	}
 
 	return &Engine{
-		Client: &http.Client{Timeout: 10 * time.Second},
+		Client:    &http.Client{Timeout: 10 * time.Second},
 		Base:      u,
 		Visited:   map[string]bool{},
 		Endpoints: map[string]*Endpoint{},

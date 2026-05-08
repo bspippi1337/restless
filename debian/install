@@ -1,0 +1,4 @@
+build/restless usr/bin
+build/man/restless.1 usr/share/man/man1
+README.md usr/share/doc/restless
+COPYING usr/share/doc/restless

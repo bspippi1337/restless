@@ -10,6 +10,7 @@ DOCDIR ?= $(PREFIX)/share/doc/$(APP)
 
 GO ?= go
 INSTALL ?= install
+PKGS := $(shell $(GO) list ./... | grep -v '/archive/' | grep -v '/cmd/wasm')
 
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT  := $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
@@ -21,7 +22,7 @@ LDFLAGS := -X github.com/bspippi1337/restless/internal/cli.buildVersion=$(VERSIO
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build run man install uninstall clean fmt vet test tidy check doctor
+.PHONY: help build run man install uninstall clean fmt vet test tidy check doctor list-packages
 
 ## help
 help:
@@ -29,6 +30,10 @@ help:
 	@echo "Restless build system"
 	@echo ""
 	@grep -E '^##' $(MAKEFILE_LIST) | sed 's/## //'
+
+## list-packages
+list-packages:
+	@printf '%s\n' $(PKGS)
 
 ## build
 build:
@@ -67,15 +72,15 @@ clean:
 
 ## fmt
 fmt:
-	$(GO) fmt ./...
+	$(GO) fmt $(PKGS)
 
 ## vet
 vet:
-	$(GO) vet ./...
+	$(GO) vet $(PKGS)
 
 ## test
 test:
-	$(GO) test ./...
+	$(GO) test $(PKGS)
 
 ## tidy
 tidy:

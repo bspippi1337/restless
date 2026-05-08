@@ -1,58 +1,19 @@
 # restless
 
-Escape goto-10 development.
+Reactive API discovery and Unix automation runtime.
 
-Understand an unfamiliar API or repo in seconds:
+Restless helps developers understand unfamiliar systems quickly.
 
-    restless map .
+It maps structure before extensive manual exploration is required.
 
-Restless shows you what exists before you know what you're looking for.
+## Features
 
-It discovers structure automatically:
-
-- endpoints
-- schema hints
-- topology
-- surface changes over time
-
-No config required.
-
----
-
-## Why restless exists
-
-Modern systems are bigger than their documentation.
-
-When opening something unfamiliar, the first problem isn’t editing code.
-
-It’s orientation.
-
-Restless answers:
-
-> what actually exists here?
-
-before you even know what to ask.
-
----
-
-## What restless is
-
-Restless is situational awareness for developers.
-
-Use it when:
-
-- onboarding to a repo
-- exploring an unfamiliar API
-- validating documentation drift
-- auditing service surfaces
-- preparing refactors
-- comparing environments
-
-Run it early.
-Run it often.
-Avoid the loop.
-
----
+- safe API discovery
+- topology mapping
+- filesystem-triggered command execution
+- structural drift inspection
+- shell-friendly output
+- terminal-native workflows
 
 ## Example
 
@@ -60,142 +21,71 @@ Map a repository surface:
 
     restless map .
 
-Explore a remote API safely:
+Safely inspect a remote API:
 
     restless scan https://example-api.dev
 
-Compare structural changes between runs:
+Watch a directory and react to changes:
 
-    restless diff previous.scan current.scan
-
----
+    restless watch . --run "make test"
 
 ## Safe by default
 
-Restless explores remote systems conservatively.
-
-Discovery uses only:
+Remote discovery uses only:
 
 - GET
 - HEAD
 - OPTIONS
 
-No mutation.
-No guessing hidden state.
-No surprises.
-
----
-
-## What restless discovers
-
-Depending on input source:
-
-From APIs:
-
-- endpoints
-- parameter shapes
-- response structure hints
-- traversal topology
-
-From repositories:
-
-- route definitions
-- service boundaries
-- structural relationships
-- surface entry points
-
-Across runs:
-
-- surface drift
-- added endpoints
-- removed endpoints
-- topology changes
-
----
-
-## Why this matters
-
-Engineering teams spend time reconstructing structure that already exists.
-
-Restless reduces:
-
-- onboarding time
-- integration risk
-- reverse-engineering effort
-- documentation trust gaps
-
-This lowers engineering cost per decision.
-
----
+No mutation is performed during discovery.
 
 ## Philosophy
 
-Documentation describes intention.
+Restless follows traditional Unix design principles:
 
-Surfaces describe reality.
+- composable tools
+- inspectable behavior
+- shell interoperability
+- local-first execution
+- minimal runtime assumptions
 
-Restless maps the surface.
-
----
-
-## Design principles
-
-Restless is built to:
-
-- work without configuration
-- provide signal immediately
-- remain safe by default
-- support iterative exploration
-- stay useful in unfamiliar systems
-
-It behaves like a developer’s field tool, not a platform.
-
----
+The project intentionally avoids heavyweight orchestration layers.
 
 ## Installation
 
-Clone:
+Build locally:
 
-    git clone https://github.com/bspippi1337/restless
-    cd restless
     make build
 
----
+Install:
 
-## Quick workflow
+    sudo make install
 
-Typical usage pattern:
+## Packaging goals
 
-    restless map .
-    restless scan https://service.internal
-    restless diff yesterday.scan today.scan
+Restless aims to remain:
 
-Understand structure first.
-Make decisions second.
+- Debian-friendly
+- reproducibly buildable
+- dependency-light
+- terminal-native
+- suitable for headless systems
 
----
+## Project structure
 
-## Stability and packaging
+Primary runtime code:
 
-Restless follows:
+    cmd/
+    internal/
 
-- reproducible builds
-- XDG state handling
-- upstream man page support
-- distribution-friendly layout
+Documentation:
 
-Designed for long-term reliability in real environments.
+    docs/
 
----
+Historical experiments and prototypes:
 
-## Architecture overview (approximate)
+    archive/
 
-![restless engine](docs/restless-engine.png)
+## License
 
-## Vision
-
-Developers should never start blind.
-
-Restless makes systems legible.
-
-MacGyverize the world.
+MIT

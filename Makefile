@@ -1,11 +1,15 @@
 APP := restless
 BIN := build
 CMD := ./cmd/restless
-PREFIX ?= $(HOME)/.local
-BINDIR := $(PREFIX)/bin
-MANDIR := $(PREFIX)/share/man/man1
 
-GO := go
+PREFIX ?= /usr/local
+DESTDIR ?=
+BINDIR ?= $(PREFIX)/bin
+MANDIR ?= $(PREFIX)/share/man/man1
+DOCDIR ?= $(PREFIX)/share/doc/$(APP)
+
+GO ?= go
+INSTALL ?= install
 
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT  := $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
@@ -17,6 +21,8 @@ LDFLAGS := -X github.com/bspippi1337/restless/internal/cli.buildVersion=$(VERSIO
 
 .DEFAULT_GOAL := help
 
+.PHONY: help build run man install uninstall clean fmt vet test tidy check doctor
+
 ## help
 help:
 	@echo ""
@@ -27,7 +33,7 @@ help:
 ## build
 build:
 	mkdir -p $(BIN)
-	$(GO) build -ldflags "$(LDFLAGS)" -o $(BIN)/$(APP) $(CMD)
+	$(GO) build -trimpath -ldflags "$(LDFLAGS)" -o $(BIN)/$(APP) $(CMD)
 
 ## run
 run:
@@ -35,17 +41,25 @@ run:
 
 ## man
 man:
-	mkdir -p $(MANDIR)
-	printf ".Dd May 2, 2026\n.Dt RESTLESS 1\n.Os\n.Sh NAME\n.Nm restless\n.Nd unix-style file watcher\n" > $(MANDIR)/$(APP).1
+	mkdir -p $(BIN)/man
+	printf ".Dd May 8, 2026\n.Dt RESTLESS 1\n.Os\n.Sh NAME\n.Nm restless\n.Nd reactive API discovery and Unix observability runtime\n.Sh SYNOPSIS\n.Nm\n.Op command\n.Op args\n.Sh DESCRIPTION\n.Nm\nperforms safe API surface discovery and reactive filesystem command execution.\n.Sh COMMANDS\n.Bl -tag -width watch\n.It Cm scan\nScan an API target.\n.It Cm learn\nDiscover API endpoints.\n.It Cm map\nRender known endpoint topology.\n.It Cm watch\nWatch a filesystem path and run a shell command on change.\n.El\n.Sh EXAMPLES\n.Nm watch . --run \"make test\"\n" > $(BIN)/man/$(APP).1
 
 ## install
 install: build man
-	mkdir -p $(BINDIR)
-	cp $(BIN)/$(APP) $(BINDIR)/$(APP)
-	chmod +x $(BINDIR)/$(APP)
-	@echo "Installed → $(BINDIR)/$(APP)"
-	@echo "Run:"
-	@echo "export PATH=\"$(BINDIR):\$$PATH\""
+	$(INSTALL) -d $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m 0755 $(BIN)/$(APP) $(DESTDIR)$(BINDIR)/$(APP)
+	$(INSTALL) -d $(DESTDIR)$(MANDIR)
+	$(INSTALL) -m 0644 $(BIN)/man/$(APP).1 $(DESTDIR)$(MANDIR)/$(APP).1
+	$(INSTALL) -d $(DESTDIR)$(DOCDIR)
+	$(INSTALL) -m 0644 README.md $(DESTDIR)$(DOCDIR)/README.md
+	@if [ -f COPYING ]; then $(INSTALL) -m 0644 COPYING $(DESTDIR)$(DOCDIR)/COPYING; fi
+	@echo "Installed -> $(DESTDIR)$(BINDIR)/$(APP)"
+
+## uninstall
+uninstall:
+	rm -f $(DESTDIR)$(BINDIR)/$(APP)
+	rm -f $(DESTDIR)$(MANDIR)/$(APP).1
+	rm -rf $(DESTDIR)$(DOCDIR)
 
 ## clean
 clean:
@@ -67,6 +81,9 @@ test:
 tidy:
 	$(GO) mod tidy
 
-## doctor
-doctor: fmt vet tidy build
+## check
+check: fmt vet test build
 	@echo "repo healthy"
+
+## doctor
+doctor: check

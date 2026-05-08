@@ -11,11 +11,13 @@ import (
 func NewRootCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "restless",
-		Short: "API topology inference CLI",
+		Short: "Reactive API discovery and Unix observability runtime",
 		Long: `Restless discovers, models, inspects, and explains API surfaces.
 
-It performs bounded, same-host API discovery using safe HTTP methods and
-stores optional session state for interactive command workflows.`,
+It performs bounded, same-host API discovery using safe HTTP methods,
+and now also supports reactive filesystem execution workflows.
+
+Restless is designed as a composable Unix-native runtime layer.`,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			maybeAutopilot(args)
 			return nil
@@ -38,6 +40,7 @@ stores optional session state for interactive command workflows.`,
 	cmd.AddCommand(NewCouncilCmd())
 	cmd.AddCommand(NewEngineCmd())
 	cmd.AddCommand(NewCopilotCmd())
+	cmd.AddCommand(NewWatchCmd())
 	cmd.AddCommand(NewVersionCmd())
 	cmd.AddCommand(NewGNUCmd())
 

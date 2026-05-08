@@ -1,5 +1,5 @@
 Source: restless
-Section: net
+Section: devel
 Priority: optional
 Maintainer: Pippi <bspippi1337@gmail.com>
 Build-Depends: debhelper-compat (= 13), dh-golang, golang-any
@@ -13,8 +13,13 @@ XS-Go-Import-Path: github.com/bspippi1337/restless
 Package: restless
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
-Description: API topology inference CLI
- Restless discovers, models, inspects, and explains API surfaces from the
- terminal. It performs bounded, same-host API discovery using safe HTTP
- methods, infers endpoint structure, stores session state using XDG paths,
- and supports offline fixture-based inspection for reproducible tests.
+Description: reactive API discovery and Unix automation runtime
+ Restless is a terminal-native developer utility for safe API surface
+ discovery, topology inspection, and filesystem-triggered command execution.
+ .
+ It performs bounded discovery using safe HTTP methods, stores local session
+ state, renders API structure, and can run shell commands reactively when
+ watched files change.
+ .
+ Restless is designed for Unix composition: small commands, inspectable output,
+ shell pipelines, and local-first workflows.

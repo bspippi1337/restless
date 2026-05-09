@@ -4,25 +4,57 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.24.x'
+          cache: true
 
-      - name: Build release artifacts
+      - name: Install Debian packaging tools
         run: |
-          make release
-          make completion
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends devscripts debhelper dh-golang golang-any lintian
+
+      - name: Normalize module graph
+        run: go mod tidy
+
+      - name: Build runtime artifacts
+        run: |
+          make build
           make man
-          (cd dist && sha256sum * > SHA256SUMS.txt)
+          mkdir -p dist/restless
+          cp build/restless dist/restless/restless
+          cp build/man/restless.1 dist/restless/restless.1
+          cp README.md COPYING dist/restless/
+          tar -C dist -czf dist/restless-linux-amd64.tar.gz restless
+          sha256sum dist/restless-linux-amd64.tar.gz > dist/restless-linux-amd64.tar.gz.sha256
+
+      - name: Build Debian package
+        run: |
+          dpkg-buildpackage -us -uc -b
+          cp ../restless_*.deb dist/ || true
+          cp ../restless_*.changes dist/ || true
+          cp ../restless_*.buildinfo dist/ || true
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS.txt
 
       - name: Upload GitHub Release
         uses: softprops/action-gh-release@v2

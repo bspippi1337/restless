@@ -10,7 +10,7 @@ DOCDIR ?= $(PREFIX)/share/doc/$(APP)
 
 GO ?= go
 INSTALL ?= install
-PKGS := $(shell $(GO) list ./... | grep -v '/archive/' | grep -v '/cmd/wasm')
+PKGS = $(shell $(GO) list ./... 2>/dev/null | grep -v '/archive/' | grep -v '/cmd/wasm')
 
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT  := $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
@@ -22,7 +22,7 @@ LDFLAGS := -X github.com/bspippi1337/restless/internal/cli.buildVersion=$(VERSIO
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build run man install uninstall clean fmt vet test tidy check doctor list-packages
+.PHONY: help build run man install uninstall clean fmt vet test tidy modcheck check doctor list-packages
 
 ## help
 help:
@@ -72,22 +72,30 @@ clean:
 
 ## fmt
 fmt:
+	@test -n "$(PKGS)" || { echo "no supported Go packages found"; exit 1; }
 	$(GO) fmt $(PKGS)
 
 ## vet
 vet:
+	@test -n "$(PKGS)" || { echo "no supported Go packages found"; exit 1; }
 	$(GO) vet $(PKGS)
 
 ## test
 test:
+	@test -n "$(PKGS)" || { echo "no supported Go packages found"; exit 1; }
 	$(GO) test $(PKGS)
 
 ## tidy
 tidy:
 	$(GO) mod tidy
 
+## modcheck
+modcheck:
+	$(GO) mod tidy
+	git diff --exit-code -- go.mod go.sum
+
 ## check
-check: fmt vet test build
+check: modcheck fmt vet test build
 	@echo "repo healthy"
 
 ## doctor

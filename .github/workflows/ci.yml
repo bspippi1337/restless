@@ -41,6 +41,12 @@ jobs:
       - name: Check supported runtime
         run: make check
 
+      - name: Generate coverage profile
+        run: |
+          PKGS=$(go list ./... | grep -v '/archive/' | grep -v '/cmd/wasm')
+          go test -coverprofile=coverage.out $PKGS
+          go tool cover -func=coverage.out
+
       - name: Smoke test binary
         run: |
           ./build/restless --help

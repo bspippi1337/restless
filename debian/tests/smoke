@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+printf '[autopkgtest] checking restless runtime\n'
+
+command -v restless >/dev/null
+
+restless --help >/dev/null
+restless watch --help >/dev/null
+
+printf '[autopkgtest] runtime ok\n'

@@ -73,7 +73,9 @@ jobs:
             build-essential \
             debhelper \
             devscripts \
-            dh-golang
+            dh-golang \
+            golang-any \
+            fakeroot
 
       - name: Build Debian package
         run: |

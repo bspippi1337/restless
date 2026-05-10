@@ -114,15 +114,7 @@ jobs:
       - name: Install built package
         run: sudo dpkg -i ../restless_*.deb
 
-      - name: Run autopkgtest smoke
-        run: |
-          set -eux
-
-          DEB="$(find .. -maxdepth 1 -name 'restless_*_amd64.deb' | head -n1)"
-
-          test -n "$DEB"
-
-          autopkgtest "$DEB" -- null
+      - name: Run autopkgtest "$DEB" -- docker debian:stable
 
       - name: Run piuparts-style smoke
         run: |

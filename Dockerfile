@@ -1,40 +1,36 @@
 FROM golang:1.24 AS builder
 
 WORKDIR /src
-
 COPY . .
 
-RUN mkdir -p /out
-
-RUN if [ -f ./cmd/restless/main.go ]; then \
-        echo "[*] building ./cmd/restless"; \
-        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-        go build -trimpath -ldflags="-s -w" \
-        -o /out/restless ./cmd/restless ; \
-    else \
-        echo "[*] building repo root"; \
-        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-        go build -trimpath -ldflags="-s -w" \
-        -o /out/restless . ; \
-    fi
-
-RUN test -f /out/restless
-RUN chmod +x /out/restless
-RUN ls -lah /out/restless
+RUN set -eux; \
+    TARGET="."; \
+    [ -f ./cmd/restless/main.go ] && TARGET="./cmd/restless"; \
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+      go build \
+      -trimpath \
+      -ldflags="-s -w" \
+      -o restless \
+      "$TARGET"; \
+    file restless; \
+    chmod +x restless; \
+    ./restless --help >/dev/null 2>&1 || true
 
 FROM debian:stable-slim
 
 RUN apt-get update && \
-    apt-get install -y ca-certificates && \
+    apt-get install -y ca-certificates file && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /out/restless /usr/local/bin/restless
+COPY --from=builder /src/restless /usr/local/bin/restless
 
-RUN chmod +x /usr/local/bin/restless && \
-    test -x /usr/local/bin/restless && \
-    ls -lah /usr/local/bin/restless
+RUN set -eux; \
+    ls -lah /usr/local/bin/; \
+    file /usr/local/bin/restless; \
+    chmod +x /usr/local/bin/restless; \
+    /usr/local/bin/restless --help >/dev/null 2>&1 || true
 
 ENV PATH="/usr/local/bin:/usr/bin:/bin"
 
 ENTRYPOINT ["/usr/local/bin/restless"]
-CMD ["--help"]
+CMD ["--version"]

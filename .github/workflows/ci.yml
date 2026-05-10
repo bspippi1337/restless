@@ -94,7 +94,9 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t restless-install-test .
+          docker build --progress=plain -t restless-install-test .
+          docker image inspect restless-install-test
+          docker run --rm --entrypoint /bin/sh restless-install-test -c "ls -lah /usr/local/bin && file /usr/local/bin/restless"
 
       - name: Docker smoke test
         run: |

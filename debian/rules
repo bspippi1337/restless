@@ -1,11 +1,15 @@
 #!/usr/bin/make -f
 
+export GO111MODULE=on
+
 %:
 	dh $@
 
 override_dh_auto_build:
 	mkdir -p build
-	CGO_ENABLED=0 go build -trimpath \
+	CGO_ENABLED=0 GO111MODULE=on go build \
+		-mod=mod \
+		-trimpath \
 		-buildvcs=false \
 		-o build/restless \
 		./cmd/restless

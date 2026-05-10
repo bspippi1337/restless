@@ -10,7 +10,7 @@ COPY . .
 RUN CGO_ENABLED=0 GO111MODULE=on go build \
     -trimpath \
     -buildvcs=false \
-    -o /restless \
+    -o /usr/local/bin/restless \
     ./cmd/restless
 
 FROM debian:stable-slim
@@ -19,9 +19,12 @@ RUN apt-get update && \
     apt-get install -y ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /restless /usr/bin/restless
+COPY --from=builder /usr/local/bin/restless /usr/local/bin/restless
 
-RUN chmod +x /usr/bin/restless
+RUN chmod 755 /usr/local/bin/restless && \
+    /usr/local/bin/restless --version
 
-ENTRYPOINT ["/usr/bin/restless"]
+ENV PATH="/usr/local/bin:${PATH}"
+
+ENTRYPOINT ["/usr/local/bin/restless"]
 CMD ["--help"]

@@ -103,7 +103,7 @@ jobs:
       - name: Install packaging tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends build-essential devscripts debhelper dh-golang lintian autopkgtest
+          sudo apt-get install -y --no-install-recommends build-essential golang-any devscripts debhelper dh-golang lintian autopkgtest
 
       - name: Normalize module graph
         run: go mod tidy

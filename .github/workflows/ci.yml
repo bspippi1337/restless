@@ -116,8 +116,7 @@ jobs:
 
       - name: Run autopkgtest smoke
         run: |
-          chmod +x debian/tests/smoke
-          autopkgtest debian/tests/smoke -- null
+          autopkgtest . -- null
 
       - name: Run piuparts-style smoke
         run: |

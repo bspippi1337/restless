@@ -1,0 +1,19 @@
+name: Installer Test
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  installer:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build container
+        run: docker build --no-cache -t restless-install-test .
+
+      - name: Run installer test
+        run: |
+          docker run --rm restless-install-test

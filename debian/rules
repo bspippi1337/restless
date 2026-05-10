@@ -1,19 +1,21 @@
 #!/usr/bin/make -f
 
 export GO111MODULE=on
+export GOPROXY=https://proxy.golang.org,direct
+export GOSUMDB=sum.golang.org
 
 %:
-	dh $@
+        dh $@
 
 override_dh_auto_build:
-	mkdir -p build
-	CGO_ENABLED=0 GO111MODULE=on go build \
-		-mod=mod \
-		-trimpath \
-		-buildvcs=false \
-		-o build/restless \
-		./cmd/restless
+        mkdir -p build
+        CGO_ENABLED=0 GO111MODULE=on go build \
+                -mod=mod \
+                -trimpath \
+                -buildvcs=false \
+                -o build/restless \
+                ./cmd/restless
 
 override_dh_auto_install:
-	install -Dm755 build/restless \
-		debian/restless/usr/bin/restless
+        install -Dm755 build/restless \
+                debian/restless/usr/bin/restless

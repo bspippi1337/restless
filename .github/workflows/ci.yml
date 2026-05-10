@@ -8,6 +8,7 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  SOURCE_DATE_EPOCH: 1704067200
 
 jobs:
   check:
@@ -50,8 +51,14 @@ jobs:
           go test -coverprofile=coverage.out $PKGS
           go tool cover -func=coverage.out
 
-      - name: Reproducible build smoke
-        run: make reproducible-build
+      - name: Reproducible build verification
+        run: |
+          make reproducible-build
+          cp build/restless build/restless.first
+          make clean
+          make reproducible-build
+          sha256sum build/restless build/restless.first
+          cmp build/restless build/restless.first
 
       - name: Release artifact smoke
         run: make release
@@ -105,6 +112,11 @@ jobs:
         run: |
           chmod +x debian/tests/smoke
           autopkgtest debian/tests/smoke -- null
+
+      - name: Run piuparts-style smoke
+        run: |
+          chmod +x debian/piuparts-smoke.sh
+          ./debian/piuparts-smoke.sh
 
       - name: Run lintian
         run: lintian ../restless_*.changes

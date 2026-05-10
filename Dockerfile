@@ -10,10 +10,10 @@ RUN set -eux; \
       go build \
       -trimpath \
       -ldflags="-s -w" \
-      -o /usr/local/bin/restless \
+      -o /tmp/restless \
       "$TARGET"; \
-    chmod +x /usr/local/bin/restless; \
-    /usr/local/bin/restless --help >/dev/null 2>&1 || true
+    chmod +x /tmp/restless; \
+    ls -lah /tmp/restless
 
 FROM debian:stable-slim
 
@@ -21,13 +21,11 @@ RUN apt-get update && \
     apt-get install -y ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /usr/local/bin/restless /usr/local/bin/restless
+COPY --from=builder /tmp/restless /usr/local/bin/restless
 
 RUN chmod +x /usr/local/bin/restless && \
-    ls -lah /usr/local/bin/restless && \
-    /usr/local/bin/restless --help >/dev/null 2>&1 || true
+    ls -lah /usr/local/bin/restless
 
 ENV PATH="/usr/local/bin:/usr/bin:/bin"
 
-ENTRYPOINT ["/usr/local/bin/restless"]
-CMD ["--help"]
+CMD ["/usr/local/bin/restless","--help"]

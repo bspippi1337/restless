@@ -1,15 +1,24 @@
 #!/bin/sh
 set -eux
 
-export HOME="$(mktemp -d)"
+TMPHOME="$(mktemp -d)"
+trap 'chmod -R u+w "$TMPHOME" || true; rm -rf "$TMPHOME" || true' EXIT
+
+export HOME="$TMPHOME"
 export GOCACHE="$HOME/.cache/go-build"
 export GOMODCACHE="$HOME/pkg/mod"
+export GOPATH="$HOME/go"
 export GOFLAGS="-modcacherw"
 
-mkdir -p "$GOCACHE" "$GOMODCACHE"
-
-go env
+mkdir -p \
+  "$GOCACHE" \
+  "$GOMODCACHE" \
+  "$GOPATH"
 
 command -v restless
 restless --help >/dev/null
 restless --version
+
+chmod -R u+w "$HOME" || true
+rm -rf "$GOMODCACHE" || true
+rm -rf "$GOCACHE" || true

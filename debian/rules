@@ -1,9 +1,7 @@
 #!/usr/bin/make -f
 
-export DH_GOLANG_EXCLUDES := \
-	archive/... \
-	scripts \
-	tools/apinav
+export DH_GOLANG_BUILDPKG := github.com/bspippi1337/restless/cmd/restless
+export DH_GOLANG_EXCLUDES := archive scripts tools
 
 %:
 	dh $@ --buildsystem=golang --with=golang

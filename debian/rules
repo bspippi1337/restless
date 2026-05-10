@@ -15,6 +15,7 @@ override_dh_auto_build:
 		-buildvcs=false \
 		-o build/restless \
 		./cmd/restless
+	$(MAKE) man
 
 override_dh_auto_install:
 	install -Dm755 build/restless \

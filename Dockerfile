@@ -1,28 +1,27 @@
-FROM golang:1.24-alpine AS build
+FROM golang:1.24 AS builder
 
 WORKDIR /src
-
-RUN apk add --no-cache git ca-certificates
 
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 \
-    go build \
+RUN CGO_ENABLED=0 GO111MODULE=on go build \
     -trimpath \
-    -ldflags "-s -w" \
-    -o /out/restless \
+    -buildvcs=false \
+    -o /restless \
     ./cmd/restless
 
+FROM debian:stable-slim
 
-FROM alpine:3.20
+RUN apt-get update && \
+    apt-get install -y ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN apk add --no-cache ca-certificates
+COPY --from=builder /restless /usr/bin/restless
 
-WORKDIR /app
+RUN chmod +x /usr/bin/restless
 
-COPY --from=build /out/restless .
-
-ENTRYPOINT ["./restless"]
+ENTRYPOINT ["/usr/bin/restless"]
+CMD ["--help"]

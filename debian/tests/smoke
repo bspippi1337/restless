@@ -1,11 +1,14 @@
 #!/bin/sh
-set -eu
+set -eux
 
 export HOME="$(mktemp -d)"
 export GOCACHE="$HOME/.cache/go-build"
 export GOMODCACHE="$HOME/pkg/mod"
+export GOFLAGS="-modcacherw"
 
 mkdir -p "$GOCACHE" "$GOMODCACHE"
+
+go env
 
 command -v restless
 restless --help >/dev/null

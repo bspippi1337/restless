@@ -17,40 +17,47 @@ jobs:
         run: |
           mkdir -p site
 
-          cat > site/index.html <<HTML
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Restless</title>
-<style>
-body {
-  background:#0b0f14;
-  color:#d7e0ea;
-  font-family: monospace;
-  padding:40px;
-}
-h1 {
-  color:#7ee787;
-}
-pre {
-  background:#11161d;
-  padding:16px;
-  border-radius:12px;
-}
-</style>
-</head>
-<body>
-<h1>RESTLESS</h1>
-<p>Composable Unix-native API exploration runtime.</p>
-<pre>
+          cat > site/index.html <<'HTML'
+          <!doctype html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Restless</title>
+            <style>
+              body {
+                background: #0b0f14;
+                color: #d7e0ea;
+                font-family: monospace;
+                padding: 40px;
+              }
+
+              h1 {
+                color: #7ee787;
+              }
+
+              pre {
+                background: #11161d;
+                padding: 16px;
+                border-radius: 12px;
+              }
+            </style>
+          </head>
+
+          <body>
+            <h1>RESTLESS</h1>
+
+            <p>
+              Composable Unix-native API exploration runtime.
+            </p>
+
+            <pre>
 restless discover https://example.org
 restless graph
 restless shell
 restless watch
-</pre>
-</body>
-</html>
+            </pre>
+          </body>
+          </html>
 HTML
 
       - name: Upload pages artifact

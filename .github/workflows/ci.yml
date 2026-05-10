@@ -41,16 +41,39 @@ jobs:
       - name: Check supported runtime
         run: make check
 
+      - name: Race detector
+        run: make race
+
       - name: Generate coverage profile
         run: |
           PKGS=$(go list ./... | grep -v '/archive/' | grep -v '/cmd/wasm')
           go test -coverprofile=coverage.out $PKGS
           go tool cover -func=coverage.out
 
+      - name: Reproducible build smoke
+        run: make reproducible-build
+
+      - name: Release artifact smoke
+        run: make release
+
       - name: Smoke test binary
         run: |
           ./build/restless --help
           ./build/restless watch --help
+          test -s dist/restless-linux-amd64.tar.gz
+          test -s dist/SHA256SUMS.txt
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.out
+
+      - name: Upload release smoke artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-smoke
+          path: dist/
 
       - name: Report module drift
         if: always()

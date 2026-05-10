@@ -12,21 +12,20 @@ RUN set -eux; \
       -ldflags="-s -w" \
       -o restless \
       "$TARGET"; \
-    file restless; \
     chmod +x restless; \
+    ls -lah restless; \
     ./restless --help >/dev/null 2>&1 || true
 
 FROM debian:stable-slim
 
 RUN apt-get update && \
-    apt-get install -y ca-certificates file && \
+    apt-get install -y ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /src/restless /usr/local/bin/restless
 
 RUN set -eux; \
-    ls -lah /usr/local/bin/; \
-    file /usr/local/bin/restless; \
+    ls -lah /usr/local/bin/restless; \
     chmod +x /usr/local/bin/restless; \
     /usr/local/bin/restless --help >/dev/null 2>&1 || true
 

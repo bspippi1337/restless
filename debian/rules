@@ -1,4 +1,9 @@
 #!/usr/bin/make -f
 
+export DH_GOLANG_EXCLUDES := \
+	archive/... \
+	scripts \
+	tools/apinav
+
 %:
 	dh $@ --buildsystem=golang --with=golang

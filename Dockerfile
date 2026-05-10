@@ -16,9 +16,16 @@ RUN set -eux; \
 
 FROM debian:stable-slim
 
-RUN apt-get update && \
-    apt-get install -y ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
+RUN set -eux; \
+    for i in 1 2 3 4 5; do \
+        apt-get update && \
+        apt-get install -y --no-install-recommends ca-certificates && \
+        rm -rf /var/lib/apt/lists/* && \
+        exit 0; \
+        echo "APT RETRY $i"; \
+        sleep 5; \
+    done; \
+    exit 1
 
 COPY --from=builder /tmp/restless /usr/local/bin/restless
 

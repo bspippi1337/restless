@@ -1,7 +1,15 @@
 #!/usr/bin/make -f
 
-export DH_GOLANG_BUILDPKG := github.com/bspippi1337/restless/cmd/restless
-export DH_GOLANG_EXCLUDES := archive scripts tools
-
 %:
-	dh $@ --buildsystem=golang --with=golang
+	dh $@
+
+override_dh_auto_build:
+	mkdir -p build
+	CGO_ENABLED=0 go build -trimpath \
+		-buildvcs=false \
+		-o build/restless \
+		./cmd/restless
+
+override_dh_auto_install:
+	install -Dm755 build/restless \
+		debian/restless/usr/bin/restless

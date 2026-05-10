@@ -20,3 +20,7 @@ override_dh_auto_build:
 override_dh_auto_install:
 	install -Dm755 build/restless \
 		debian/restless/usr/bin/restless
+
+
+override_dh_dwz:
+	@echo "Skipping dwz for Go binaries"

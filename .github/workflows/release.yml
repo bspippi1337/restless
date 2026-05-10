@@ -8,12 +8,15 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  SOURCE_DATE_EPOCH: 1704067200
 
 jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
+      attestations: write
 
     steps:
       - name: Checkout
@@ -35,14 +38,7 @@ jobs:
 
       - name: Build runtime artifacts
         run: |
-          make build
-          make man
-          mkdir -p dist/restless
-          cp build/restless dist/restless/restless
-          cp build/man/restless.1 dist/restless/restless.1
-          cp README.md COPYING dist/restless/
-          tar -C dist -czf dist/restless-linux-amd64.tar.gz restless
-          sha256sum dist/restless-linux-amd64.tar.gz > dist/restless-linux-amd64.tar.gz.sha256
+          make release
 
       - name: Build Debian package
         run: |
@@ -54,10 +50,23 @@ jobs:
       - name: Generate checksums
         run: |
           cd dist
+          rm -f SHA256SUMS.txt
           sha256sum * > SHA256SUMS.txt
+          sha256sum -c SHA256SUMS.txt
+
+      - name: Attest release tarball provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/restless-linux-amd64.tar.gz
+
+      - name: Attest Debian package provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/*.deb
 
       - name: Upload GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          generate_release_notes: true
           files: |
             dist/*

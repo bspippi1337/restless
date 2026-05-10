@@ -1,11 +1,12 @@
 #!/bin/sh
 set -eu
 
-printf '[autopkgtest] checking restless runtime\n'
+export HOME="$(mktemp -d)"
+export GOCACHE="$HOME/.cache/go-build"
+export GOMODCACHE="$HOME/pkg/mod"
 
-command -v restless >/dev/null
+mkdir -p "$GOCACHE" "$GOMODCACHE"
 
+command -v restless
 restless --help >/dev/null
-restless watch --help >/dev/null
-
-printf '[autopkgtest] runtime ok\n'
+restless --version

@@ -54,11 +54,12 @@ jobs:
       - name: Reproducible build verification
         run: |
           make reproducible-build
-          cp build/restless build/restless.first
+          mkdir -p .repro
+          cp build/restless .repro/restless.first
           make clean
           make reproducible-build
-          sha256sum build/restless build/restless.first
-          cmp build/restless build/restless.first
+          sha256sum build/restless .repro/restless.first
+          cmp build/restless .repro/restless.first
 
       - name: Release artifact smoke
         run: make release
@@ -97,7 +98,7 @@ jobs:
       - name: Install packaging tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends devscripts debhelper dh-golang golang-any lintian autopkgtest
+          sudo apt-get install -y --no-install-recommends build-essential devscripts debhelper dh-golang golang-any lintian autopkgtest
 
       - name: Normalize module graph
         run: go mod tidy

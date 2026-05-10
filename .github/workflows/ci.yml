@@ -98,4 +98,4 @@ jobs:
 
       - name: Docker smoke test
         run: |
-          docker run --rm restless-install-test --version
+          docker run --rm --entrypoint /usr/local/bin/restless restless-install-test --version --version

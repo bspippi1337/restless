@@ -12,8 +12,7 @@ RUN set -eux; \
       -ldflags="-s -w" \
       -o /tmp/restless \
       "$TARGET"; \
-    chmod +x /tmp/restless; \
-    ls -lah /tmp/restless
+    chmod +x /tmp/restless
 
 FROM debian:stable-slim
 
@@ -23,9 +22,7 @@ RUN apt-get update && \
 
 COPY --from=builder /tmp/restless /usr/local/bin/restless
 
-RUN chmod +x /usr/local/bin/restless && \
-    ls -lah /usr/local/bin/restless
+RUN chmod +x /usr/local/bin/restless
 
-ENV PATH="/usr/local/bin:/usr/bin:/bin"
-
-CMD ["/usr/local/bin/restless","--help"]
+ENTRYPOINT ["/usr/local/bin/restless"]
+CMD ["--help"]

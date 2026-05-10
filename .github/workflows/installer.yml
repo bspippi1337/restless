@@ -11,9 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build container
-        run: docker build --no-cache -t restless-install-test .
+      - name: Build image
+        run: |
+          docker build --no-cache -t restless-install-test .
 
-      - name: Run installer test
+      - name: Run runtime smoke
         run: |
           docker run --rm restless-install-test

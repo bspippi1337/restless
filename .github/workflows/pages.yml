@@ -1,0 +1,75 @@
+name: Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate docs index
+        run: |
+          mkdir -p site
+
+          cat > site/index.html <<HTML
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Restless</title>
+<style>
+body {
+  background:#0b0f14;
+  color:#d7e0ea;
+  font-family: monospace;
+  padding:40px;
+}
+h1 {
+  color:#7ee787;
+}
+pre {
+  background:#11161d;
+  padding:16px;
+  border-radius:12px;
+}
+</style>
+</head>
+<body>
+<h1>RESTLESS</h1>
+<p>Composable Unix-native API exploration runtime.</p>
+<pre>
+restless discover https://example.org
+restless graph
+restless shell
+restless watch
+</pre>
+</body>
+</html>
+HTML
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: pages
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

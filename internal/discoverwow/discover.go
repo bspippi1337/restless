@@ -491,6 +491,33 @@ func simplify(s string) string {
 	return s[idx:]
 }
 
+func hasRelation(in []Relation, r Relation) bool {
+	for _, x := range in {
+		if x.From != r.From {
+			continue
+		}
+
+		if len(x.To) != len(r.To) {
+			continue
+		}
+
+		match := true
+
+		for i := range x.To {
+			if x.To[i] != r.To[i] {
+				match = false
+				break
+			}
+		}
+
+		if match {
+			return true
+		}
+	}
+
+	return false
+}
+
 func trimProto(s string) string {
 	s = strings.TrimPrefix(s, "https://")
 	s = strings.TrimPrefix(s, "http://")

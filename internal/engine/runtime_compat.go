@@ -1,13 +1,18 @@
 package engine
 
-import (
-	"fmt"
-)
+import "strings"
 
-func NormalizeTarget(t string) string {
-	return normalizeTarget(t)
-}
+func normalizeTarget(t string) string {
+	t = strings.TrimSpace(t)
 
-func Step(i int, total int, msg string) {
-	fmt.Printf("[%d/%d] %s\n", i, total, msg)
+	if t == "" {
+		return ""
+	}
+
+	if !strings.HasPrefix(t, "http://") &&
+		!strings.HasPrefix(t, "https://") {
+		return "https://" + t
+	}
+
+	return t
 }

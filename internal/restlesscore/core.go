@@ -39,12 +39,9 @@ type CrawlNode struct {
 }
 
 func Scan(target string, timeout time.Duration) (*ScanResult, error) {
-
 	base := normalize(target)
 
-	client := &http.Client{
-		Timeout: timeout,
-	}
+	client := &http.Client{Timeout: timeout}
 
 	r := &ScanResult{
 		Target:  target,
@@ -59,7 +56,7 @@ func Scan(target string, timeout time.Duration) (*ScanResult, error) {
 	r.Fingerprints = fingerprints(headers, body)
 	r.APIType = detectAPIType(r.Fingerprints)
 
-	if status >= 200 && status < 400 {
+	if status >= 200 && status < 500 {
 		r.Confirmed = append(r.Confirmed, Endpoint{
 			Method:     "GET",
 			Path:       "/",
@@ -70,81 +67,27 @@ func Scan(target string, timeout time.Duration) (*ScanResult, error) {
 	}
 
 	initial := discover(base, body)
-
-	queue := []CrawlNode{}
-
-	for _, p := range initial {
-		queue = append(queue, CrawlNode{
-			Path:  p,
-			Depth: 1,
-		})
-	}
-
 	seen := map[string]bool{}
 
-	for len(queue) > 0 {
-
-		node := queue[0]
-		queue = queue[1:]
-
-		if seen[node.Path] {
+	for _, p := range initial {
+		if seen[p] {
 			continue
 		}
 
-		seen[node.Path] = true
+		seen[p] = true
 
-		status, body, _, err := fetch(client, base+node.Path)
+		status, _, _, _ := fetch(client, base+p)
 
-		ep := Endpoint{
-			Method: "GET",
-			Path:   node.Path,
-			Status: status,
-			Source: "crawl",
-		}
-
-		if err == nil {
-
-			switch {
-
-			case status >= 200 && status < 300:
-				ep.Confidence = "high"
-				r.Confirmed = append(r.Confirmed, ep)
-
-			case status == 401 || status == 403 || status == 405:
-				ep.Confidence = "medium"
-				r.Confirmed = append(r.Confirmed, ep)
-			}
-
-			r.Topology = append(r.Topology, Edge{
-				From: "/",
-				To:   node.Path,
-			})
-
-			if node.Depth < 2 {
-
-				next := discover(base, body)
-
-				for _, np := range next {
-
-					if !seen[np] {
-
-						r.Topology = append(r.Topology, Edge{
-							From: node.Path,
-							To:   np,
-						})
-
-						queue = append(queue, CrawlNode{
-							Path:  np,
-							Depth: node.Depth + 1,
-						})
-					}
-				}
-			}
-		}
+		r.Confirmed = append(r.Confirmed, Endpoint{
+			Method:     "GET",
+			Path:       p,
+			Status:     status,
+			Confidence: "high",
+			Source:     "surface",
+		})
 	}
 
 	r.Confirmed = uniqEndpoints(r.Confirmed)
-	r.Topology = uniqEdges(r.Topology)
 
 	sort.Slice(r.Confirmed, func(i, j int) bool {
 		return r.Confirmed[i].Path < r.Confirmed[j].Path
@@ -154,81 +97,12 @@ func Scan(target string, timeout time.Duration) (*ScanResult, error) {
 }
 
 func Render(title string, r *ScanResult) string {
-
 	var b strings.Builder
-
-	type bucket struct {
-		Name  string
-		Icon  string
-		Paths []Endpoint
-	}
-
-	buckets := map[string]*bucket{
-		"identity": {
-			Name: "Identity",
-			Icon: "👤",
-		},
-		"repositories": {
-			Name: "Repositories",
-			Icon: "📦",
-		},
-		"activity": {
-			Name: "Activity",
-			Icon: "📡",
-		},
-		"search": {
-			Name: "Search",
-			Icon: "🔍",
-		},
-		"platform": {
-			Name: "Platform",
-			Icon: "⏱",
-		},
-		"misc": {
-			Name: "Misc",
-			Icon: "•",
-		},
-	}
-
-	for _, ep := range r.Confirmed {
-
-		if ep.Path == "/" {
-			continue
-		}
-
-		switch {
-
-		case strings.Contains(ep.Path, "user"):
-			buckets["identity"].Paths =
-				append(buckets["identity"].Paths, ep)
-
-		case strings.Contains(ep.Path, "repo"):
-			buckets["repositories"].Paths =
-				append(buckets["repositories"].Paths, ep)
-
-		case strings.Contains(ep.Path, "event"):
-			buckets["activity"].Paths =
-				append(buckets["activity"].Paths, ep)
-
-		case strings.Contains(ep.Path, "search"):
-			buckets["search"].Paths =
-				append(buckets["search"].Paths, ep)
-
-		case strings.Contains(ep.Path, "rate"):
-			buckets["platform"].Paths =
-				append(buckets["platform"].Paths, ep)
-
-		default:
-			buckets["misc"].Paths =
-				append(buckets["misc"].Paths, ep)
-		}
-	}
 
 	live := 0
 	restricted := 0
 
 	for _, ep := range r.Confirmed {
-
 		if ep.Status >= 200 && ep.Status < 300 {
 			live++
 		} else {
@@ -236,138 +110,102 @@ func Render(title string, r *ScanResult) string {
 		}
 	}
 
-	fmt.Fprintf(
-		&b,
-		title,
-		r.Target,
-	)
-
-	fmt.Fprintf(&b, "Type  %s\n", r.APIType)
+	fmt.Fprintf(&b, "RESTLESS ENGINE :: %s\n\n", strings.TrimRight(r.Target, "/"))
+	fmt.Fprintf(&b, "Type      %s\n", r.APIType)
 
 	if len(r.Fingerprints) > 0 {
-
-		fmt.Fprintf(&b, "Traits  ")
-
-		for i, fp := range r.Fingerprints {
-
-			if i > 0 {
-				fmt.Fprintf(&b, " · ")
-			}
-
-			fp = strings.ReplaceAll(fp, "application/json; charset=utf-8", "json")
-			fp = strings.ReplaceAll(fp, "text/html; charset=utf-8", "html")
-
-			fmt.Fprintf(&b, "%s", fp)
-		}
-
-		fmt.Fprintf(&b, "\n")
+		fmt.Fprintf(&b, "Traits    %s\n", strings.Join(r.Fingerprints, " · "))
 	}
 
 	fmt.Fprintf(&b, "\n")
 
-	order := []string{
-		"identity",
-		"repositories",
-		"activity",
-		"search",
-		"platform",
-		"misc",
-	}
+	groups := map[string][]Endpoint{}
 
-	for _, key := range order {
-
-		bk := buckets[key]
-
-		if len(bk.Paths) == 0 {
+	for _, ep := range r.Confirmed {
+		if ep.Path == "/" {
 			continue
 		}
 
-		fmt.Fprintf(
-			&b,
-			"%s %s\n",
-			bk.Icon,
-			bk.Name,
-		)
+		groups[groupName(ep.Path)] = append(groups[groupName(ep.Path)], ep)
+	}
 
-		for _, ep := range bk.Paths {
+	order := []string{
+		"Identity",
+		"Repositories",
+		"Activity",
+		"Search",
+		"Platform",
+		"Misc",
+	}
 
+	for _, name := range order {
+		items := groups[name]
+		if len(items) == 0 {
+			continue
+		}
+
+		fmt.Fprintf(&b, "%s\n", name)
+		fmt.Fprintf(&b, "%s\n", strings.Repeat("-", len(name)))
+
+		for _, ep := range items {
 			state := "restricted"
-
 			if ep.Status >= 200 && ep.Status < 300 {
 				state = "live"
 			}
 
-			fmt.Fprintf(
-				&b,
-				"  %-24s %s\n",
-				ep.Path,
-				state,
-			)
+			fmt.Fprintf(&b, "  %-28s %s\n", ep.Path, state)
 		}
 
 		fmt.Fprintf(&b, "\n")
 	}
 
-	fmt.Fprintf(&b, "Graph\n")
-	fmt.Fprintf(&b, "-----\n")
-
-	fmt.Fprintf(&b, "  /\n")
-
-	for _, key := range order {
-
-		bk := buckets[key]
-
-		if len(bk.Paths) == 0 {
-			continue
-		}
-
-		fmt.Fprintf(
-			&b,
-			"  - %s\n",
-			strings.ToLower(bk.Name),
-		)
-
-		for _, ep := range bk.Paths {
-
-			fmt.Fprintf(
-				&b,
-				"  - %s\n",
-				ep.Path,
-			)
-		}
-	}
-
+	fmt.Fprintf(&b, "Capability Profile\n")
+	fmt.Fprintf(&b, "------------------\n")
+	fmt.Fprintf(&b, "  Traversal Surface   %d endpoints\n", len(r.Confirmed))
+	fmt.Fprintf(&b, "  Anonymous Access   %d live\n", live)
+	fmt.Fprintf(&b, "  Restricted Surface %d gated\n", restricted)
 	fmt.Fprintf(&b, "\n")
 
-	fmt.Fprintf(&b, "Surface\n")
-	fmt.Fprintf(&b, "-------\n")
-
-	fmt.Fprintf(
-		&b,
-		"  %d discovered · %d live · %d restricted\n",
-		len(r.Confirmed),
-		live,
-		restricted,
-	)
+	fmt.Fprintf(&b, "Suggested Workflows\n")
+	fmt.Fprintf(&b, "-------------------\n")
+	fmt.Fprintf(&b, "  restless discover %s\n", r.Target)
+	fmt.Fprintf(&b, "  restless inspect %s\n", r.Target)
+	fmt.Fprintf(&b, "  restless fuzz %s\n", r.Target)
+	fmt.Fprintf(&b, "  restless map %s\n", r.Target)
 
 	return b.String()
 }
 
-func normalize(raw string) string {
+func groupName(path string) string {
+	p := strings.ToLower(path)
 
+	switch {
+	case strings.Contains(p, "user"):
+		return "Identity"
+	case strings.Contains(p, "repo"):
+		return "Repositories"
+	case strings.Contains(p, "event"):
+		return "Activity"
+	case strings.Contains(p, "search"):
+		return "Search"
+	case strings.Contains(p, "rate") || strings.Contains(p, "version"):
+		return "Platform"
+	default:
+		return "Misc"
+	}
+}
+
+func normalize(raw string) string {
 	raw = strings.TrimSpace(raw)
 	raw = strings.TrimPrefix(raw, "https://")
 	raw = strings.TrimPrefix(raw, "http://")
 	raw = strings.TrimRight(raw, "/")
-
 	return "https://" + raw
 }
 
 func fetch(client *http.Client, u string) (int, []byte, http.Header, error) {
-
 	req, _ := http.NewRequest("GET", u, nil)
-
-	req.Header.Set("User-Agent", "restless-crawler")
+	req.Header.Set("User-Agent", "restless-blckswan")
 	req.Header.Set("Accept", "application/json,text/html,*/*")
 
 	resp, err := client.Do(req)
@@ -383,10 +221,15 @@ func fetch(client *http.Client, u string) (int, []byte, http.Header, error) {
 }
 
 func fingerprints(h http.Header, body []byte) []string {
-
 	var out []string
 
+	if s := h.Get("Server"); s != "" {
+		out = append(out, s)
+	}
+
 	if ct := h.Get("Content-Type"); ct != "" {
+		ct = strings.ReplaceAll(ct, "application/json; charset=utf-8", "json")
+		ct = strings.ReplaceAll(ct, "text/html; charset=utf-8", "html")
 		out = append(out, ct)
 	}
 
@@ -398,10 +241,6 @@ func fingerprints(h http.Header, body []byte) []string {
 		out = append(out, "rate-limited")
 	}
 
-	if s := h.Get("Server"); s != "" {
-		out = append(out, s)
-	}
-
 	if json.Valid(body) {
 		out = append(out, "json-root")
 	}
@@ -410,10 +249,8 @@ func fingerprints(h http.Header, body []byte) []string {
 }
 
 func detectAPIType(fp []string) string {
-
 	for _, f := range fp {
-
-		if strings.Contains(f, "github-api") {
+		if strings.Contains(strings.ToLower(f), "github") {
 			return "REST catalog"
 		}
 	}
@@ -422,15 +259,12 @@ func detectAPIType(fp []string) string {
 }
 
 func discover(base string, body []byte) []string {
-
 	var out []string
 
 	var data map[string]any
 
 	if json.Unmarshal(body, &data) == nil {
-
 		for _, v := range data {
-
 			s, ok := v.(string)
 			if !ok {
 				continue
@@ -445,15 +279,6 @@ func discover(base string, body []byte) []string {
 				continue
 			}
 
-			if u.Host != "" {
-
-				baseURL, _ := url.Parse(base)
-
-				if baseURL.Host != u.Host {
-					continue
-				}
-			}
-
 			if u.Path != "" && strings.HasPrefix(u.Path, "/") {
 				out = append(out, strings.TrimRight(u.Path, "/"))
 			}
@@ -461,24 +286,22 @@ func discover(base string, body []byte) []string {
 	}
 
 	out = append(out,
-		"/rate_limit",
+		"/user",
 		"/users",
 		"/repos",
-		"/search",
 		"/events",
-		"/user",
+		"/search",
+		"/rate_limit",
 	)
 
 	return uniqStrings(out)
 }
 
 func uniqStrings(in []string) []string {
-
 	m := map[string]bool{}
 	var out []string
 
 	for _, s := range in {
-
 		if s == "" || m[s] {
 			continue
 		}
@@ -488,39 +311,15 @@ func uniqStrings(in []string) []string {
 	}
 
 	sort.Strings(out)
-
 	return out
 }
 
 func uniqEndpoints(in []Endpoint) []Endpoint {
-
 	m := map[string]bool{}
 	var out []Endpoint
 
 	for _, e := range in {
-
 		k := e.Method + " " + e.Path
-
-		if m[k] {
-			continue
-		}
-
-		m[k] = true
-		out = append(out, e)
-	}
-
-	return out
-}
-
-func uniqEdges(in []Edge) []Edge {
-
-	m := map[string]bool{}
-	var out []Edge
-
-	for _, e := range in {
-
-		k := e.From + "->" + e.To
-
 		if m[k] {
 			continue
 		}

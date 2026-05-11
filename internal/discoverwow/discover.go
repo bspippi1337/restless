@@ -201,6 +201,8 @@ func Discover(target string) (*Result, error) {
 		)
 	}
 
+	res.Relations = compactRelations(res.Relations)
+
 	sort.Slice(
 		res.TopEndpoints,
 		func(i, j int) bool {
@@ -270,11 +272,17 @@ func renderEndpoints(
 	for i := 0; i < limit; i++ {
 		it := items[i]
 
+		path := it.Path
+
+		if len(path) > 52 {
+			path = path[:49] + "..."
+		}
+
 		fmt.Fprintf(
 			b,
-			"  %2d  %-50s %s\n",
+			"  %2d  %-53s %s\n",
 			it.Score,
-			it.Path,
+			path,
 			it.Reason,
 		)
 	}
@@ -323,7 +331,17 @@ func renderRelations(
 	fmt.Fprintf(b, "Relationship Graph\n")
 	fmt.Fprintf(b, "------------------\n")
 
+	seen := map[string]bool{}
+
 	for _, r := range items {
+		key := r.From + strings.Join(r.To, ",")
+
+		if seen[key] {
+			continue
+		}
+
+		seen[key] = true
+
 		fmt.Fprintf(b, "  %s\n", r.From)
 
 		for _, to := range r.To {
@@ -415,18 +433,36 @@ func inferRelation(path string) Relation {
 	return Relation{}
 }
 
+func compactRelations(in []Relation) []Relation {
+	out := make([]Relation, 0)
+	seen := map[string]bool{}
+
+	for _, r := range in {
+		key := r.From + strings.Join(r.To, ",")
+
+		if seen[key] {
+			continue
+		}
+
+		seen[key] = true
+		out = append(out, r)
+	}
+
+	return out
+}
+
 func scorePath(path string) int {
 	score := 50
 
 	switch {
 	case strings.Contains(path, "search"):
-		score += 40
+		score += 48
 	case strings.Contains(path, "repo"):
-		score += 38
+		score += 46
 	case strings.Contains(path, "user"):
-		score += 35
+		score += 42
 	case strings.Contains(path, "event"):
-		score += 30
+		score += 35
 	}
 
 	if strings.Contains(path, "{") {
@@ -479,51 +515,6 @@ func appendUnique(in []string, v string) []string {
 	return append(in, v)
 }
 
-func looksURL(s string) bool {
-	return strings.HasPrefix(s, "http://") ||
-		strings.HasPrefix(s, "https://")
-}
-
-func simplify(s string) string {
-	s = strings.TrimPrefix(s, "https://")
-	s = strings.TrimPrefix(s, "http://")
-
-	idx := strings.Index(s, "/")
-
-	if idx == -1 {
-		return "/"
-	}
-
-	return s[idx:]
-}
-
-func hasRelation(in []Relation, r Relation) bool {
-	for _, x := range in {
-		if x.From != r.From {
-			continue
-		}
-
-		if len(x.To) != len(r.To) {
-			continue
-		}
-
-		match := true
-
-		for i := range x.To {
-			if x.To[i] != r.To[i] {
-				match = false
-				break
-			}
-		}
-
-		if match {
-			return true
-		}
-	}
-
-	return false
-}
-
 func normalizeTarget(raw string) (string, error) {
 	raw = strings.TrimSpace(raw)
 
@@ -562,10 +553,21 @@ func normalizeTarget(raw string) (string, error) {
 	}
 
 	if strings.ContainsAny(host, "æøåÆØÅ ") {
-		return "", fmt.Errorf(
+		clean := sanitizeHostname(host)
+
+		msg := fmt.Sprintf(
 			"invalid target: unexpected characters in hostname %q",
 			host,
 		)
+
+		if clean != host && clean != "" {
+			msg += fmt.Sprintf(
+				"\n\ndid you mean:\n  %s",
+				clean,
+			)
+		}
+
+		return "", fmt.Errorf(msg)
 	}
 
 	if _, err := net.LookupHost(host); err != nil {
@@ -576,6 +578,35 @@ func normalizeTarget(raw string) (string, error) {
 	}
 
 	return strings.TrimRight(raw, "/"), nil
+}
+
+func sanitizeHostname(host string) string {
+	host = strings.ToLower(host)
+
+	re := regexp.MustCompile(`[^a-z0-9\.\-]`)
+	host = re.ReplaceAllString(host, "")
+
+	host = strings.Trim(host, ".- ")
+
+	return host
+}
+
+func looksURL(s string) bool {
+	return strings.HasPrefix(s, "http://") ||
+		strings.HasPrefix(s, "https://")
+}
+
+func simplify(s string) string {
+	s = strings.TrimPrefix(s, "https://")
+	s = strings.TrimPrefix(s, "http://")
+
+	idx := strings.Index(s, "/")
+
+	if idx == -1 {
+		return "/"
+	}
+
+	return s[idx:]
 }
 
 func trimProto(s string) string {

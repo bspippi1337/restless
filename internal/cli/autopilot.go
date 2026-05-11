@@ -2,40 +2,38 @@ package cli
 
 import (
 	"fmt"
-	"log"
-	"strings"
+	"os"
 
 	"github.com/bspippi1337/restless/internal/engine"
 )
 
-func maybeAutopilot(args []string) bool {
+func maybeAutopilot(args []string) {
 
 	if len(args) == 0 {
-		return false
+		return
 	}
 
-	target := args[0]
+	target := args[len(args)-1]
 
-	if !strings.Contains(target, ".") {
-		return false
+	if target == "" {
+		return
 	}
 
-	fmt.Println("Restless autopilot scanning:", target)
+	if args[0] != "inspect" &&
+		args[0] != "scan" &&
+		args[0] != "discover" {
+		return
+	}
+
+	fmt.Fprintf(os.Stderr, "Restless autopilot scanning: %s\n", target)
 
 	res, err := engine.Run(target)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 
-	dot := engine.TopologyToDOT(res.Topology)
-
-	out := target + ".svg"
-
-	if err := engine.RenderDOT(dot, out); err != nil {
-		log.Fatal(err)
+	if res.Topology != "" {
+		dot := engine.TopologyToDOT(res.Topology)
+		engine.RenderDOT(dot)
 	}
-
-	fmt.Println("Graph written to", out)
-
-	return true
 }

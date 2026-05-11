@@ -1,65 +1,60 @@
 package engine
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
 	"strings"
 )
 
-func Print(r *Result) {
-	PrintResult(r)
-}
-
 func TopologyToDOT(topology string) string {
-
 	lines := strings.Split(topology, "\n")
 
-	var dot strings.Builder
-	dot.WriteString("digraph API {\n")
-	dot.WriteString("rankdir=LR;\n")
+	var b strings.Builder
+	b.WriteString("digraph restless {\n")
+	b.WriteString("  rankdir=LR;\n")
 
-	var stack []string
+	rootExists := false
 
-	for _, line := range lines {
+	for _, raw := range lines {
+		line := strings.TrimSpace(raw)
 
-		level := strings.Count(line, "  ")
-		name := strings.TrimSpace(strings.ReplaceAll(line, "└──", ""))
-
-		if name == "" {
+		if line == "" {
 			continue
 		}
 
-		if name == "root" {
-			stack = []string{"root"}
+		if line == "root" {
+			rootExists = true
 			continue
 		}
 
-		if level < len(stack) {
-			stack = stack[:level]
+		if !strings.Contains(line, "└──") {
+			continue
 		}
 
-		parent := stack[len(stack)-1]
+		parts := strings.SplitN(line, "└──", 2)
+		if len(parts) != 2 {
+			continue
+		}
 
-		dot.WriteString(fmt.Sprintf("\"%s\" -> \"%s\";\n", parent, name))
+		node := strings.TrimSpace(parts[1])
+		if node == "" {
+			continue
+		}
 
-		stack = append(stack, name)
+		if !rootExists {
+			rootExists = true
+		}
 
+		safe := strings.ReplaceAll(node, "\"", "")
+
+		b.WriteString("  \"root\" -> \"")
+		b.WriteString(safe)
+		b.WriteString("\";\n")
 	}
 
-	dot.WriteString("}\n")
+	if !rootExists {
+		b.WriteString("  \"root\";\n")
+	}
 
-	return dot.String()
-}
+	b.WriteString("}\n")
 
-func RenderDOT(dot string, file string) error {
-
-	tmp := file + ".dot"
-
-	os.WriteFile(tmp, []byte(dot), 0644)
-
-	cmd := exec.Command("dot", "-Tsvg", tmp, "-o", file)
-
-	return cmd.Run()
-
+	return b.String()
 }

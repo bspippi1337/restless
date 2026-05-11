@@ -3,12 +3,29 @@ package discoverwow
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"regexp"
 	"sort"
 	"strings"
 	"time"
 )
+
+type EndpointScore struct {
+	Path   string
+	Score  int
+	Reason string
+}
+
+type FieldInfo struct {
+	Path   string
+	Fields []string
+}
+
+type Relation struct {
+	From string
+	To   []string
+}
 
 type Result struct {
 	Target    string
@@ -19,6 +36,10 @@ type Result struct {
 	Params    []string
 	Signals   []string
 	Next      []string
+
+	TopEndpoints []EndpointScore
+	FieldIntel   []FieldInfo
+	Relations    []Relation
 }
 
 func Discover(target string) (*Result, error) {
@@ -60,10 +81,48 @@ func Discover(target string) (*Result, error) {
 		v := fmt.Sprintf("%v", root[k])
 
 		if looksURL(v) {
+			path := simplify(v)
+
 			res.Traversal = appendUnique(
 				res.Traversal,
-				simplify(v),
+				path,
 			)
+
+			score := scorePath(path)
+
+			res.TopEndpoints = append(
+				res.TopEndpoints,
+				EndpointScore{
+					Path:   path,
+					Score:  score,
+					Reason: explainScore(path),
+				},
+			)
+
+			fields := inspectSample(
+				client,
+				target,
+				path,
+			)
+
+			if len(fields) > 0 {
+				res.FieldIntel = append(
+					res.FieldIntel,
+					FieldInfo{
+						Path:   path,
+						Fields: fields,
+					},
+				)
+			}
+
+			rel := inferRelation(path)
+
+			if rel.From != "" {
+				res.Relations = append(
+					res.Relations,
+					rel,
+				)
+			}
 		}
 
 		lk := strings.ToLower(k)
@@ -108,26 +167,17 @@ func Discover(target string) (*Result, error) {
 		}
 	}
 
-	link := resp.Header.Get("Link")
-
-	if strings.Contains(link, `rel="next"`) {
-		res.Schema = append(
-			res.Schema,
-			"pagination detected",
+	if resp.Header.Get("ETag") != "" {
+		res.Signals = appendUnique(
+			res.Signals,
+			"conditional request support",
 		)
 	}
 
 	if resp.Header.Get("X-RateLimit-Limit") != "" {
-		res.Signals = append(
+		res.Signals = appendUnique(
 			res.Signals,
 			"rate-limit headers",
-		)
-	}
-
-	if resp.Header.Get("ETag") != "" {
-		res.Signals = append(
-			res.Signals,
-			"conditional request support",
 		)
 	}
 
@@ -145,9 +195,13 @@ func Discover(target string) (*Result, error) {
 		)
 	}
 
-	sort.Strings(res.Traversal)
-	sort.Strings(res.Params)
-	sort.Strings(res.Signals)
+	sort.Slice(
+		res.TopEndpoints,
+		func(i, j int) bool {
+			return res.TopEndpoints[i].Score >
+				res.TopEndpoints[j].Score
+		},
+	)
 
 	return res, nil
 }
@@ -158,18 +212,20 @@ func Render(r *Result) string {
 	fmt.Fprintf(&b, "\nDISCOVER\n")
 	fmt.Fprintf(&b, "Target      %s\n\n", trimProto(r.Target))
 
-	renderSection(&b, "Identity Model", r.Identity)
-	renderSection(&b, "Traversal Candidates", r.Traversal)
-	renderSection(&b, "Schema Hints", r.Schema)
-	renderSection(&b, "Flow Candidates", r.Flows)
-	renderSection(&b, "Parameter Inference", r.Params)
-	renderSection(&b, "Interesting Signals", r.Signals)
-	renderSection(&b, "Suggested Next Step", r.Next)
+	renderSimple(&b, "Identity Model", r.Identity)
+	renderEndpoints(&b, r.TopEndpoints)
+	renderFields(&b, r.FieldIntel)
+	renderRelations(&b, r.Relations)
+	renderSimple(&b, "Schema Hints", r.Schema)
+	renderSimple(&b, "Flow Candidates", r.Flows)
+	renderSimple(&b, "Parameter Inference", r.Params)
+	renderSimple(&b, "Interesting Signals", r.Signals)
+	renderSimple(&b, "Suggested Next Step", r.Next)
 
 	return b.String()
 }
 
-func renderSection(
+func renderSimple(
 	b *strings.Builder,
 	title string,
 	items []string,
@@ -188,10 +244,214 @@ func renderSection(
 	fmt.Fprintln(b)
 }
 
+func renderEndpoints(
+	b *strings.Builder,
+	items []EndpointScore,
+) {
+	if len(items) == 0 {
+		return
+	}
+
+	fmt.Fprintf(b, "Top Candidates\n")
+	fmt.Fprintf(b, "--------------\n")
+
+	limit := 8
+
+	if len(items) < limit {
+		limit = len(items)
+	}
+
+	for i := 0; i < limit; i++ {
+		it := items[i]
+
+		fmt.Fprintf(
+			b,
+			"  %2d  %-50s %s\n",
+			it.Score,
+			it.Path,
+			it.Reason,
+		)
+	}
+
+	fmt.Fprintln(b)
+}
+
+func renderFields(
+	b *strings.Builder,
+	items []FieldInfo,
+) {
+	if len(items) == 0 {
+		return
+	}
+
+	fmt.Fprintf(b, "Field Intelligence\n")
+	fmt.Fprintf(b, "------------------\n")
+
+	limit := 3
+
+	if len(items) < limit {
+		limit = len(items)
+	}
+
+	for i := 0; i < limit; i++ {
+		it := items[i]
+
+		fmt.Fprintf(b, "  %s\n", it.Path)
+
+		for _, f := range it.Fields {
+			fmt.Fprintf(b, "    - %s\n", f)
+		}
+
+		fmt.Fprintln(b)
+	}
+}
+
+func renderRelations(
+	b *strings.Builder,
+	items []Relation,
+) {
+	if len(items) == 0 {
+		return
+	}
+
+	fmt.Fprintf(b, "Relationship Graph\n")
+	fmt.Fprintf(b, "------------------\n")
+
+	for _, r := range items {
+		fmt.Fprintf(b, "  %s\n", r.From)
+
+		for _, to := range r.To {
+			fmt.Fprintf(b, "    -> %s\n", to)
+		}
+
+		fmt.Fprintln(b)
+	}
+}
+
+func inspectSample(
+	client *http.Client,
+	target string,
+	path string,
+) []string {
+	if strings.Contains(path, "{") {
+		return nil
+	}
+
+	req, _ := http.NewRequest(
+		"GET",
+		target+path,
+		nil,
+	)
+
+	req.Header.Set(
+		"User-Agent",
+		"restless-discover/next",
+	)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil
+	}
+
+	body, _ := io.ReadAll(
+		io.LimitReader(resp.Body, 8192),
+	)
+
+	var obj map[string]interface{}
+
+	if json.Unmarshal(body, &obj) != nil {
+		return nil
+	}
+
+	fields := make([]string, 0)
+
+	for k := range obj {
+		fields = append(fields, k)
+	}
+
+	sort.Strings(fields)
+
+	if len(fields) > 6 {
+		fields = fields[:6]
+	}
+
+	return fields
+}
+
+func inferRelation(path string) Relation {
+	switch {
+	case strings.Contains(path, "user"):
+		return Relation{
+			From: "user",
+			To: []string{
+				"repositories",
+				"followers",
+				"organizations",
+			},
+		}
+
+	case strings.Contains(path, "repo"):
+		return Relation{
+			From: "repository",
+			To: []string{
+				"issues",
+				"contributors",
+				"commits",
+			},
+		}
+	}
+
+	return Relation{}
+}
+
+func scorePath(path string) int {
+	score := 50
+
+	switch {
+	case strings.Contains(path, "search"):
+		score += 40
+	case strings.Contains(path, "repo"):
+		score += 38
+	case strings.Contains(path, "user"):
+		score += 35
+	case strings.Contains(path, "event"):
+		score += 30
+	}
+
+	if strings.Contains(path, "{") {
+		score += 8
+	}
+
+	return score
+}
+
+func explainScore(path string) string {
+	switch {
+	case strings.Contains(path, "search"):
+		return "query surface"
+	case strings.Contains(path, "repo"):
+		return "repository traversal"
+	case strings.Contains(path, "user"):
+		return "identity traversal"
+	case strings.Contains(path, "event"):
+		return "activity stream"
+	}
+
+	return "general endpoint"
+}
+
 func inferParams(s string) []string {
 	var out []string
 
-	re := regexp.MustCompile(`[?&]([a-zA-Z0-9_\-]+)=`)
+	re := regexp.MustCompile(
+		`[?&]([a-zA-Z0-9_\-]+)=`,
+	)
+
 	matches := re.FindAllStringSubmatch(s, -1)
 
 	for _, m := range matches {

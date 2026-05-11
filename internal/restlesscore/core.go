@@ -2,133 +2,249 @@ package restlesscore
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/bspippi1337/restless/internal/intel"
 )
 
 type Endpoint struct {
-	Method string
-	Path string
-	Status int
+	Method     string
+	Path       string
+	Status     int
 	Confidence string
-	Source string
+	Source     string
 }
 
 type Edge struct {
 	From string
-	To string
+	To   string
 }
 
 type ScanResult struct {
-	Target string
-	BaseURL string
-	APIType string
+	Target       string
+	BaseURL      string
+	APIType      string
 	Fingerprints []string
-	Confirmed []Endpoint
-	Topology []Edge
+	Confirmed    []Endpoint
+	Topology     []Edge
 }
 
 type CrawlNode struct {
-	Path string
+	Path  string
 	Depth int
 }
 
+func Scan(target string, timeout time.Duration) (*ScanResult, error) {
+	base := normalize(target)
+	client := &http.Client{Timeout: timeout}
+
+	r := &ScanResult{
+		Target:  target,
+		BaseURL: base,
+	}
+
+	status, body, headers, err := fetch(client, base+"/")
+	if err != nil {
+		return nil, err
+	}
+
+	r.Fingerprints = fingerprints(headers, body)
+	r.APIType = detectAPIType(r.Fingerprints)
+
+	if status >= 200 && status < 500 {
+		r.Confirmed = append(r.Confirmed, Endpoint{
+			Method:     "GET",
+			Path:       "/",
+			Status:     status,
+			Confidence: "high",
+			Source:     "root",
+		})
+	}
+
+	seen := map[string]bool{}
+
+	for _, p := range discover(base, body) {
+		if seen[p] {
+			continue
+		}
+
+		seen[p] = true
+		status, _, _, _ := fetch(client, base+p)
+
+		r.Confirmed = append(r.Confirmed, Endpoint{
+			Method:     "GET",
+			Path:       p,
+			Status:     status,
+			Confidence: "high",
+			Source:     "surface",
+		})
+	}
+
+	r.Confirmed = uniqEndpoints(r.Confirmed)
+
+	sort.Slice(r.Confirmed, func(i, j int) bool {
+		return r.Confirmed[i].Path < r.Confirmed[j].Path
+	})
+
+	return r, nil
+}
+
 func Render(title string, r *ScanResult) string {
-	var b strings.Builder
-
-	live := 0
-	gated := 0
+	endpoints := make([]intel.Endpoint, 0, len(r.Confirmed))
 
 	for _, ep := range r.Confirmed {
-		if ep.Status >= 200 && ep.Status < 300 {
-			live++
-		} else {
-			gated++
+		endpoints = append(endpoints, intel.Endpoint{
+			Path:   ep.Path,
+			Status: ep.Status,
+			Source: ep.Source,
+		})
+	}
+
+	profile := intel.Analyze(
+		r.Target,
+		r.APIType,
+		r.Fingerprints,
+		endpoints,
+	)
+
+	return intel.RenderNervousSystem(profile)
+}
+
+func normalize(raw string) string {
+	raw = strings.TrimSpace(raw)
+	raw = strings.TrimPrefix(raw, "https://")
+	raw = strings.TrimPrefix(raw, "http://")
+	raw = strings.TrimRight(raw, "/")
+	return "https://" + raw
+}
+
+func fetch(client *http.Client, u string) (int, []byte, http.Header, error) {
+	req, _ := http.NewRequest("GET", u, nil)
+	req.Header.Set("User-Agent", "restless-blckswan")
+	req.Header.Set("Accept", "application/json,text/html,*/*")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0, nil, nil, err
+	}
+
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(io.LimitReader(resp.Body, 1024*1024))
+
+	return resp.StatusCode, body, resp.Header, nil
+}
+
+func fingerprints(h http.Header, body []byte) []string {
+	var out []string
+
+	if s := h.Get("Server"); s != "" {
+		out = append(out, s)
+	}
+
+	if ct := h.Get("Content-Type"); ct != "" {
+		ct = strings.ReplaceAll(ct, "application/json; charset=utf-8", "json")
+		ct = strings.ReplaceAll(ct, "text/html; charset=utf-8", "html")
+		out = append(out, ct)
+	}
+
+	if h.Get("X-GitHub-Request-Id") != "" {
+		out = append(out, "github-api")
+	}
+
+	if h.Get("X-RateLimit-Limit") != "" {
+		out = append(out, "rate-limited")
+	}
+
+	if json.Valid(body) {
+		out = append(out, "json-root")
+	}
+
+	return uniqStrings(out)
+}
+
+func detectAPIType(fp []string) string {
+	for _, f := range fp {
+		if strings.Contains(strings.ToLower(f), "github") {
+			return "REST catalog"
 		}
 	}
 
-	line := strings.Repeat("═", 60)
-	section := strings.Repeat("─", 60)
+	return "REST/JSON"
+}
 
-	fmt.Fprintf(&b, "RESTLESS ENGINE\n")
-	fmt.Fprintf(&b, "%s\n\n", line)
-	fmt.Fprintf(&b, "TARGET      %s\n", trimProto(r.Target))
-	fmt.Fprintf(&b, "TYPE        %s\n", r.APIType)
-	fmt.Fprintf(&b, "TRAITS      %s\n\n", strings.Join(r.Fingerprints, " · "))
+func discover(base string, body []byte) []string {
+	var out []string
+	var data map[string]any
 
-	fmt.Fprintf(&b, "SURFACE\n")
-	fmt.Fprintf(&b, "%s\n\n", section)
-
-	groups := map[string][]Endpoint{}
-
-	for _, ep := range r.Confirmed {
-		if ep.Path == "/" {
-			continue
-		}
-
-		groups[groupName(ep.Path)] = append(groups[groupName(ep.Path)], ep)
-	}
-
-	order := []string{"IDENTITY", "REPOSITORIES", "ACTIVITY", "SEARCH", "PLATFORM", "MISC"}
-
-	for _, name := range order {
-		items := groups[strings.Title(strings.ToLower(name))]
-		if len(items) == 0 {
-			continue
-		}
-
-		fmt.Fprintf(&b, "%s\n", name)
-
-		for _, ep := range items {
-			state := "gated"
-			if ep.Status >= 200 && ep.Status < 300 {
-				state = "live"
+	if json.Unmarshal(body, &data) == nil {
+		for _, v := range data {
+			s, ok := v.(string)
+			if !ok {
+				continue
 			}
 
-			fmt.Fprintf(&b, "  %-30s %s\n", dotted(strings.TrimPrefix(ep.Path, "/"), 30), state)
+			if strings.Contains(s, "{") {
+				s = strings.Split(s, "{")[0]
+			}
+
+			u, err := url.Parse(s)
+			if err != nil {
+				continue
+			}
+
+			if u.Path != "" && strings.HasPrefix(u.Path, "/") {
+				out = append(out, strings.TrimRight(u.Path, "/"))
+			}
+		}
+	}
+
+	out = append(out,
+		"/user",
+		"/users",
+		"/repos",
+		"/events",
+		"/search",
+		"/rate_limit",
+	)
+
+	return uniqStrings(out)
+}
+
+func uniqStrings(in []string) []string {
+	m := map[string]bool{}
+	var out []string
+
+	for _, s := range in {
+		if s == "" || m[s] {
+			continue
 		}
 
-		fmt.Fprintf(&b, "\n")
+		m[s] = true
+		out = append(out, s)
 	}
 
-	fmt.Fprintf(&b, "SIGNALS\n")
-	fmt.Fprintf(&b, "%s\n\n", section)
-	fmt.Fprintf(&b, "  authenticated escalation preferred\n")
-	fmt.Fprintf(&b, "  public edge heavily shielded\n")
-	fmt.Fprintf(&b, "  anonymous traversal partially available\n\n")
-
-	fmt.Fprintf(&b, "CAPABILITY\n")
-	fmt.Fprintf(&b, "%s\n\n", section)
-	fmt.Fprintf(&b, "  %-30s %d\n", dotted("discovered", 30), len(r.Confirmed))
-	fmt.Fprintf(&b, "  %-30s %d\n", dotted("live", 30), live)
-	fmt.Fprintf(&b, "  %-30s %d\n", dotted("gated", 30), gated)
-	fmt.Fprintf(&b, "  %-30s medium\n\n", dotted("attack surface", 30))
-
-	fmt.Fprintf(&b, "WORKFLOWS\n")
-	fmt.Fprintf(&b, "%s\n\n", section)
-	fmt.Fprintf(&b, "  restless discover %s\n", trimProto(r.Target))
-	fmt.Fprintf(&b, "  restless inspect  %s\n", trimProto(r.Target))
-	fmt.Fprintf(&b, "  restless fuzz     %s\n", trimProto(r.Target))
-	fmt.Fprintf(&b, "  restless map      %s\n", trimProto(r.Target))
-
-	return b.String()
+	sort.Strings(out)
+	return out
 }
 
-func dotted(s string, width int) string {
-	if len(s) >= width {
-		return s
+func uniqEndpoints(in []Endpoint) []Endpoint {
+	m := map[string]bool{}
+	var out []Endpoint
+
+	for _, e := range in {
+		k := e.Method + " " + e.Path
+		if m[k] {
+			continue
+		}
+
+		m[k] = true
+		out = append(out, e)
 	}
 
-	return s + strings.Repeat(".", width-len(s))
-}
-
-func trimProto(s string) string {
-	s = strings.TrimPrefix(s, "https://")
-	s = strings.TrimPrefix(s, "http://")
-	return strings.TrimRight(s, "/")
+	return out
 }

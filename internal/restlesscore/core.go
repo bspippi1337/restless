@@ -323,7 +323,7 @@ func Render(title string, r *ScanResult) string {
 
 		fmt.Fprintf(
 			&b,
-			"  ├─ %s\n",
+			"  - %s\n",
 			strings.ToLower(bk.Name),
 		)
 
@@ -331,7 +331,7 @@ func Render(title string, r *ScanResult) string {
 
 			fmt.Fprintf(
 				&b,
-				"  │  └─ %s\n",
+				"  - %s\n",
 				ep.Path,
 			)
 		}
@@ -340,7 +340,7 @@ func Render(title string, r *ScanResult) string {
 	fmt.Fprintf(&b, "\n")
 
 	fmt.Fprintf(&b, "Surface\n")
-	fmt.Fprintf(&b, "-----──\n")
+	fmt.Fprintf(&b, "-------\n")
 
 	fmt.Fprintf(
 		&b,

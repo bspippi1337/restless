@@ -45,9 +45,9 @@ func NewMapCmd() *cobra.Command {
 					continue
 				}
 
-				prefix := "├──"
+				prefix := "-─"
 				if i == len(api.Endpoints)-1 {
-					prefix = "└──"
+					prefix = "-─"
 				}
 
 				fmt.Printf("%s %s\n", prefix, path)

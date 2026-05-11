@@ -109,7 +109,6 @@ func (m model) View() string {
 	for i := range grid {
 		grid[i] = make([]bool, w)
 	}
-
 	// signal parameters derived from API stats
 	base := 0.18
 	jitter := float64(m.sig.ClientErr) * 0.02
@@ -142,7 +141,7 @@ func (m model) View() string {
 
 	header := m.title.Render("⚡ restless signal monitor")
 	stats := m.muted.Render(
-		fmt.Sprintf("2xx:%d  3xx:%d  4xx:%d  5xx:%d  429:%d   (press any key to quit)",
+		fmt.Sprintf("2xx:%d  3xx:%d  4xx:%d  5xx:%d  429:%d  (press any key to quit)",
 			m.sig.OK, m.sig.Redirect, m.sig.ClientErr, m.sig.ServerErr, m.sig.RateLimit,
 		),
 	)

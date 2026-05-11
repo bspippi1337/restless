@@ -17,7 +17,6 @@ type Module interface {
 type Registry struct {
 	Log    *logx.Logger
 	Runner engine.Runner
-
 	// Hooks
 	RequestMutators  []func(*RequestContext) error
 	ResponseMutators []func(*ResponseContext) error

@@ -352,7 +352,6 @@ func (r *Runner) Run(ctx context.Context) (*Report, error) {
 
 			if ep.Status < 500 {
 				r.addFound(ep)
-
 				ct := strings.ToLower(ep.ContentType)
 				if strings.Contains(ct, "application/json") && len(body) > 0 {
 					for _, p := range r.extractPathsFromJSON(body) {

@@ -75,7 +75,6 @@ func Probe(target string) (*ProbeResult, error) {
 	if resp != nil && resp.Request != nil && resp.Request.URL != nil {
 		finalURL = resp.Request.URL.String()
 	}
-
 	// OPTIONS -> Allow (best effort)
 	methodHints := []string{}
 	if u, e := url.Parse(finalURL); e == nil && u.Scheme != "" {
@@ -162,11 +161,11 @@ func Usage(out io.Writer) {
 	fmt.Fprintln(out, "restless")
 	fmt.Fprintln(out, "")
 	fmt.Fprintln(out, "Usage:")
-	fmt.Fprintln(out, "  restless <domain-or-url>          # default: smart")
+	fmt.Fprintln(out, "  restless <domain-or-url>  # default: smart")
 	fmt.Fprintln(out, "  restless probe <domain-or-url>")
 	fmt.Fprintln(out, "  restless smart <domain-or-url>")
 	fmt.Fprintln(out, "  restless simulate <domain-or-url> # alias: smart (for now)")
-	fmt.Fprintln(out, "  restless <METHOD> <url>           # raw HTTP (GET/POST/...)")
+	fmt.Fprintln(out, "  restless <METHOD> <url>  # raw HTTP (GET/POST/...)")
 	fmt.Fprintln(out, "")
 }
 
@@ -175,7 +174,6 @@ func Main(args []string, in io.Reader, out io.Writer) int {
 		Usage(out)
 		return 0
 	}
-
 	// raw HTTP: METHOD URL
 	if len(args) >= 2 && len(args[0]) <= 8 {
 		m := strings.ToUpper(args[0])
@@ -186,7 +184,6 @@ func Main(args []string, in io.Reader, out io.Writer) int {
 	}
 
 	cmd := strings.ToLower(args[0])
-
 	// default: treat as target -> smart
 	if cmd != "probe" && cmd != "smart" && cmd != "simulate" {
 		return Main(append([]string{"smart"}, args...), in, out)

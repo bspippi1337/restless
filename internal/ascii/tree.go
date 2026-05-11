@@ -57,11 +57,11 @@ func Render(root *Node) {
 }
 
 func renderNode(n *Node, prefix string, last bool) {
-	connector := "├── "
-	nextPrefix := prefix + "│   "
+	connector := "  "
+	nextPrefix := prefix + "  "
 	if last {
-		connector = "└── "
-		nextPrefix = prefix + "    "
+		connector = "  "
+		nextPrefix = prefix + "  "
 	}
 
 	fmt.Println(prefix + connector + n.Name)

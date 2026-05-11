@@ -347,7 +347,7 @@ func (e *Engine) PrintMap() {
 		}
 		sort.Strings(fields)
 		for _, p := range fields {
-			fmt.Printf("    %s : %s\n", p, ep.Parameters[p])
+			fmt.Printf("  %s : %s\n", p, ep.Parameters[p])
 		}
 	}
 }

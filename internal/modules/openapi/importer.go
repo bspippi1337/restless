@@ -33,7 +33,6 @@ func Import(source string) (SpecIndex, error) {
 	if err := os.WriteFile(rawPath, raw, 0o644); err != nil {
 		return SpecIndex{}, err
 	}
-
 	// Parse minimal metadata if possible
 	title := ""
 	ver := ""

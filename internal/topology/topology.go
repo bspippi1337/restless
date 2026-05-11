@@ -57,11 +57,11 @@ func BuildTree(lines []string) *Node {
 // Render prints the topology as ASCII tree.
 func Render(n *Node, prefix string, last bool) {
 
-	connector := "├─"
-	nextPrefix := prefix + "│ "
+	connector := "  "
+	nextPrefix := prefix + "  "
 
 	if last {
-		connector = "└─"
+		connector = "  "
 		nextPrefix = prefix + "  "
 	}
 

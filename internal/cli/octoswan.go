@@ -160,7 +160,7 @@ func NewOctoSwanCmd() *cobra.Command {
 			fmt.Println("artifacts:")
 			fmt.Println("  report: ", jsonPath)
 			fmt.Println("  summary:", mdPath)
-			fmt.Println("  map:    ", svgPath)
+			fmt.Println("  map:  ", svgPath)
 
 			if demo {
 				fmt.Println()

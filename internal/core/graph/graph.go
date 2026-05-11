@@ -20,7 +20,7 @@ func Render() (string, error) {
 
 	for _, r := range st.LastScan.Endpoints {
 
-		b.WriteString(" ├─ ")
+		b.WriteString("  ")
 		b.WriteString(r.Method)
 		b.WriteString(" ")
 		b.WriteString(r.Path)

@@ -39,7 +39,7 @@ func WriteText(w io.Writer, result core.VerificationResult, opts TextOptions) er
 
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "Summary:")
-	fmt.Fprintf(w, "  OK:   %d\n", result.Summary.OK)
+	fmt.Fprintf(w, "  OK:  %d\n", result.Summary.OK)
 	fmt.Fprintf(w, "  WARN: %d\n", result.Summary.Warn)
 	fmt.Fprintf(w, "  FAIL: %d\n", result.Summary.Fail)
 

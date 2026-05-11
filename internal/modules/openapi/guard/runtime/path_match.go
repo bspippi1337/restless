@@ -15,7 +15,6 @@ func MatchPathTemplate(doc *openapi3.T, concretePath string) (string, bool) {
 	if doc == nil || doc.Paths == nil {
 		return "", false
 	}
-
 	// Prefer longer (more specific) templates first.
 	templates := make([]string, 0, len(doc.Paths.Map()))
 	for t := range doc.Paths.Map() {

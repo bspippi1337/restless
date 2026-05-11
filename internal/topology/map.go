@@ -47,11 +47,11 @@ func ASCII(host string, paths []string) string {
 		sort.Strings(keys)
 		for i, k := range keys {
 			last := i == len(keys)-1
-			branch := "├── "
-			next := prefix + "│   "
+			branch := "  "
+			next := prefix + "  "
 			if last {
-				branch = "└── "
-				next = prefix + "    "
+				branch = "  "
+				next = prefix + "  "
 			}
 			sb.WriteString(prefix)
 			sb.WriteString(branch)

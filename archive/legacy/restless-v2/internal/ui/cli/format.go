@@ -16,10 +16,10 @@ func (s *State) PrintHeader(title string) {
 	}
 	fmt.Printf("Session: %s\n", s.SessionName)
 	if s.Session.BaseURL != "" {
-		fmt.Printf("Base:    %s\n", s.Session.BaseURL)
+		fmt.Printf("Base:  %s\n", s.Session.BaseURL)
 	}
 	if s.Session.Mode != "" {
-		fmt.Printf("Mode:    %s\n", s.Session.Mode)
+		fmt.Printf("Mode:  %s\n", s.Session.Mode)
 	}
 	fmt.Println(strings.Repeat("-", 40))
 	if title != "" {

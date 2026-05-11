@@ -43,14 +43,12 @@ func BuildRequest(idx SpecIndex, spec Spec, ra RunArgs) (types.Request, string, 
 	if base == "" {
 		return types.Request{}, "", errors.New("missing base url (spec has no servers[0].url and no --base provided)")
 	}
-
 	// Replace {param} in path
 	for k, v := range ra.PathParams {
 		path = strings.ReplaceAll(path, "{"+k+"}", url.PathEscape(v))
 	}
 
 	full := base + path
-
 	// Query params
 	if len(ra.QueryParams) > 0 {
 		u, err := url.Parse(full)
@@ -156,7 +154,6 @@ func strictEnabled() bool {
 }
 
 // SPEC_LOADER_START
-
 // --- DISK LOADER PATCH ---
 
 func loadSpecFromDisk(openapiDir, id string) ([]byte, error) {

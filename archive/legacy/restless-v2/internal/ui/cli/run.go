@@ -45,7 +45,7 @@ func newRunCmd(state *State) *cobra.Command {
 			}
 
 			fmt.Printf("\nStatus: %d\n", res.Status)
-			fmt.Printf("Time:   %s\n", formatDuration(dur))
+			fmt.Printf("Time:  %s\n", formatDuration(dur))
 			fmt.Println(strings.Repeat("-", 40))
 			fmt.Println()
 

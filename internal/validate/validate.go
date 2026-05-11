@@ -71,7 +71,6 @@ func Run(ctx context.Context, opt Options) (Report, error) {
 
 	var findings []Finding
 	checked := 0
-
 	// Iterate paths + operations
 	for path, item := range spec.Paths.Map() {
 		ops := operations(item)
@@ -83,7 +82,6 @@ func Run(ctx context.Context, opt Options) (Report, error) {
 
 			exp := expectedCodes(op)
 			code, problem := hit(ctx, client, method, u.String(), opt.AuthHeader)
-
 			// Core rule: 404 is drift (endpoint missing)
 			// In non-strict mode we don't fail on 401/403 (auth required), but we still report mismatched codes
 			fail := false
@@ -247,14 +245,12 @@ func hit(ctx context.Context, client *http.Client, method, target, authHeader st
 	if err != nil {
 		return 0, "request build failed"
 	}
-
 	// Optional single header "Key: Value"
 	if authHeader != "" {
 		if k, v, ok := strings.Cut(authHeader, ":"); ok {
 			req.Header.Set(strings.TrimSpace(k), strings.TrimSpace(v))
 		}
 	}
-
 	// Give servers something sane
 	req.Header.Set("Accept", "application/json")
 

@@ -238,11 +238,11 @@ func splitArgs(line string) []string {
 
 func printShellHelp(out io.Writer, names []string) {
 	fmt.Fprintln(out, "Commands:")
-	fmt.Fprintln(out, "  help                 show this help")
-	fmt.Fprintln(out, "  endpoints | eps       list learned endpoint commands")
-	fmt.Fprintln(out, "  base                 print base URL")
+	fmt.Fprintln(out, "  help  show this help")
+	fmt.Fprintln(out, "  endpoints | eps  list learned endpoint commands")
+	fmt.Fprintln(out, "  base  print base URL")
 	fmt.Fprintln(out, "  call METHOD PATH ... raw call (example: call GET /users mojombo)")
-	fmt.Fprintln(out, "  exit | quit          leave shell")
+	fmt.Fprintln(out, "  exit | quit  leave shell")
 	fmt.Fprintln(out, "")
 	fmt.Fprintln(out, "Endpoint commands:")
 	if len(names) == 0 {
@@ -250,6 +250,6 @@ func printShellHelp(out io.Writer, names []string) {
 		return
 	}
 	for _, n := range names {
-		fmt.Fprintf(out, "  %s [seg...]          GET on learned endpoint (seg appended to path)\n", n)
+		fmt.Fprintf(out, "  %s [seg...]  GET on learned endpoint (seg appended to path)\n", n)
 	}
 }

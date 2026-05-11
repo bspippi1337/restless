@@ -51,7 +51,6 @@ func Get(ctx context.Context, baseURL string) (*openapi3.T, string, bool) {
 	if exists && time.Since(entry.LoadedAt) < ttl {
 		return entry.Doc, entry.SpecRef, true
 	}
-
 	// 2) network refresh
 	if specRef, ok := auto.TryDiscover(baseURL); ok {
 		doc, err := gloader.Load(ctx, specRef, gloader.LoadOptions{AllowRemoteRefs: true})
@@ -63,7 +62,6 @@ func Get(ctx context.Context, baseURL string) (*openapi3.T, string, bool) {
 			return doc, specRef, true
 		}
 	}
-
 	// 3) disk fallback
 	doc, specRef, ok := loadFromDisk(baseURL)
 	if ok {

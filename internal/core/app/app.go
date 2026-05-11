@@ -46,7 +46,6 @@ func (a *App) RunOnce(ctx context.Context, req types.Request) (types.Response, e
 			return types.Response{}, err
 		}
 	}
-
 	// Build final request
 	h := http.Header{}
 	for k, vv := range rc.Header {
@@ -65,7 +64,6 @@ func (a *App) RunOnce(ctx context.Context, req types.Request) (types.Response, e
 	if err != nil {
 		return types.Response{}, err
 	}
-
 	// Apply response mutators
 	rsc := &ResponseContext{
 		StatusCode: resp.StatusCode,
@@ -80,7 +78,6 @@ func (a *App) RunOnce(ctx context.Context, req types.Request) (types.Response, e
 			return types.Response{}, err
 		}
 	}
-
 	// Write back
 	outHeaders := http.Header{}
 	for k, vv := range rsc.Header {

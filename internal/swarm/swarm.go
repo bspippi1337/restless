@@ -40,7 +40,6 @@ func (s *Swarm) Run(worker func(Task) Result) {
 			defer s.wg.Done()
 
 			for t := range s.Tasks {
-
 				s.Results <- worker(t)
 
 			}

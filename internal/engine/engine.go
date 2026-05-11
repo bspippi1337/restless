@@ -28,7 +28,7 @@ func buildTopology(e []Endpoint) string {
 	b.WriteString("root\n")
 
 	for _, ep := range e {
-		b.WriteString("  └── ")
+		b.WriteString("  ")
 		b.WriteString(strings.TrimPrefix(ep.Path, "/"))
 		b.WriteString("\n")
 	}

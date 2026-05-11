@@ -162,11 +162,11 @@ func Usage(out io.Writer) {
 	fmt.Fprintln(out, "restless")
 	fmt.Fprintln(out, "")
 	fmt.Fprintln(out, "Usage:")
-	fmt.Fprintln(out, "  restless <domain-or-url>          # default: smart")
+	fmt.Fprintln(out, "  restless <domain-or-url>  # default: smart")
 	fmt.Fprintln(out, "  restless probe <domain-or-url>")
 	fmt.Fprintln(out, "  restless smart <domain-or-url>")
 	fmt.Fprintln(out, "  restless simulate <domain-or-url> # alias: smart (for now)")
-	fmt.Fprintln(out, "  restless <METHOD> <url>           # raw HTTP (GET/POST/...)")
+	fmt.Fprintln(out, "  restless <METHOD> <url>  # raw HTTP (GET/POST/...)")
 	fmt.Fprintln(out, "")
 }
 

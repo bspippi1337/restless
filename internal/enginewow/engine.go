@@ -183,17 +183,17 @@ func Render(r *Result) string {
 	var b strings.Builder
 
 	fmt.Fprintf(&b, "\nENGINE\n")
-	fmt.Fprintf(&b, "Target      %s\n", r.Base)
-	fmt.Fprintf(&b, "Type        %s\n", r.Kind)
-	fmt.Fprintf(&b, "Surface     %d nodes\n", r.Surface)
-	fmt.Fprintf(&b, "Exposure    %s\n", r.Exposure)
+	fmt.Fprintf(&b, "Target  %s\n", r.Base)
+	fmt.Fprintf(&b, "Type  %s\n", r.Kind)
+	fmt.Fprintf(&b, "Surface  %d nodes\n", r.Surface)
+	fmt.Fprintf(&b, "Exposure  %s\n", r.Exposure)
 	fmt.Fprintf(&b, "Auth Walls  %d%%\n", r.AuthScore)
-	fmt.Fprintf(&b, "Latency     %s avg\n", r.AvgLatency.Round(time.Millisecond))
+	fmt.Fprintf(&b, "Latency  %s avg\n", r.AvgLatency.Round(time.Millisecond))
 
 	if len(r.Traits) > 0 {
 		fmt.Fprintf(
 			&b,
-			"Traits      %s\n",
+			"Traits  %s\n",
 			strings.Join(r.Traits, ", "),
 		)
 	}

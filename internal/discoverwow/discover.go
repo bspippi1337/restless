@@ -218,7 +218,7 @@ func Render(r *Result) string {
 	var b strings.Builder
 
 	fmt.Fprintf(&b, "\nDISCOVER\n")
-	fmt.Fprintf(&b, "Target      %s\n\n", trimProto(r.Target))
+	fmt.Fprintf(&b, "Target  %s\n\n", trimProto(r.Target))
 
 	renderSimple(&b, "Identity Model", r.Identity)
 	renderEndpoints(&b, r.TopEndpoints)
@@ -313,7 +313,7 @@ func renderFields(
 		fmt.Fprintf(b, "  %s\n", it.Path)
 
 		for _, f := range it.Fields {
-			fmt.Fprintf(b, "    - %s\n", f)
+			fmt.Fprintf(b, "  - %s\n", f)
 		}
 
 		fmt.Fprintln(b)
@@ -345,7 +345,7 @@ func renderRelations(
 		fmt.Fprintf(b, "  %s\n", r.From)
 
 		for _, to := range r.To {
-			fmt.Fprintf(b, "    -> %s\n", to)
+			fmt.Fprintf(b, "  -> %s\n", to)
 		}
 
 		fmt.Fprintln(b)

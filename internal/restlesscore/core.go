@@ -242,11 +242,11 @@ func Render(title string, r *ScanResult) string {
 		r.Target,
 	)
 
-	fmt.Fprintf(&b, "Type      %s\n", r.APIType)
+	fmt.Fprintf(&b, "Type  %s\n", r.APIType)
 
 	if len(r.Fingerprints) > 0 {
 
-		fmt.Fprintf(&b, "Traits    ")
+		fmt.Fprintf(&b, "Traits  ")
 
 		for i, fp := range r.Fingerprints {
 
@@ -309,7 +309,7 @@ func Render(title string, r *ScanResult) string {
 	}
 
 	fmt.Fprintf(&b, "Graph\n")
-	fmt.Fprintf(&b, "─────\n")
+	fmt.Fprintf(&b, "-----\n")
 
 	fmt.Fprintf(&b, "  /\n")
 
@@ -340,7 +340,7 @@ func Render(title string, r *ScanResult) string {
 	fmt.Fprintf(&b, "\n")
 
 	fmt.Fprintf(&b, "Surface\n")
-	fmt.Fprintf(&b, "───────\n")
+	fmt.Fprintf(&b, "-----──\n")
 
 	fmt.Fprintf(
 		&b,

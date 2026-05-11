@@ -16,7 +16,7 @@ func Header(app, tab, face string) string {
 	right := lipgloss.NewStyle().Foreground(cDim).Render(face)
 
 	return lipgloss.NewStyle().Padding(0, 1).Render(left+mid) + "  " + right + "\n" +
-		lipgloss.NewStyle().Foreground(cLine).Render(lipgloss.NewStyle().Padding(0, 1).Render(repeat("─", 80)))
+		lipgloss.NewStyle().Foreground(cLine).Render(lipgloss.NewStyle().Padding(0, 1).Render(repeat("", 80)))
 }
 
 func Footer(help string) string {

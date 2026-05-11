@@ -60,11 +60,11 @@ func BuildTopologyASCII(host string, eps []Endpoint) string {
 			ch := n.children[k]
 			isLast := i == len(keys)-1
 
-			branch := "├── "
-			nextPrefix := prefix + "│   "
+			branch := "  "
+			nextPrefix := prefix + "  "
 			if isLast {
-				branch = "└── "
-				nextPrefix = prefix + "    "
+				branch = "  "
+				nextPrefix = prefix + "  "
 			}
 
 			sb.WriteString(prefix)

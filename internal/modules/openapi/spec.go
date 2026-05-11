@@ -49,12 +49,10 @@ func LoadSpec(raw []byte) (Spec, error) {
 	if err := json.Unmarshal(raw, &s); err == nil && s.Paths != nil {
 		return validateSpec(s)
 	}
-
 	// Then YAML
 	if err := yaml.Unmarshal(raw, &s); err == nil && s.Paths != nil {
 		return validateSpec(s)
 	}
-
 	// Last attempt: YAML may parse into map if weird anchors; still fail fast
 	return Spec{}, errors.New("failed to parse spec as JSON or YAML")
 }

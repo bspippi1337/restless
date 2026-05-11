@@ -43,12 +43,10 @@ func ExpandLite(seed []EndpointLite, opt Options) []EndpointLite {
 		seen[k] = true
 		out = append(out, EndpointLite{Method: m, Path: p})
 	}
-
 	// seed first
 	for _, e := range seed {
 		add(e.Method, e.Path)
 	}
-
 	// build simple vocab from seed paths
 	parts := []string{}
 	for _, e := range seed {
@@ -70,15 +68,12 @@ func ExpandLite(seed []EndpointLite, opt Options) []EndpointLite {
 	if len(parts) == 0 {
 		parts = []string{"api", "v1", "v2", "health", "status", "users", "auth"}
 	}
-
 	// common params candidates
 	paramVals := []string{"{id}", "{uuid}", "{userId}", "{projectId}", "{slug}"}
-
 	// candidate methods
 	methods := []string{"GET", "POST", "PUT", "PATCH", "DELETE"}
 
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-
 	// generate extra endpoints
 	for len(out) < len(seen)+maxExtra {
 		// random path length 1-4
@@ -94,12 +89,10 @@ func ExpandLite(seed []EndpointLite, opt Options) []EndpointLite {
 		p := "/" + strings.Join(segs, "/")
 		m := methods[rng.Intn(len(methods))]
 		add(m, p)
-
 		// also add GET variant for visibility
 		if m != "GET" {
 			add("GET", p)
 		}
-
 		// stop if we hit limit
 		if len(out) >= len(seen)+maxExtra {
 			break
@@ -112,7 +105,6 @@ func ExpandLite(seed []EndpointLite, opt Options) []EndpointLite {
 		}
 		return out[i].Path < out[j].Path
 	})
-
 	// return only generated beyond original seed (but safe to return all; caller can dedupe)
 	return out
 }

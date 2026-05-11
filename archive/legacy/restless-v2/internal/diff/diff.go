@@ -103,7 +103,7 @@ func PrintHuman(w io.Writer, r Report) {
 	if r.Same {
 		fmt.Fprintf(w, "✔ diff OK (no drift)\n")
 		fmt.Fprintf(w, "  from: %s  fp=%s\n", r.From, r.FromFP)
-		fmt.Fprintf(w, "  to:   %s  fp=%s\n", r.To, r.ToFP)
+		fmt.Fprintf(w, "  to:  %s  fp=%s\n", r.To, r.ToFP)
 		return
 	}
 	fmt.Fprintf(w, "✖ diff DRIFT detected (%d)\n\n", r.ChangeCount)

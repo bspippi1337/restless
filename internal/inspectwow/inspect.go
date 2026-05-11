@@ -24,6 +24,7 @@ type Result struct {
 	Relations []string
 	Signals   []string
 	Examples  []string
+	Problems  []string
 }
 
 func Inspect(target string) (*Result, error) {
@@ -43,7 +44,7 @@ func Inspect(target string) (*Result, error) {
 
 	req.Header.Set(
 		"User-Agent",
-		"restless-inspect/next",
+		"Restless/420",
 	)
 
 	resp, err := client.Do(req)
@@ -73,12 +74,44 @@ func Inspect(target string) (*Result, error) {
 	}
 
 	body, _ := io.ReadAll(
-		io.LimitReader(resp.Body, 16384),
+		io.LimitReader(resp.Body, 32768),
 	)
+
+	if strings.Contains(
+		strings.ToLower(target),
+		"github.com",
+	) {
+		enrichGitHub(
+			req,
+			resp,
+			r,
+			body,
+		)
+	}
 
 	var obj map[string]interface{}
 
 	if json.Unmarshal(body, &obj) == nil {
+
+		if msg, ok := obj["message"].(string); ok {
+			switch {
+			case strings.Contains(
+				strings.ToLower(msg),
+				"rate limit",
+			):
+				r.Problems = append(
+					r.Problems,
+					"github rate limit exceeded",
+				)
+
+			case resp.StatusCode == 403:
+				r.Problems = append(
+					r.Problems,
+					"access restricted",
+				)
+			}
+		}
+
 		keys := make([]string, 0)
 
 		for k, v := range obj {
@@ -144,9 +177,20 @@ func Render(r *Result) string {
 	var b strings.Builder
 
 	fmt.Fprintf(&b, "\nINSPECT\n")
-	fmt.Fprintf(&b, "Target      %s\n", trimProto(r.Target))
-	fmt.Fprintf(&b, "Status      %d\n", r.Status)
-	fmt.Fprintf(&b, "Content     %s\n\n", r.ContentType)
+	fmt.Fprintf(&b, "Target  %s\n", trimProto(r.Target))
+	fmt.Fprintf(&b, "Status  %d\n", r.Status)
+	fmt.Fprintf(&b, "Content  %s\n\n", r.ContentType)
+
+	if len(r.Problems) > 0 {
+		fmt.Fprintf(&b, "Observations\n")
+		fmt.Fprintf(&b, "------------\n")
+
+		for _, p := range r.Problems {
+			fmt.Fprintf(&b, "- %s\n", p)
+		}
+
+		fmt.Fprintln(&b)
+	}
 
 	if len(r.Fields) > 0 {
 		fmt.Fprintf(&b, "Fields\n")

@@ -38,7 +38,6 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 	docURLs := []string{}
 	endpoints := []Endpoint{}
 	base := ""
-
 	// 1) OpenAPI
 	for _, h := range hosts {
 		oas, urls, err := docparse.TryOpenAPI(ctx, h)
@@ -68,7 +67,6 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 	if base == "" {
 		base = hosts[0]
 	}
-
 	// 2) Sitemap hints
 	smURLs, smPaths := scrape.SitemapDocs(ctx, base, max(12, opt.BudgetPages*3))
 	if len(smURLs) > 0 {
@@ -88,7 +86,6 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 			})
 		}
 	}
-
 	// 3) Light docs scrape
 	scrHits, scrVisited := scrape.LightDocsScrape(ctx, base, max(1, opt.BudgetPages))
 	docURLs = append(docURLs, scrVisited...)
@@ -110,7 +107,6 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 			}},
 		})
 	}
-
 	// 4) Fuzz expansion
 	if opt.Fuzz {
 		seed := dedupe(endpoints)
@@ -136,7 +132,6 @@ func DiscoverDomain(domain string, opt Options) (Finding, error) {
 	}
 
 	endpoints = dedupe(endpoints)
-
 	// 5) Verify (safe)
 	if opt.Verify {
 		verified := []Endpoint{}

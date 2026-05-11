@@ -34,7 +34,6 @@ func loadSource(src string) ([]byte, error) {
 		}
 
 		body := strings.TrimSpace(string(data))
-
 		// hvis HTML, prøv fallback uten petstore redirect
 		if strings.HasPrefix(body, "<") {
 			return nil, errors.New("received HTML instead of OpenAPI spec")

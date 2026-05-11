@@ -34,14 +34,12 @@ type Snapshot struct {
 
 func FromValidateReport(baseURL, specPath string, rep validate.Report) Snapshot {
 	eps := make([]Endpoint, 0, rep.Checked)
-
 	// Build map of failures first
 	failMap := map[string]validate.Finding{}
 	for _, f := range rep.Findings {
 		key := strings.ToUpper(f.Method) + " " + f.Path
 		failMap[key] = f
 	}
-
 	// We only have explicit per-endpoint info for failures in validate.Report today.
 	// So we snapshot failures + include a stable fingerprint of "no drift" when OK.
 	// Future enhancement: validate can be extended to return per-endpoint observed codes.

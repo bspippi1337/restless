@@ -14,7 +14,7 @@ func Build(host string, paths []string) string {
 			continue
 		}
 
-		tree += " ├── " + p + "\n"
+		tree += "  " + p + "\n"
 	}
 
 	return tree

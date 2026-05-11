@@ -21,13 +21,13 @@ func newSessionCmd(state *State) *cobra.Command {
 			}
 
 			fmt.Printf("Base URL:  %s\n", state.Session.BaseURL)
-			fmt.Printf("Mode:      %s\n", state.Session.Mode)
+			fmt.Printf("Mode:  %s\n", state.Session.Mode)
 			if state.Session.LastCall != "" {
 				fmt.Printf("Last call: %s\n", state.Session.LastCall)
 			}
 			fmt.Printf("Requests:  %d\n", state.Session.RequestCount)
 			if !state.Session.UpdatedAt.IsZero() {
-				fmt.Printf("Updated:   %s\n", state.Session.UpdatedAt.Format(time.RFC3339))
+				fmt.Printf("Updated:  %s\n", state.Session.UpdatedAt.Format(time.RFC3339))
 			}
 			return nil
 		},

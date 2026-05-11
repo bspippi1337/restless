@@ -40,7 +40,6 @@ func MaybeValidateResponse(
 	if !ok || doc == nil {
 		return
 	}
-
 	// 12.5: accept concrete paths by mapping to template if possible.
 	if doc.Paths != nil && doc.Paths.Find(path) == nil {
 		if tpl, ok := gruntime.MatchPathTemplate(doc, path); ok {
@@ -62,7 +61,6 @@ func MaybeValidateResponse(
 		Findings:      findings,
 	}
 	res.CDI = gruntime.ComputeCDI(findings, gruntime.DefaultWeights())
-
 	// 13: not-quite-steady-state snapshot (strictly observational).
 	_ = ai.UpdateFromGuard(baseURL, specRef, findings, res.CDI)
 

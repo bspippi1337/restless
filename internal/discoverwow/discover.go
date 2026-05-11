@@ -10,11 +10,6 @@ import (
 	"time"
 )
 
-type Signal struct {
-	Title string
-	Items []string
-}
-
 type Result struct {
 	Target    string
 	Identity  []string
@@ -65,7 +60,10 @@ func Discover(target string) (*Result, error) {
 		v := fmt.Sprintf("%v", root[k])
 
 		if looksURL(v) {
-			res.Traversal = append(res.Traversal, simplify(v))
+			res.Traversal = appendUnique(
+				res.Traversal,
+				simplify(v),
+			)
 		}
 
 		lk := strings.ToLower(k)
@@ -136,18 +134,20 @@ func Discover(target string) (*Result, error) {
 	if len(res.Traversal) > 0 {
 		res.Flows = append(
 			res.Flows,
-			"enumerate resources → inspect entities → traverse relations",
+			"enumerate resources",
+			"inspect entities",
+			"traverse relations",
 		)
-	}
-
-	if len(res.Traversal) > 0 {
-		next := res.Traversal[0]
 
 		res.Next = append(
 			res.Next,
-			"restless inspect "+target+next,
+			"restless inspect "+target+res.Traversal[0],
 		)
 	}
+
+	sort.Strings(res.Traversal)
+	sort.Strings(res.Params)
+	sort.Strings(res.Signals)
 
 	return res, nil
 }
@@ -155,35 +155,34 @@ func Discover(target string) (*Result, error) {
 func Render(r *Result) string {
 	var b strings.Builder
 
-	fmt.Fprintf(&b,
-		"\nDISCOVER :: %s\n\n",
-		trimProto(r.Target),
-	)
+	fmt.Fprintf(&b, "\nDISCOVER\n")
+	fmt.Fprintf(&b, "Target      %s\n\n", trimProto(r.Target))
 
-	section(&b, "Identity model", r.Identity)
-	section(&b, "Traversal candidates", r.Traversal)
-	section(&b, "Schema hints", r.Schema)
-	section(&b, "Flow candidates", r.Flows)
-	section(&b, "Parameter inference", r.Params)
-	section(&b, "Interesting signals", r.Signals)
-	section(&b, "Suggested next step", r.Next)
+	renderSection(&b, "Identity Model", r.Identity)
+	renderSection(&b, "Traversal Candidates", r.Traversal)
+	renderSection(&b, "Schema Hints", r.Schema)
+	renderSection(&b, "Flow Candidates", r.Flows)
+	renderSection(&b, "Parameter Inference", r.Params)
+	renderSection(&b, "Interesting Signals", r.Signals)
+	renderSection(&b, "Suggested Next Step", r.Next)
 
 	return b.String()
 }
 
-func section(b *strings.Builder, title string, items []string) {
+func renderSection(
+	b *strings.Builder,
+	title string,
+	items []string,
+) {
 	if len(items) == 0 {
 		return
 	}
 
-	fmt.Fprintf(b,
-		"%s\n%s\n",
-		title,
-		strings.Repeat("─", len(title)),
-	)
+	fmt.Fprintf(b, "%s\n", title)
+	fmt.Fprintf(b, "%s\n", strings.Repeat("-", len(title)))
 
-	for _, i := range items {
-		fmt.Fprintf(b, "  %s\n", i)
+	for _, item := range items {
+		fmt.Fprintf(b, "  - %s\n", item)
 	}
 
 	fmt.Fprintln(b)
@@ -210,6 +209,7 @@ func appendUnique(in []string, v string) []string {
 			return in
 		}
 	}
+
 	return append(in, v)
 }
 

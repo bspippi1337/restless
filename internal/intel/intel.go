@@ -127,20 +127,22 @@ func Analyze(target string, kind string, traits []string, endpoints []Endpoint) 
 
 func RenderNervousSystem(p Profile) string {
 	var b strings.Builder
-	bar := strings.Repeat("═", 60)
-	thin := strings.Repeat("─", 60)
+	bar := strings.Repeat("═", 64)
+	thin := strings.Repeat("─", 64)
 
 	fmt.Fprintf(&b, "RESTLESS ENGINE\n")
 	fmt.Fprintf(&b, "%s\n\n", bar)
-	fmt.Fprintf(&b, "TARGET      %s\n", p.Target)
-	fmt.Fprintf(&b, "TYPE        %s\n", p.Kind)
+	fmt.Fprintf(&b, "TARGET   %s\n", p.Target)
+	fmt.Fprintf(&b, "TYPE     %s\n", p.Kind)
+
 	if len(p.Traits) > 0 {
-		fmt.Fprintf(&b, "TRAITS      %s\n", strings.Join(p.Traits, " · "))
+		fmt.Fprintf(&b, "TRAITS   %s\n", strings.Join(p.Traits, " · "))
 	}
+
 	fmt.Fprintf(&b, "\n")
 
-	renderPulses(&b, thin, p.Pulses)
-	renderReflexes(&b, thin, p.Reflexes)
+	renderSignals(&b, thin, p.Pulses)
+	renderAdaptation(&b, thin, p.Reflexes)
 	renderList(&b, thin, "CAPABILITIES", p.Capabilities)
 	renderList(&b, thin, "RISK SURFACE", p.Risks)
 	renderList(&b, thin, "WORKFLOWS", p.Workflows)
@@ -148,25 +150,44 @@ func RenderNervousSystem(p Profile) string {
 	return b.String()
 }
 
-func renderPulses(b *strings.Builder, thin string, pulses []Pulse) {
+func renderSignals(b *strings.Builder, thin string, pulses []Pulse) {
 	if len(pulses) == 0 {
 		return
 	}
-	fmt.Fprintf(b, "SIGNALS\n%s\n\n", thin)
+
+	fmt.Fprintf(b, "SIGNALS\n")
+	fmt.Fprintf(b, "%s\n\n", thin)
+
 	for _, pulse := range pulses {
-		fmt.Fprintf(b, "  %-24s %3d  %s\n", dotted(pulse.Name, 24), pulse.Weight, pulse.Reason)
+		fmt.Fprintf(
+			b,
+			"  %-26s %3d  %s\n",
+			dotted(pulse.Name, 26),
+			pulse.Weight,
+			pulse.Reason,
+		)
 	}
+
 	fmt.Fprintf(b, "\n")
 }
 
-func renderReflexes(b *strings.Builder, thin string, reflexes []Reflex) {
+func renderAdaptation(b *strings.Builder, thin string, reflexes []Reflex) {
 	if len(reflexes) == 0 {
 		return
 	}
-	fmt.Fprintf(b, "ADAPTATION\n%s\n\n", thin)
+
+	fmt.Fprintf(b, "ADAPTATION\n")
+	fmt.Fprintf(b, "%s\n\n", thin)
+
 	for _, r := range reflexes {
-		fmt.Fprintf(b, "  when %-20s -> %s\n", r.Trigger, r.Action)
+		fmt.Fprintf(
+			b,
+			"  when %-24s → %s\n",
+			r.Trigger,
+			r.Action,
+		)
 	}
+
 	fmt.Fprintf(b, "\n")
 }
 
@@ -174,10 +195,14 @@ func renderList(b *strings.Builder, thin string, title string, items []string) {
 	if len(items) == 0 {
 		return
 	}
-	fmt.Fprintf(b, "%s\n%s\n\n", title, thin)
+
+	fmt.Fprintf(b, "%s\n", title)
+	fmt.Fprintf(b, "%s\n\n", thin)
+
 	for _, item := range uniq(items) {
-		fmt.Fprintf(b, "  %s\n", item)
+		fmt.Fprintf(b, "  • %s\n", item)
 	}
+
 	fmt.Fprintf(b, "\n")
 }
 
@@ -185,7 +210,8 @@ func dotted(s string, width int) string {
 	if len(s) >= width {
 		return s
 	}
-	return s + strings.Repeat(".", width-len(s))
+
+	return s + strings.Repeat("·", width-len(s))
 }
 
 func normalizeTarget(s string) string {
@@ -205,14 +231,17 @@ func fallback(s string, f string) string {
 func uniq(in []string) []string {
 	seen := map[string]bool{}
 	out := []string{}
+
 	for _, item := range in {
 		item = strings.TrimSpace(item)
 		if item == "" || seen[item] {
 			continue
 		}
+
 		seen[item] = true
 		out = append(out, item)
 	}
+
 	return out
 }
 
@@ -222,5 +251,6 @@ func appendUnique(in []string, v string) []string {
 			return in
 		}
 	}
+
 	return append(in, v)
 }

@@ -89,3 +89,8 @@ Historical experiments and prototypes:
 ## License
 
 MIT
+
+## Status
+
+![CI](https://github.com/bspippi1337/restless/actions/workflows/ci.yml/badge.svg)
+![Installer](https://github.com/bspippi1337/restless/actions/workflows/installer.yml/badge.svg)

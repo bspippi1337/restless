@@ -5,8 +5,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  test:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,13 +18,14 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.24"
+          cache: true
 
-      - name: Show toolchain
+      - name: Toolchain
         run: |
           go version
           docker --version
 
-      - name: Normalize module graph
+      - name: Normalize modules
         run: |
           go mod tidy
           go mod download
@@ -30,20 +34,28 @@ jobs:
         run: |
           git diff --exit-code go.mod go.sum
 
-      - name: Build
+      - name: Formatting
         run: |
-          make build || go build ./cmd/restless
+          test -z "$(gofmt -l .)"
+
+      - name: Vet
+        run: |
+          go vet ./...
 
       - name: Test
         run: |
           go test ./...
 
-      - name: Smoke test binary
+      - name: Build
         run: |
-          ./build/restless --help || \
-          go run ./cmd/restless --help
+          mkdir -p build
+          go build -o build/restless ./cmd/restless
 
-      - name: Debian package smoke
+      - name: Binary smoke
+        run: |
+          ./build/restless --help
+
+      - name: Debian smoke
         run: |
           sudo apt-get update
           sudo apt-get install -y \

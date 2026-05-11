@@ -3,95 +3,77 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
-	"runtime"
-	"strings"
 
-	"github.com/bspippi1337/restless/internal/cli"
-	"github.com/bspippi1337/restless/internal/engine"
+	"github.com/bspippi1337/restless/internal/discovery"
 )
 
-func looksLikeTarget(s string) bool {
-	return strings.Contains(s, ".")
-}
-
-func openFile(path string) {
-	var cmd *exec.Cmd
-
-	switch runtime.GOOS {
-	case "darwin":
-		cmd = exec.Command("open", path)
-	case "windows":
-		cmd = exec.Command("cmd", "/c", "start", path)
-	default:
-		cmd = exec.Command("xdg-open", path)
-	}
-
-	cmd.Start()
-}
-
 func main() {
+	if len(os.Args) < 3 {
+		fmt.Println("usage: restless inspect <target>")
+		os.Exit(1)
+	}
 
-	open := false
-	target := ""
+	cmd := os.Args[1]
+	target := os.Args[2]
 
-	for _, a := range os.Args[1:] {
+	if cmd != "inspect" {
+		fmt.Println("currently only inspect is patched in this recovery build")
+		os.Exit(1)
+	}
 
-		if a == "--open" || a == "-o" {
-			open = true
-			continue
-		}
+	fp, err := discovery.FingerprintTarget(target)
+	if err != nil {
+		fmt.Println("error:", err)
+		os.Exit(1)
+	}
 
-		if looksLikeTarget(a) {
-			target = a
+	fmt.Println("Restless Real Discovery Engine")
+	fmt.Println()
+
+	fmt.Printf("Scanning: %s\n\n", fp.Target)
+
+	fmt.Println("[1/5] probing target")
+	fmt.Println("[2/5] fingerprinting stack")
+	fmt.Println("[3/5] extracting API hints")
+	fmt.Println("[4/5] inferring architecture")
+	fmt.Println("[5/5] scoring confidence")
+
+	fmt.Println()
+	fmt.Println("Fingerprint")
+	fmt.Println("-----------")
+	fmt.Printf("API type: %s\n", fp.APIType)
+	fmt.Printf("Server: %s\n", fp.Server)
+	fmt.Printf("Confidence: %d/100\n", fp.Confidence)
+
+	fmt.Println()
+	fmt.Println("Technologies")
+	fmt.Println("------------")
+
+	if len(fp.Technologies) == 0 {
+		fmt.Println("No obvious technologies detected")
+	} else {
+		for _, t := range fp.Technologies {
+			fmt.Printf("- %s\n", t)
 		}
 	}
 
-	if target != "" {
+	fmt.Println()
+	fmt.Println("Discovery")
+	fmt.Println("---------")
 
-		target = engine.NormalizeTarget(target)
-
-		fmt.Println("Restless API Discovery Engine")
-		fmt.Println("Scanning:", target)
-		fmt.Println()
-
-		engine.Step(1, 5, "probing API surface")
-
-		res, err := engine.Run(target)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		engine.Step(2, 5, "inferring resource model")
-
-		engine.Step(3, 5, "building topology")
-
-		engine.PrintResult(res)
-
-		engine.Step(4, 5, "generating graph")
-
-		dot := engine.TopologyToDOT(res.Topology)
-
-		out := strings.ReplaceAll(target, "https://", "") + ".svg"
-
-		err = engine.RenderDOT(dot, out)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		engine.Step(5, 5, "complete")
-
-		fmt.Println()
-		fmt.Println("Graph written to", out)
-
-		if open {
-			openFile(out)
-		}
-
-		os.Exit(0)
+	if fp.GraphQL {
+		fmt.Println("- GraphQL hints detected")
 	}
 
-	cli.Execute()
+	if fp.OpenAPI {
+		fmt.Println("- OpenAPI/Swagger hints detected")
+	}
+
+	if len(fp.InterestingURLs) == 0 {
+		fmt.Println("- No obvious API endpoints discovered")
+	} else {
+		for _, u := range fp.InterestingURLs {
+			fmt.Printf("- %s\n", u)
+		}
+	}
 }

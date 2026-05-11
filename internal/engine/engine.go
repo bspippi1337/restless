@@ -128,7 +128,7 @@ func PrintResult(r *Result) {
 	fmt.Println("API type:", r.APIType)
 	fmt.Println()
 
-	fmt.Println("Endpoints discovered")
+	fmt.Println("Discovery")
 	fmt.Println("--------------------")
 
 	for _, e := range r.Endpoints {

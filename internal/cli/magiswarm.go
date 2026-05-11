@@ -61,7 +61,6 @@ func NewMagiswarmCmd() *cobra.Command {
 				opt.Wordlist = strings.Split(string(b), "\n")
 			}
 
-			fmt.Println("\033[38;5;45m⚡ restless magiswarm\033[0m")
 			fmt.Println("sandstorm pulse: on  |  nagios: shhh")
 			fmt.Println()
 

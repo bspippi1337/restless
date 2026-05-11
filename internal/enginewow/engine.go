@@ -182,51 +182,54 @@ func analyze(r *Result) {
 func Render(r *Result) string {
 	var b strings.Builder
 
-	fmt.Fprintf(&b, "\nRESTLESS ENGINE\n")
-	fmt.Fprintf(&b, "Target     %s\n", r.Base)
-	fmt.Fprintf(&b, "Type       %s\n", r.Kind)
-	fmt.Fprintf(&b, "Surface    %d live nodes\n", r.Surface)
-	fmt.Fprintf(&b, "Exposure   %s\n", r.Exposure)
-	fmt.Fprintf(&b, "Auth wall  %d%%\n", r.AuthScore)
-	fmt.Fprintf(&b, "Latency    %s avg\n\n", r.AvgLatency.Round(time.Millisecond))
+	fmt.Fprintf(&b, "\nENGINE\n")
+	fmt.Fprintf(&b, "Target      %s\n", r.Base)
+	fmt.Fprintf(&b, "Type        %s\n", r.Kind)
+	fmt.Fprintf(&b, "Surface     %d nodes\n", r.Surface)
+	fmt.Fprintf(&b, "Exposure    %s\n", r.Exposure)
+	fmt.Fprintf(&b, "Auth Walls  %d%%\n", r.AuthScore)
+	fmt.Fprintf(&b, "Latency     %s avg\n", r.AvgLatency.Round(time.Millisecond))
 
-	fmt.Fprintf(&b, "Recon\n─────\n")
-
-	for _, n := range r.Nodes {
-		fmt.Fprintf(&b,
-			"  %s %-16s %-3d %-10s %s\n",
-			icon(n),
-			n.Path,
-			n.Status,
-			n.Class,
-			n.Signal,
+	if len(r.Traits) > 0 {
+		fmt.Fprintf(
+			&b,
+			"Traits      %s\n",
+			strings.Join(r.Traits, ", "),
 		)
 	}
 
-	fmt.Fprintf(&b, "\nSurface Map\n───────────\n")
-	fmt.Fprintf(&b, "  ◎ /\n")
+	fmt.Fprintf(&b, "\nEndpoints\n")
+	fmt.Fprintf(&b, "---------\n")
 
 	for _, n := range r.Nodes {
-		if n.Path == "/" {
-			continue
+		state := "unknown"
+
+		switch {
+		case n.Status == 200:
+			state = "live"
+		case n.AuthWall:
+			state = "restricted"
+		case n.Status >= 400:
+			state = "blocked"
 		}
 
-		fmt.Fprintf(&b,
-			"  ├─%s %-18s %s\n",
-			dot(n),
+		fmt.Fprintf(
+			&b,
+			"%-24s %-11s %3d  %s\n",
 			n.Path,
-			bar(n.Confidence),
+			state,
+			n.Status,
+			n.Class,
 		)
 	}
 
-	fmt.Fprintf(&b, "\nVerdict\n───────\n")
+	if len(r.Suggestions) > 0 {
+		fmt.Fprintf(&b, "\nSuggestions\n")
+		fmt.Fprintf(&b, "-----------\n")
 
-	if r.AuthScore > 50 {
-		fmt.Fprintf(&b,
-			"  API is alive, structured, and guarded.\n")
-	} else {
-		fmt.Fprintf(&b,
-			"  Good visible surface for adaptive traversal.\n")
+		for _, s := range r.Suggestions {
+			fmt.Fprintf(&b, "- %s\n", s)
+		}
 	}
 
 	return b.String()

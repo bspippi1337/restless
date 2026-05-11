@@ -184,7 +184,6 @@ func NewBlckswanCmd() *cobra.Command {
 			_ = os.WriteFile(svgPath, []byte(svg), 0o644)
 			_ = os.WriteFile(mdPath, []byte(buildSummaryMarkdown(rep, filepath.Base(svgPath))), 0o644)
 
-			fmt.Println("\033[38;5;45m⚡ BLCKSWAN\033[0m")
 			fmt.Println("target:", target)
 			if gql != nil {
 				fmt.Println("graphql:", gql.Note, "introspection:", gql.Introspection, "types:", gql.Types)

@@ -238,7 +238,6 @@ func Render(title string, r *ScanResult) string {
 
 	fmt.Fprintf(
 		&b,
-		"\033[1;36m%s\033[0m \033[2m:: %s\033[0m\n\n",
 		title,
 		r.Target,
 	)

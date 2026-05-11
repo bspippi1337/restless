@@ -125,7 +125,6 @@ func NewOctoSwanCmd() *cobra.Command {
 			_ = os.WriteFile(mdPath, []byte(buildSummary(rep, filepath.Base(svgPath))), 0o644)
 			_ = os.WriteFile(svgPath, []byte(buildMapSVG(rep.Host, rep.FoundPaths)), 0o644)
 
-			fmt.Println("\033[38;5;45m⚡ OCTOSWAN\033[0m")
 			fmt.Println("swan brain online + octopus arms deployed")
 			fmt.Println("target:", target)
 			fmt.Println("arms:", arms, "seeds:", len(seeds), "found:", len(found))

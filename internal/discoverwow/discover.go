@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 )
 
 type EndpointScore struct {
@@ -43,9 +46,12 @@ type Result struct {
 }
 
 func Discover(target string) (*Result, error) {
-	if !strings.HasPrefix(target, "http") {
-		target = "https://" + target
+	clean, err := normalizeTarget(target)
+	if err != nil {
+		return nil, err
 	}
+
+	target = clean
 
 	client := &http.Client{
 		Timeout: 7 * time.Second,
@@ -516,6 +522,60 @@ func hasRelation(in []Relation, r Relation) bool {
 	}
 
 	return false
+}
+
+func normalizeTarget(raw string) (string, error) {
+	raw = strings.TrimSpace(raw)
+
+	raw = strings.TrimRightFunc(raw, func(r rune) bool {
+		if unicode.IsLetter(r) || unicode.IsNumber(r) {
+			return false
+		}
+
+		switch r {
+		case '.', '-', '_', '/', ':':
+			return false
+		}
+
+		return true
+	})
+
+	if !strings.HasPrefix(raw, "http://") &&
+		!strings.HasPrefix(raw, "https://") {
+		raw = "https://" + raw
+	}
+
+	u, err := url.Parse(raw)
+	if err != nil {
+		return "", fmt.Errorf(
+			"invalid target: %w",
+			err,
+		)
+	}
+
+	host := strings.TrimSpace(u.Host)
+
+	if host == "" {
+		return "", fmt.Errorf(
+			"invalid target: missing host",
+		)
+	}
+
+	if strings.ContainsAny(host, "æøåÆØÅ ") {
+		return "", fmt.Errorf(
+			"invalid target: unexpected characters in hostname %q",
+			host,
+		)
+	}
+
+	if _, err := net.LookupHost(host); err != nil {
+		return "", fmt.Errorf(
+			"unable to resolve host %q",
+			host,
+		)
+	}
+
+	return strings.TrimRight(raw, "/"), nil
 }
 
 func trimProto(s string) string {

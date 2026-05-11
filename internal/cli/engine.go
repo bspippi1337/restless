@@ -2,36 +2,44 @@ package cli
 
 import (
 	"fmt"
+	"time"
 
-	"github.com/bspippi1337/restless/internal/engine"
 	"github.com/spf13/cobra"
+
+	"github.com/bspippi1337/restless/internal/restlesscore"
 )
 
 func NewEngineCmd() *cobra.Command {
 
+	var timeout time.Duration
+
 	cmd := &cobra.Command{
-		Use:   "engine <target>",
-		Short: "run full restless discovery engine",
+		Use:   "engine <host>",
+		Short: "Adaptive API engine",
 		Args:  cobra.ExactArgs(1),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			target := args[0]
-
-			fmt.Println("RESTLESS ENGINE")
-			fmt.Println("Target:", target)
-			fmt.Println()
-
-			r, err := engine.Run(target)
+			r, err := restlesscore.Scan(args[0], timeout)
 			if err != nil {
 				return err
 			}
 
-			engine.Print(r)
+			fmt.Fprint(
+				cmd.OutOrStdout(),
+				restlesscore.Render("RESTLESS ENGINE", r),
+			)
 
 			return nil
 		},
 	}
+
+	cmd.Flags().DurationVar(
+		&timeout,
+		"timeout",
+		7*time.Second,
+		"HTTP timeout",
+	)
 
 	return cmd
 }

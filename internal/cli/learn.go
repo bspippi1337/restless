@@ -2,46 +2,44 @@ package cli
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 
-	"github.com/bspippi1337/restless/internal/discovery"
+	"github.com/bspippi1337/restless/internal/restlesscore"
 )
 
 func NewLearnCmd() *cobra.Command {
 
+	var timeout time.Duration
+
 	cmd := &cobra.Command{
-		Use:   "learn <url>",
-		Short: "Discover API and store endpoints",
+		Use:   "learn <host>",
+		Short: "Adaptive endpoint learner",
 		Args:  cobra.ExactArgs(1),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			target := args[0]
-
-			fmt.Println("restless learning mode")
-			fmt.Println("target:", target)
-			fmt.Println()
-
-			res, err := discovery.Discover(target)
-			if err != nil {
-				return err
-			}
-			_ = res.Endpoints
+			r, err := restlesscore.Scan(args[0], timeout)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println("learned endpoints:", len(res.Endpoints))
-			fmt.Println()
-
-			for _, e := range res.Endpoints {
-				fmt.Println(" ", e)
-			}
+			fmt.Fprint(
+				cmd.OutOrStdout(),
+				restlesscore.Render("RESTLESS LEARN", r),
+			)
 
 			return nil
 		},
 	}
+
+	cmd.Flags().DurationVar(
+		&timeout,
+		"timeout",
+		7*time.Second,
+		"HTTP timeout",
+	)
 
 	return cmd
 }

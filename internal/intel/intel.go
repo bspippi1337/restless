@@ -69,45 +69,42 @@ func Analyze(target string, kind string, traits []string, endpoints []Endpoint) 
 	}
 
 	if live > 0 {
-		p.Pulses = append(p.Pulses, Pulse{"anonymous traversal", 30, "public surface responds without credentials"})
+		p.Pulses = append(p.Pulses, Pulse{"public access", 30, "anonymous traversal available"})
 		p.Capabilities = appendUnique(p.Capabilities, "anonymous reconnaissance")
 	}
 
 	if gated > 0 {
-		p.Pulses = append(p.Pulses, Pulse{"gated expansion", 40, "restricted endpoints detected"})
-		p.Reflexes = append(p.Reflexes, Reflex{"403/401 surface", "prefer authenticated traversal", "anonymous view is incomplete"})
+		p.Pulses = append(p.Pulses, Pulse{"restricted surface", 40, "authenticated endpoints detected"})
+		p.Reflexes = append(p.Reflexes, Reflex{"403/401 responses", "prefer authenticated traversal", "anonymous view incomplete"})
 		p.Risks = appendUnique(p.Risks, "auth boundary present")
 	}
 
 	if search {
-		p.Pulses = append(p.Pulses, Pulse{"search cortex", 35, "queryable endpoints detected"})
+		p.Pulses = append(p.Pulses, Pulse{"search exposure", 35, "queryable endpoints detected"})
 		p.Capabilities = appendUnique(p.Capabilities, "search enumeration")
-		p.Reflexes = append(p.Reflexes, Reflex{"search endpoint", "generate safe query probes", "indexed surfaces reveal structure quickly"})
 	}
 
 	if identity {
-		p.Capabilities = appendUnique(p.Capabilities, "identity graph traversal")
+		p.Capabilities = appendUnique(p.Capabilities, "identity traversal")
 	}
 
 	if repo {
-		p.Capabilities = appendUnique(p.Capabilities, "resource graph traversal")
+		p.Capabilities = appendUnique(p.Capabilities, "resource traversal")
 	}
 
 	if rate {
-		p.Pulses = append(p.Pulses, Pulse{"rate governor", 25, "quota endpoint or rate headers observed"})
-		p.Reflexes = append(p.Reflexes, Reflex{"rate limit", "slow down and cache", "avoid wasting quota"})
+		p.Pulses = append(p.Pulses, Pulse{"rate limiting", 25, "quota enforcement observed"})
 	}
 
 	if graphql {
-		p.Pulses = append(p.Pulses, Pulse{"graph nerve", 45, "GraphQL edge detected"})
+		p.Pulses = append(p.Pulses, Pulse{"graphql edge", 45, "graphql endpoint detected"})
 		p.Risks = appendUnique(p.Risks, "schema exploration surface")
 	}
 
 	for _, trait := range p.Traits {
 		lt := strings.ToLower(trait)
 		if strings.Contains(lt, "github") {
-			p.Pulses = append(p.Pulses, Pulse{"github organism", 50, "GitHub API fingerprint detected"})
-			p.Reflexes = append(p.Reflexes, Reflex{"github fingerprint", "prefer catalog traversal", "root document exposes route templates"})
+			p.Pulses = append(p.Pulses, Pulse{"github api", 50, "github fingerprint detected"})
 		}
 		if strings.Contains(lt, "rate") {
 			p.Capabilities = appendUnique(p.Capabilities, "quota aware operation")
@@ -133,10 +130,10 @@ func RenderNervousSystem(p Profile) string {
 	bar := strings.Repeat("═", 60)
 	thin := strings.Repeat("─", 60)
 
-	fmt.Fprintf(&b, "RESTLESS NERVOUS SYSTEM\n")
+	fmt.Fprintf(&b, "RESTLESS ENGINE\n")
 	fmt.Fprintf(&b, "%s\n\n", bar)
 	fmt.Fprintf(&b, "TARGET      %s\n", p.Target)
-	fmt.Fprintf(&b, "ORGANISM    %s\n", p.Kind)
+	fmt.Fprintf(&b, "TYPE        %s\n", p.Kind)
 	if len(p.Traits) > 0 {
 		fmt.Fprintf(&b, "TRAITS      %s\n", strings.Join(p.Traits, " · "))
 	}
@@ -155,7 +152,7 @@ func renderPulses(b *strings.Builder, thin string, pulses []Pulse) {
 	if len(pulses) == 0 {
 		return
 	}
-	fmt.Fprintf(b, "PULSES\n%s\n\n", thin)
+	fmt.Fprintf(b, "SIGNALS\n%s\n\n", thin)
 	for _, pulse := range pulses {
 		fmt.Fprintf(b, "  %-24s %3d  %s\n", dotted(pulse.Name, 24), pulse.Weight, pulse.Reason)
 	}
@@ -166,10 +163,9 @@ func renderReflexes(b *strings.Builder, thin string, reflexes []Reflex) {
 	if len(reflexes) == 0 {
 		return
 	}
-	fmt.Fprintf(b, "REFLEX ARC\n%s\n\n", thin)
+	fmt.Fprintf(b, "ADAPTATION\n%s\n\n", thin)
 	for _, r := range reflexes {
 		fmt.Fprintf(b, "  when %-20s -> %s\n", r.Trigger, r.Action)
-		fmt.Fprintf(b, "  %-27s %s\n", "", r.Reason)
 	}
 	fmt.Fprintf(b, "\n")
 }

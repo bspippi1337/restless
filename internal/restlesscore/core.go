@@ -157,20 +157,106 @@ func Render(title string, r *ScanResult) string {
 
 	var b strings.Builder
 
-	fmt.Fprintf(&b, "\033[1;36m%s\033[0m\n", title)
-	fmt.Fprintf(&b, "\033[2m%s\033[0m\n\n", r.BaseURL)
+	type bucket struct {
+		Name  string
+		Icon  string
+		Paths []Endpoint
+	}
 
-	fmt.Fprintf(&b, "Type        %s\n", r.APIType)
+	buckets := map[string]*bucket{
+		"identity": {
+			Name: "Identity",
+			Icon: "👤",
+		},
+		"repositories": {
+			Name: "Repositories",
+			Icon: "📦",
+		},
+		"activity": {
+			Name: "Activity",
+			Icon: "📡",
+		},
+		"search": {
+			Name: "Search",
+			Icon: "🔍",
+		},
+		"platform": {
+			Name: "Platform",
+			Icon: "⏱",
+		},
+		"misc": {
+			Name: "Misc",
+			Icon: "•",
+		},
+	}
+
+	for _, ep := range r.Confirmed {
+
+		if ep.Path == "/" {
+			continue
+		}
+
+		switch {
+
+		case strings.Contains(ep.Path, "user"):
+			buckets["identity"].Paths =
+				append(buckets["identity"].Paths, ep)
+
+		case strings.Contains(ep.Path, "repo"):
+			buckets["repositories"].Paths =
+				append(buckets["repositories"].Paths, ep)
+
+		case strings.Contains(ep.Path, "event"):
+			buckets["activity"].Paths =
+				append(buckets["activity"].Paths, ep)
+
+		case strings.Contains(ep.Path, "search"):
+			buckets["search"].Paths =
+				append(buckets["search"].Paths, ep)
+
+		case strings.Contains(ep.Path, "rate"):
+			buckets["platform"].Paths =
+				append(buckets["platform"].Paths, ep)
+
+		default:
+			buckets["misc"].Paths =
+				append(buckets["misc"].Paths, ep)
+		}
+	}
+
+	live := 0
+	restricted := 0
+
+	for _, ep := range r.Confirmed {
+
+		if ep.Status >= 200 && ep.Status < 300 {
+			live++
+		} else {
+			restricted++
+		}
+	}
+
+	fmt.Fprintf(
+		&b,
+		"\033[1;36m%s\033[0m \033[2m:: %s\033[0m\n\n",
+		title,
+		r.Target,
+	)
+
+	fmt.Fprintf(&b, "Type      %s\n", r.APIType)
 
 	if len(r.Fingerprints) > 0 {
 
-		fmt.Fprintf(&b, "Traits      ")
+		fmt.Fprintf(&b, "Traits    ")
 
 		for i, fp := range r.Fingerprints {
 
 			if i > 0 {
 				fmt.Fprintf(&b, " · ")
 			}
+
+			fp = strings.ReplaceAll(fp, "application/json; charset=utf-8", "json")
+			fp = strings.ReplaceAll(fp, "text/html; charset=utf-8", "html")
 
 			fmt.Fprintf(&b, "%s", fp)
 		}
@@ -180,70 +266,90 @@ func Render(title string, r *ScanResult) string {
 
 	fmt.Fprintf(&b, "\n")
 
-	fmt.Fprintf(&b, "Live\n")
-	fmt.Fprintf(&b, "────\n")
+	order := []string{
+		"identity",
+		"repositories",
+		"activity",
+		"search",
+		"platform",
+		"misc",
+	}
 
-	for _, ep := range r.Confirmed {
+	for _, key := range order {
 
-		if ep.Path == "/" {
+		bk := buckets[key]
+
+		if len(bk.Paths) == 0 {
 			continue
-		}
-
-		icon := "•"
-
-		switch {
-
-		case strings.Contains(ep.Path, "user"):
-			icon = "👤"
-
-		case strings.Contains(ep.Path, "repo"):
-			icon = "📦"
-
-		case strings.Contains(ep.Path, "search"):
-			icon = "🔍"
-
-		case strings.Contains(ep.Path, "event"):
-			icon = "📡"
-
-		case strings.Contains(ep.Path, "rate"):
-			icon = "⏱"
 		}
 
 		fmt.Fprintf(
 			&b,
-			"  %s %-24s %d\n",
-			icon,
-			ep.Path,
-			ep.Status,
+			"%s %s\n",
+			bk.Icon,
+			bk.Name,
 		)
+
+		for _, ep := range bk.Paths {
+
+			state := "restricted"
+
+			if ep.Status >= 200 && ep.Status < 300 {
+				state = "live"
+			}
+
+			fmt.Fprintf(
+				&b,
+				"  %-24s %s\n",
+				ep.Path,
+				state,
+			)
+		}
+
+		fmt.Fprintf(&b, "\n")
+	}
+
+	fmt.Fprintf(&b, "Graph\n")
+	fmt.Fprintf(&b, "─────\n")
+
+	fmt.Fprintf(&b, "  /\n")
+
+	for _, key := range order {
+
+		bk := buckets[key]
+
+		if len(bk.Paths) == 0 {
+			continue
+		}
+
+		fmt.Fprintf(
+			&b,
+			"  ├─ %s\n",
+			strings.ToLower(bk.Name),
+		)
+
+		for _, ep := range bk.Paths {
+
+			fmt.Fprintf(
+				&b,
+				"  │  └─ %s\n",
+				ep.Path,
+			)
+		}
 	}
 
 	fmt.Fprintf(&b, "\n")
 
-	fmt.Fprintf(&b, "Topology\n")
-	fmt.Fprintf(&b, "────────\n")
+	fmt.Fprintf(&b, "Surface\n")
+	fmt.Fprintf(&b, "───────\n")
 
-	if len(r.Topology) == 0 {
-
-		fmt.Fprintf(&b, "  no graph discovered\n")
-
-	} else {
-
-		seen := map[string]bool{}
-
-		for _, e := range r.Topology {
-
-			line := fmt.Sprintf("%s → %s", e.From, e.To)
-
-			if seen[line] {
-				continue
-			}
-
-			seen[line] = true
-
-			fmt.Fprintf(&b, "  %s\n", line)
-		}
-	}
+	fmt.Fprintf(
+		&b,
+		"  %d discovered · %d live · %d restricted\n",
+		len(r.Confirmed),
+		live,
+		restricted,
+	)
 
 	return b.String()
 }

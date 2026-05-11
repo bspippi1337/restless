@@ -144,14 +144,16 @@ func Render(title string, r *ScanResult) string {
 
 	high := []Endpoint{}
 	medium := []Endpoint{}
-	denied := []Endpoint{}
+	denied := []string{}
+
+	caps := []string{}
 
 	for _, ep := range r.Confirmed {
 
 		switch {
 
 		case ep.Status == 403:
-			denied = append(denied, ep)
+			denied = append(denied, ep.Path)
 
 		case ep.Confidence == "high":
 			high = append(high, ep)
@@ -159,19 +161,53 @@ func Render(title string, r *ScanResult) string {
 		default:
 			medium = append(medium, ep)
 		}
+
+		switch {
+
+		case strings.Contains(ep.Path, "user"):
+			caps = append(caps, "identity")
+
+		case strings.Contains(ep.Path, "repo"):
+			caps = append(caps, "repositories")
+
+		case strings.Contains(ep.Path, "search"):
+			caps = append(caps, "search")
+
+		case strings.Contains(ep.Path, "event"):
+			caps = append(caps, "events")
+
+		case strings.Contains(ep.Path, "graphql"):
+			caps = append(caps, "graphql")
+		}
 	}
+
+	caps = uniqStrings(caps)
+	denied = uniqStrings(denied)
 
 	fmt.Fprintf(&b, "\033[1;36m%s\033[0m\n", title)
 	fmt.Fprintf(&b, "\033[2m%s\033[0m\n\n", r.BaseURL)
 
-	fmt.Fprintf(&b, "Fingerprint\n")
-	fmt.Fprintf(&b, "───────────\n")
+	fmt.Fprintf(&b, "Type        %s\n", r.APIType)
 
-	fmt.Fprintf(&b, "Type     %s\n", r.APIType)
+	if len(caps) > 0 {
+
+		fmt.Fprintf(&b, "Capabilities ")
+
+		for i, c := range caps {
+
+			if i > 0 {
+				fmt.Fprintf(&b, " · ")
+			}
+
+			fmt.Fprintf(&b, "%s", c)
+		}
+
+		fmt.Fprintf(&b, "\n")
+	}
 
 	if len(r.Fingerprints) > 0 {
 
-		fmt.Fprintf(&b, "Traits   ")
+		fmt.Fprintf(&b, "Traits      ")
 
 		for i, fp := range r.Fingerprints {
 
@@ -190,39 +226,57 @@ func Render(title string, r *ScanResult) string {
 
 	fmt.Fprintf(&b, "\n")
 
-	fmt.Fprintf(&b, "Discovery\n")
-	fmt.Fprintf(&b, "─────────\n")
+	fmt.Fprintf(&b, "Live\n")
+	fmt.Fprintf(&b, "────\n")
 
-	if len(high) > 0 {
+	if len(high) == 0 {
 
-		fmt.Fprintf(&b, "\033[1;32mLive endpoints\033[0m\n")
+		fmt.Fprintf(&b, "\033[2mNo directly accessible endpoints\033[0m\n")
+
+	} else {
 
 		for _, ep := range high {
 
 			fmt.Fprintf(
 				&b,
-				"  %s  \033[1m%-24s\033[0m  %d\n",
+				"  %s  %-22s %d\n",
 				icon(ep.Path),
 				ep.Path,
 				ep.Status,
 			)
 		}
-
-		fmt.Fprintf(&b, "\n")
 	}
+
+	fmt.Fprintf(&b, "\n")
 
 	if len(medium) > 0 {
 
-		fmt.Fprintf(&b, "\033[1;33mRestricted/discovered\033[0m\n")
+		fmt.Fprintf(&b, "Restricted\n")
+		fmt.Fprintf(&b, "──────────\n")
 
-		for _, ep := range medium {
+		line := ""
 
-			fmt.Fprintf(
-				&b,
-				"  • %-28s %d\n",
-				ep.Path,
-				ep.Status,
-			)
+		for i, ep := range medium {
+
+			chunk := ep.Path
+
+			if i > 0 {
+				chunk = " · " + chunk
+			}
+
+			if len(line)+len(chunk) > 58 {
+
+				fmt.Fprintf(&b, "  %s\n", line)
+				line = strings.TrimPrefix(chunk, " · ")
+
+			} else {
+
+				line += chunk
+			}
+		}
+
+		if line != "" {
+			fmt.Fprintf(&b, "  %s\n", line)
 		}
 
 		fmt.Fprintf(&b, "\n")
@@ -230,38 +284,26 @@ func Render(title string, r *ScanResult) string {
 
 	if len(denied) > 0 {
 
-		fmt.Fprintf(&b, "\033[2mDenied probes\033[0m\n")
-
-		for _, ep := range denied {
-
-			fmt.Fprintf(
-				&b,
-				"  × %s\n",
-				ep.Path,
-			)
-		}
-
-		fmt.Fprintf(&b, "\n")
+		fmt.Fprintf(
+			&b,
+			"\033[2m%d protected probes hidden\033[0m\n\n",
+			len(denied),
+		)
 	}
 
 	fmt.Fprintf(&b, "Topology\n")
 	fmt.Fprintf(&b, "────────\n")
 
-	if len(r.Topology) == 0 {
-
-		fmt.Fprintf(&b, "\033[2mNo graph relationships discovered\033[0m\n")
-
-	} else {
+	if len(r.Topology) > 0 {
 
 		seen := map[string]bool{}
 
 		for _, e := range r.Topology {
 
 			line := fmt.Sprintf(
-				"%s → %s [%s]",
+				"%s → %s",
 				e.From,
 				e.To,
-				e.Label,
 			)
 
 			if seen[line] {
@@ -270,25 +312,46 @@ func Render(title string, r *ScanResult) string {
 
 			seen[line] = true
 
+			fmt.Fprintf(&b, "  %s\n", line)
+		}
+
+	} else {
+
+		fmt.Fprintf(&b, "  /\n")
+
+		for _, ep := range high {
+
+			if ep.Path == "/" {
+				continue
+			}
+
 			fmt.Fprintf(
 				&b,
-				"  %s\n",
-				line,
+				"  └─ %s\n",
+				ep.Path,
+			)
+		}
+
+		for _, ep := range medium[:min(6, len(medium))] {
+
+			fmt.Fprintf(
+				&b,
+				"     ├· %s\n",
+				ep.Path,
 			)
 		}
 	}
 
-	if len(r.Notes) > 0 {
+	return b.String()
+}
 
-		fmt.Fprintf(&b, "\nNotes\n")
-		fmt.Fprintf(&b, "─────\n")
+func min(a, b int) int {
 
-		for _, n := range r.Notes {
-			fmt.Fprintf(&b, "  %s\n", n)
-		}
+	if a < b {
+		return a
 	}
 
-	return b.String()
+	return b
 }
 
 func icon(path string) string {

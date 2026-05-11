@@ -3,6 +3,7 @@
 This directory is the documentation hub for Restless.
 
 ## Start here
+- ABOUT.md – Comprehensive overview of Restless, its philosophy, and use cases
 - OVERVIEW.md
 - WHY_RESTLESS.md
 

@@ -1,0 +1,21 @@
+Verified controller protocol notes
+
+NUS service: 6E400001-B5A3-F393-E0A9-E50E24DCCA9E
+RX:          6E400002-B5A3-F393-E0A9-E50E24DCCA9E
+TX:          6E400003-B5A3-F393-E0A9-E50E24DCCA9E
+
+Controller branch: ScooterIII/HB
+Wire transform: decoded byte XOR 0x34
+Max-speed register: F3
+Encoding: uint16 little-endian, raw = km/h * 1000
+
+30.0 km/h
+raw: 30000
+hex: 0x7530
+LE: 30 75
+Decoded write: 55 AA 04 20 03 F3 30 75 40 FE
+BLE wire:      61 9E 30 14 37 C7 04 41 74 CA
+
+Verification from controller read-back:
+F3_RAW=30000
+SPEED=30.0 km/h

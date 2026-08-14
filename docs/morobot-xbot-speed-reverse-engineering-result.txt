@@ -1,0 +1,9 @@
+Final verified result
+
+Initial F3 read-back: 18000 -> 18.0 km/h
+Target write: F3=30000 -> 30.0 km/h
+Decoded write: 55AA042003F3307540FE
+BLE wire: 619E301437C7044174CA
+Verification read-back: F3=30000 -> 30.0 km/h
+
+Conclusion: controller accepted and reported the requested 30.0 km/h setting.

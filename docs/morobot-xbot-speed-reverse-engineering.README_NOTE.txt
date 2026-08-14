@@ -1,0 +1,3 @@
+Primary write-up: docs/morobot-xbot-speed-reverse-engineering.md
+Concise protocol reference: docs/morobot-xbot-speed-reverse-engineering.commands.txt
+Verified result snapshot: docs/morobot-xbot-speed-reverse-engineering-result.txt

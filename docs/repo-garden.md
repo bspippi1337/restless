@@ -46,7 +46,7 @@ Run `make garden` for a read-only root audit and C cleaner preview, `make garden
 
 ## Continuous maintenance
 
-`.github/workflows/repo-garden.yml` runs weekly and on pull requests, plus manual triggers. It checks root layout, Go doctor tests, builds the C cleaner on Linux/macOS, and tests dry-run, apply, symlink refusal, and source preservation. Windows runs the Go doctor checks. C compilation on Windows is supported in source via Windows APIs but is **not independently CI-verified yet**.
+`.github/workflows/repo-garden.yml` runs weekly and on pull requests, plus manual triggers. It checks root layout, Go doctor tests, builds the C cleaner on Linux/macOS, and tests dry-run, apply, symlink refusal, and source preservation. Windows checks both the Go doctor and compiles the C cleaner using LLVM Clang. Native MSVC compilation remains an additional unverified portability target.
 
 This job reports problems; it **does not automatically delete files or push changes to main**.
 

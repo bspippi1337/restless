@@ -4,6 +4,12 @@
  * POSIX: cc -std=c11 -D_DEFAULT_SOURCE -Wall -Wextra -Werror -o restless-clean tools/c/restless-clean.c
  * MSVC: cl /W4 /TC tools\c\restless-clean.c
  */
+#ifdef _WIN32
+/* Fixed-path fopen is safe; silence MSVC's generic deprecation warning. */
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

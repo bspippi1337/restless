@@ -9,6 +9,7 @@ on:
       - 'docs/RESTLESS_42_*'
       - 'tests/toolbox.test.mjs'
       - 'tests/contract.test.mjs'
+      - 'tests/library.test.mjs'
       - '.github/workflows/pages.yml'
   pull_request:
     paths:
@@ -17,6 +18,7 @@ on:
       - 'docs/RESTLESS_42_*'
       - 'tests/toolbox.test.mjs'
       - 'tests/contract.test.mjs'
+      - 'tests/library.test.mjs'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -48,6 +50,9 @@ jobs:
           node --check site/contract/engine.mjs
           node --check site/contract/app.mjs
           node --test tests/contract.test.mjs
+          node --check site/library/engine.mjs
+          node --check site/library/app.mjs
+          node --test tests/library.test.mjs
       - name: Render full documentation for Pages and offline release
         run: node tools/pages/build-site.mjs
       - name: Validate site and all local links

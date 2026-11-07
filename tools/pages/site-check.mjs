@@ -37,7 +37,7 @@ if(!home.includes('id="workbench"'))failures.push("Root is not the live Toolbox 
 if(!home.includes('src="./toolbox/app.mjs"'))failures.push("Root Toolbox is missing its real JS engine.");
 if(!home.includes('href="./toolbox/toolbox.css"'))failures.push("Root Toolbox CSS points outside its published location.");
 if(home.includes('href="../')||home.includes('src="../'))failures.push("Root Toolbox contains stale nested-path links.");
-for(const required of ["index.html","guide/index.html","podcast/index.html","toolbox/index.html","toolbox/manual/index.html","docs/index.html","contract/index.html","contract/app.mjs","contract/engine.mjs","toolbox/app.mjs","toolbox/transforms.mjs","downloads/RESTLESS_42_Field_Guide_EN.md","downloads/RESTLESS_42_Browser_Toolbox_EN.md","downloads/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt"]){
+for(const required of ["index.html","guide/index.html","podcast/index.html","toolbox/index.html","toolbox/manual/index.html","docs/index.html","contract/index.html","contract/app.mjs","contract/engine.mjs","library/index.html","library/app.mjs","library/engine.mjs","library/manual/index.html","downloads/RESTLESS_42_API_Atlas_EN.md","toolbox/app.mjs","toolbox/transforms.mjs","downloads/RESTLESS_42_Field_Guide_EN.md","downloads/RESTLESS_42_Browser_Toolbox_EN.md","downloads/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt"]){
   try{const info=await stat(path.join(root,required));if(!info.isFile())throw Error("not file");}
   catch{failures.push("Missing site asset: "+required);}
 }

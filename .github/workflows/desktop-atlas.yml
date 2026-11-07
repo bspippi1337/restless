@@ -1,0 +1,76 @@
+name: RESTLESS 42 Native Desktop Atlas
+
+on:
+  pull_request:
+    paths:
+      - 'desktop/**'
+      - 'internal/library/**'
+      - 'internal/botanical/**'
+      - '.github/workflows/desktop-atlas.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'desktop/**'
+      - 'internal/library/**'
+      - '.github/workflows/desktop-atlas.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: Native GUI on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: Linux-amd64
+            executable: restless-atlas
+          - os: macos-15
+            artifact: macOS-arm64
+            executable: restless-atlas
+          - os: windows-latest
+            artifact: Windows-amd64
+            executable: restless-atlas.exe
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.13'
+          cache: true
+      - name: Linux native graphics dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y gcc libgl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev pkg-config
+      - name: Windows native MinGW C compiler
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (Test-Path 'C:\msys64\mingw64\bin\gcc.exe') {
+            Add-Content $env:GITHUB_PATH 'C:\msys64\mingw64\bin'
+          } else {
+            where.exe gcc
+          }
+      - name: Fetch and verify native GUI dependencies
+        working-directory: desktop
+        run: |
+          go mod tidy
+          go mod verify
+      - name: Build executable GUI
+        working-directory: desktop
+        run: go build -trimpath -o "${{ matrix.executable }}" .
+      - name: Native code tests
+        working-directory: desktop
+        run: go test ./...
+      - name: Save platform-native executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: RESTLESS-42-Atlas-${{ matrix.artifact }}
+          path: desktop/${{ matrix.executable }}
+          retention-days: 30
+          if-no-files-found: error

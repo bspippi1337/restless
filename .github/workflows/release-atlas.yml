@@ -1,0 +1,229 @@
+name: RESTLESS 42 Atlas RC1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/release-atlas.yml'
+      - 'desktop/**'
+      - 'internal/library/**'
+      - 'site/library/**'
+      - 'android/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-atlas.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: restless-42-atlas-rc1
+  cancel-in-progress: false
+
+jobs:
+  core:
+    name: Go, browser, Android and offline website
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: Install docs renderer and Android SDK
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y pandoc
+          test -x "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Go/JavaScript checks and tests
+        run: |
+          set -Eeuo pipefail
+          test -z "$(gofmt -l .)"
+          go mod verify
+          go vet ./...
+          go test ./...
+          node --check site/library/app.mjs
+          node --check site/library/engine.mjs
+          node --test tests/library.test.mjs tests/toolbox.test.mjs tests/contract.test.mjs
+          if [ -f tests/request.test.mjs ]; then node --test tests/request.test.mjs; fi
+      - name: Validate docs, links and real Chrome UX
+        run: |
+          set -Eeuo pipefail
+          node tools/pages/build-site.mjs
+          node tools/pages/site-check.mjs site
+          npm install --prefix "$RUNNER_TEMP/restless-playwright" --no-package-lock --no-save --silent playwright@1.56.1
+          PLAYWRIGHT_PACKAGE="$RUNNER_TEMP/restless-playwright/node_modules/playwright/index.mjs" node tools/pages/browser-smoke.mjs site "$RUNNER_TEMP/screenshots"
+      - name: Build and verify Android permissionless debug APK
+        run: |
+          set -Eeuo pipefail
+          gradle --no-daemon -p android :app:assembleDebug
+          apk=android/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$apk"
+          unzip -t "$apk" >/dev/null
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$apk"
+          if "$ANDROID_HOME/build-tools/35.0.0/aapt" dump permissions "$apk" | grep -Eq 'INTERNET|READ_EXTERNAL_STORAGE|WRITE_EXTERNAL_STORAGE|ACCESS_NETWORK_STATE'; then
+            echo "Unexpected network or broad storage permissions" >&2
+            exit 1
+          fi
+      - name: Package CLI for 5 targets plus Android and website
+        run: |
+          set -Eeuo pipefail
+          TAG=v0.6.0-rc.1
+          SHORT_SHA="$(echo "$GITHUB_SHA" | cut -c1-12)"
+          DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          LDFLAGS="-s -w -X github.com/bspippi1337/restless/internal/version.Version=0.6.0-rc.1 -X github.com/bspippi1337/restless/internal/version.Commit=$SHORT_SHA -X github.com/bspippi1337/restless/internal/version.Date=$DATE"
+          mkdir -p dist
+          while read -r targetos arch; do
+            [ -n "$targetos" ] || continue
+            name="RESTLESS-42-$TAG-CLI-$targetos-$arch"
+            stage="$(mktemp -d)"
+            mkdir -p "$stage/$name"
+            exe=restless
+            if [ "$targetos" = windows ]; then exe=restless.exe; fi
+            CGO_ENABLED=0 GOOS="$targetos" GOARCH="$arch" go build -trimpath -ldflags="$LDFLAGS" -o "$stage/$name/$exe" ./cmd/restless
+            cp README.md LICENSE "$stage/$name/"
+            if [ "$targetos" = windows ]; then
+              (cd "$stage" && zip -q -r "$GITHUB_WORKSPACE/dist/$name.zip" "$name")
+              unzip -t "dist/$name.zip" >/dev/null
+            else
+              tar -czf "dist/$name.tar.gz" -C "$stage" "$name"
+              tar -tzf "dist/$name.tar.gz" >/dev/null
+            fi
+            rm -rf "$stage"
+          done <<'TARGETS'
+          linux amd64
+          linux arm64
+          darwin amd64
+          darwin arm64
+          windows amd64
+          TARGETS
+          cp android/app/build/outputs/apk/debug/app-debug.apk "dist/RESTLESS-42-$TAG-Android-debug.apk"
+          (cd site && zip -q -r "$GITHUB_WORKSPACE/dist/RESTLESS-42-$TAG-Website-offline.zip" .)
+          unzip -t "dist/RESTLESS-42-$TAG-Website-offline.zip" >/dev/null
+          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: atlas-rc1-core
+          path: dist/*
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: atlas-visual-qa-screenshots
+          path: ${{ runner.temp }}/screenshots/*.png
+          retention-days: 30
+          if-no-files-found: ignore
+
+  desktop:
+    name: Native desktop ${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: Linux
+            exe: restless-atlas
+          - os: macos-15
+            label: macOS
+            exe: restless-atlas
+          - os: windows-latest
+            label: Windows
+            exe: restless-atlas.exe
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.13'
+      - name: Linux graphics libraries
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y gcc libgl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev pkg-config
+      - name: Windows C compiler
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (Test-Path 'C:\msys64\mingw64\bin\gcc.exe') {
+            Add-Content $env:GITHUB_PATH 'C:\msys64\mingw64\bin'
+          } else {
+            where.exe gcc
+          }
+      - name: Build and test actual native GUI
+        working-directory: desktop
+        run: |
+          go mod tidy
+          go mod verify
+          go test ./...
+          go build -trimpath -o "${{ matrix.exe }}" .
+      - name: Package binary with actual detected architecture
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ARCH="$(cd desktop && go env GOARCH)"
+          name="RESTLESS-42-v0.6.0-rc.1-Native-${{ matrix.label }}-$ARCH"
+          mkdir -p dist_native
+          tar -czf "dist_native/$name.tar.gz" -C desktop "${{ matrix.exe }}"
+          tar -tzf "dist_native/$name.tar.gz" >/dev/null
+      - uses: actions/upload-artifact@v4
+        with:
+          name: atlas-rc1-native-${{ matrix.label }}
+          path: dist_native/*
+          retention-days: 30
+          if-no-files-found: error
+
+  publish:
+    name: Checksummed immutable GitHub prerelease
+    needs: [core, desktop]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: atlas-rc1-*
+          path: dist
+          merge-multiple: true
+      - name: Validate and checksum every release asset
+        run: |
+          set -Eeuo pipefail
+          test "$(find dist -maxdepth 1 -type f -name '*.apk' | wc -l)" -eq 1
+          test "$(find dist -maxdepth 1 -type f -name '*Native-*' | wc -l)" -eq 3
+          test "$(find dist -maxdepth 1 -type f -name '*CLI-*' | wc -l)" -eq 5
+          test "$(find dist -maxdepth 1 -type f -name '*Website-offline.zip' | wc -l)" -eq 1
+          for package in dist/*.tar.gz; do tar -tzf "$package" >/dev/null; done
+          for package in dist/*.zip; do unzip -t "$package" >/dev/null; done
+          (cd dist && sha256sum -- * > SHA256SUMS.txt)
+          test "$(wc -l < dist/SHA256SUMS.txt)" -eq 10
+          (cd dist && sha256sum -c SHA256SUMS.txt)
+      - name: Publish only a new, never-overwritten tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -Eeuo pipefail
+          TAG=v0.6.0-rc.1
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::Refusing to overwrite existing release $TAG"
+            exit 1
+          fi
+          gh release create "$TAG" dist/* \
+            --target "$GITHUB_SHA" --prerelease \
+            --title "RESTLESS 42 v0.6 RC1 | Native API Atlas + Android + Toolbox" \
+            --notes-file docs/RELEASE_NOTES_v0.6.0-rc.1.md

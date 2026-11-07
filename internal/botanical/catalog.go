@@ -60,17 +60,18 @@ type Operation struct {
 	UnresolvedRefs bool                  `json:"unresolved_refs"`
 	SourceURL      string                `json:"source_url"`
 	SourceSHA256   string                `json:"source_sha256"`
+	Request        *RequestSample        `json:"request,omitempty"`
+	Responses      []ResponseSummary     `json:"responses,omitempty"`
 }
 type rawOperation struct {
-	OperationID string                `yaml:"operationId"`
-	Summary     string                `yaml:"summary"`
-	Description string                `yaml:"description"`
-	Tags        []string              `yaml:"tags"`
-	Parameters  []Parameter           `yaml:"parameters"`
-	Security    []map[string][]string `yaml:"security"`
-	RequestBody struct {
-		Ref string `yaml:"$ref"`
-	} `yaml:"requestBody"`
+	OperationID string                 `yaml:"operationId"`
+	Summary     string                 `yaml:"summary"`
+	Description string                 `yaml:"description"`
+	Tags        []string               `yaml:"tags"`
+	Parameters  []Parameter            `yaml:"parameters"`
+	Security    []map[string][]string  `yaml:"security"`
+	RequestBody rawRequestBody         `yaml:"requestBody"`
+	Responses   map[string]rawResponse `yaml:"responses"`
 }
 type rawPath struct {
 	Ref        string        `yaml:"$ref"`
@@ -194,6 +195,7 @@ func BuildCatalog(directory string) (Catalog, error) {
 							Description: op.Description, Tags: op.Tags, Parameters: parameters, Security: security,
 							AuthSpecified: len(security) > 0, UnresolvedRefs: unresolved,
 							SourceURL: r.URL, SourceSHA256: r.SHA256,
+							Request: summarizeRequest(op.RequestBody), Responses: summarizeResponses(op.Responses),
 						})
 					}
 				}

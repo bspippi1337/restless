@@ -8,6 +8,7 @@
         android:icon="@drawable/app_icon"
         android:usesCleartextTraffic="false"
         android:supportsRtl="true">
+        <activity android:name=".AtlasActivity" android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

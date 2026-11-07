@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 720" role="img" aria-labelledby="title desc">
+<title id="title">RESTLESS 42 topology illustration</title>
+<desc id="desc">Stylized documentation flow from one explicit HTTPS host through source files and documented API methods. No hidden endpoints or live network calls.</desc>
+<defs>
+ <radialGradient id="haze"><stop stop-color="#193d35" stop-opacity=".9"/><stop offset=".57" stop-color="#0a1a27" stop-opacity=".32"/><stop offset="1" stop-color="#071019" stop-opacity="0"/></radialGradient>
+ <linearGradient id="wire" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#abff76"/><stop offset=".55" stop-color="#73e1be"/><stop offset="1" stop-color="#3b8db9"/></linearGradient>
+ <linearGradient id="card" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1a2a39"/><stop offset="1" stop-color="#101c29"/></linearGradient>
+ <linearGradient id="lime" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#b8ff73"/><stop offset="1" stop-color="#71e3ca"/></linearGradient>
+ <pattern id="dots" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1.1" fill="#80c59d" opacity=".22"/></pattern>
+ <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="9"/></filter>
+ <filter id="soft" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#02080c" flood-opacity=".5"/></filter>
+</defs>
+<rect width="1080" height="720" fill="#07121d"/>
+<rect width="1080" height="720" fill="url(#haze)"/>
+<rect width="1080" height="720" fill="url(#dots)"/>
+<g opacity=".65" stroke="#253d48" stroke-width="1"><path d="M0 160H1080 M0 390H1080 M0 616H1080 M174 0V720 M545 0V720 M860 0V720"/></g>
+<g fill="none" stroke="#8bf3bb" stroke-width="2.5" opacity=".12" filter="url(#glow)">
+ <path d="M233 330C322 330 319 187 424 187H542C630 187 605 134 699 134H789"/>
+ <path d="M233 330C338 330 327 496 443 496H548C612 496 626 572 701 572H789"/>
+</g>
+<g fill="none" stroke="url(#wire)" stroke-width="2.5" opacity=".8" stroke-linecap="round">
+ <path d="M267 334H334C372 334 370 173 414 173H479"/>
+ <path d="M267 334H334C372 334 373 495 414 495H479"/>
+ <path d="M645 173H693C713 173 713 124 739 124H783"/>
+ <path d="M645 173H693C713 173 713 255 739 255H783"/>
+ <path d="M645 495H693C713 495 713 449 739 449H783"/>
+ <path d="M645 495H693C713 495 713 581 739 581H783"/>
+</g>
+<g fill="#b9ff7c"><circle cx="334" cy="334" r="5"/><circle cx="414" cy="173" r="4.5"/><circle cx="414" cy="495" r="4.5"/><circle cx="693" cy="173" r="4.5"/><circle cx="693" cy="495" r="4.5"/></g>
+<g filter="url(#soft)">
+ <rect x="42" y="257" width="244" height="154" rx="21" fill="url(#card)" stroke="#9aeda2" stroke-opacity=".88" stroke-width="2"/>
+ <rect x="42" y="257" width="244" height="5" rx="2.5" fill="url(#lime)"/>
+ <circle cx="79" cy="302" r="15" fill="#1b4034" stroke="#9df88c" stroke-width="1.5"/>
+ <path d="m73 301 4 4 8-9" fill="none" stroke="#b9ff82" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+ <text x="103" y="304" font-family="system-ui,sans-serif" font-weight="800" font-size="16" fill="#d8f7ee" letter-spacing="2">EXACT HOST</text>
+ <text x="67" y="350" font-family="monospace" font-size="20" fill="#fff">docs.example.org</text>
+ <text x="67" y="383" font-family="monospace" font-size="13" fill="#8cafb8">HTTPS · ROBOTS-AWARE</text>
+ <rect x="474" y="104" width="175" height="144" rx="18" fill="url(#card)" stroke="#4d8d8f" stroke-width="1.5"/>
+ <rect x="474" y="104" width="5" height="144" rx="2.5" fill="#6bdfcc"/>
+ <text x="496" y="144" font-family="monospace" font-size="13" fill="#7feec9" letter-spacing="1">SOURCE / 01</text>
+ <text x="496" y="183" font-family="system-ui,sans-serif" font-size="18" font-weight="700" fill="#f1faf9">openapi.json</text>
+ <text x="496" y="214" font-family="monospace" font-size="12" fill="#93aab8">SHA256: a6f1…</text>
+ <rect x="474" y="424" width="175" height="144" rx="18" fill="url(#card)" stroke="#4d8d8f" stroke-width="1.5"/>
+ <rect x="474" y="424" width="5" height="144" rx="2.5" fill="#6bdfcc"/>
+ <text x="496" y="464" font-family="monospace" font-size="13" fill="#7feec9" letter-spacing="1">SOURCE / 02</text>
+ <text x="496" y="503" font-family="system-ui,sans-serif" font-size="18" font-weight="700" fill="#f1faf9">reference</text>
+ <text x="496" y="534" font-family="monospace" font-size="12" fill="#93aab8">HTML · LINKED</text>
+</g>
+<g filter="url(#soft)">
+ <rect x="783" y="82" width="256" height="85" rx="14" fill="#172b38" stroke="#537884" stroke-width="1.3"/>
+ <rect x="805" y="104" width="58" height="28" rx="6" fill="#244533" stroke="#5fa87a"/>
+ <text x="817" y="123" font-family="monospace" font-size="13" font-weight="700" fill="#b9ff86">GET</text>
+ <text x="877" y="123" font-family="monospace" font-size="19" fill="#edf7f8">/pets</text>
+ <text x="806" y="149" font-family="monospace" font-size="12" fill="#96b4be">DEFINITIONS ONLY</text>
+ <rect x="783" y="213" width="256" height="85" rx="14" fill="#172b38" stroke="#537884" stroke-width="1.3"/>
+ <rect x="805" y="235" width="67" height="28" rx="6" fill="#483b2d" stroke="#b18963"/>
+ <text x="817" y="254" font-family="monospace" font-size="13" font-weight="700" fill="#fbe0a6">POST</text>
+ <text x="881" y="254" font-family="monospace" font-size="19" fill="#edf7f8">/pets</text>
+ <text x="806" y="280" font-family="monospace" font-size="12" fill="#96b4be">BODY EXAMPLE</text>
+ <rect x="783" y="407" width="256" height="85" rx="14" fill="#172b38" stroke="#537884" stroke-width="1.3"/>
+ <rect x="805" y="429" width="58" height="28" rx="6" fill="#244533" stroke="#5fa87a"/>
+ <text x="817" y="448" font-family="monospace" font-size="13" font-weight="700" fill="#b9ff86">GET</text>
+ <text x="876" y="448" font-family="monospace" font-size="18" fill="#edf7f8">/orders</text>
+ <text x="806" y="473" font-family="monospace" font-size="12" fill="#96b4be">QUERY PARAMETERS</text>
+ <rect x="783" y="539" width="256" height="85" rx="14" fill="#172b38" stroke="#537884" stroke-width="1.3"/>
+ <rect x="805" y="561" width="75" height="28" rx="6" fill="#3e3437" stroke="#9c6778"/>
+ <text x="815" y="580" font-family="monospace" font-size="13" font-weight="700" fill="#ffbad1">PATCH</text>
+ <text x="889" y="580" font-family="monospace" font-size="18" fill="#edf7f8">/{id}</text>
+ <text x="806" y="606" font-family="monospace" font-size="12" fill="#96b4be">REVIEW REQUIRED</text>
+</g>
+<g fill="#b0cbd0" font-family="monospace" font-size="13" letter-spacing="1.5">
+ <text x="43" y="45">01 / SCOPE</text><text x="472" y="45">02 / EVIDENCE</text><text x="784" y="45">03 / OPERATIONS</text>
+</g>
+<rect x="43" y="651" width="996" height="42" rx="11" fill="#16312e" stroke="#417b60" stroke-width="1.1"/>
+<circle cx="69" cy="672" r="5" fill="#b6fc86"/>
+<text x="87" y="677" font-family="monospace" font-size="14" fill="#b8f6d0">EXAMPLE DATA  ·  NO LIVE API CALLS  ·  ZERO GUESSED PATHS</text>
+</svg>

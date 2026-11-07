@@ -27,6 +27,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -121,9 +122,12 @@ public final class MainActivity extends Activity {
         bar.addView(badge);root.addView(bar,lp(-1,72,0));
 
         LinearLayout nav=horizontal();nav.setPadding(dp(12),dp(5),dp(8),dp(7));
-        Button work=action("Workbench",true,()->showTab(0)),guide=action("Guide",false,()->showTab(1)),about=action("About",false,()->showTab(2));
-        addButton(nav,work);addButton(nav,guide);addButton(nav,about);
-        root.addView(nav,lp(-1,54,0));
+        Button work=action("Workbench",true,()->showTab(0)),atlas=action("API Atlas",false,()->startActivity(new Intent(this,AtlasActivity.class))),guide=action("Guide",false,()->showTab(1)),about=action("About",false,()->showTab(2));
+        addButton(nav,work);addButton(nav,atlas);addButton(nav,guide);addButton(nav,about);
+        HorizontalScrollView navScroll=new HorizontalScrollView(this);
+        navScroll.setHorizontalScrollBarEnabled(false);
+        navScroll.addView(nav);
+        root.addView(navScroll,lp(-1,54,0));
         View line=new View(this);line.setBackgroundColor(STROKE);root.addView(line,lp(-1,1,0));
         content=new FrameLayout(this);root.addView(content,new LinearLayout.LayoutParams(-1,0,1));
         showTab(0);

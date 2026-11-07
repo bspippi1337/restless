@@ -60,18 +60,18 @@ type Operation struct {
 	UnresolvedRefs bool                  `json:"unresolved_refs"`
 	SourceURL      string                `json:"source_url"`
 	SourceSHA256   string                `json:"source_sha256"`
-	Request *RequestSample `json:"request,omitempty"`
-	Responses []ResponseSummary `json:"responses,omitempty"`
+	Request        *RequestSample        `json:"request,omitempty"`
+	Responses      []ResponseSummary     `json:"responses,omitempty"`
 }
 type rawOperation struct {
-	OperationID string                `yaml:"operationId"`
-	Summary     string                `yaml:"summary"`
-	Description string                `yaml:"description"`
-	Tags        []string              `yaml:"tags"`
-	Parameters  []Parameter           `yaml:"parameters"`
-	Security    []map[string][]string `yaml:"security"`
-	RequestBody rawRequestBody `yaml:"requestBody"`
-	Responses map[string]rawResponse `yaml:"responses"`
+	OperationID string                 `yaml:"operationId"`
+	Summary     string                 `yaml:"summary"`
+	Description string                 `yaml:"description"`
+	Tags        []string               `yaml:"tags"`
+	Parameters  []Parameter            `yaml:"parameters"`
+	Security    []map[string][]string  `yaml:"security"`
+	RequestBody rawRequestBody         `yaml:"requestBody"`
+	Responses   map[string]rawResponse `yaml:"responses"`
 }
 type rawPath struct {
 	Ref        string        `yaml:"$ref"`

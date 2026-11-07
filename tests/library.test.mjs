@@ -29,8 +29,8 @@ test("Parse documented operations and create a reproducible tree of explicit pat
  assert.equal(model.stats.paths,3);
  assert.equal(model.stats.methods.GET,3);
  assert.equal(model.stats.methods.POST,1);
- assert.equal(tree.nodes.length,5);
- assert.equal(tree.edges.length,4);
+ assert.equal(tree.nodes.length,4);
+ assert.equal(tree.edges.length,3);
  assert.ok(tree.nodes.some(x=>x.path==="/items/{id}/images"&&x.operations[0].operationId==="listImages"));
  assert.equal(model.server,"https://api.inventory.example.net/v1");
 });

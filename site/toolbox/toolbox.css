@@ -64,3 +64,8 @@
 @media(max-width:1150px){.lab-layout{grid-template-columns:minmax(180px,.7fr) minmax(230px,.95fr) minmax(300px,1.4fr)}.toolbar-actions{margin-left:0}.workbench-intro{align-items:start}.privacy-pill{min-width:210px}}
 @media(max-width:940px){.lab-layout{grid-template-columns:1fr 1.15fr}.io-panel{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}.io-divider{grid-column:1/-1;grid-row:2}.io-section{min-height:340px}.lab-panel{min-height:auto}.lab-explainer{grid-template-columns:1fr}.workbench-intro{display:block}.privacy-pill{margin-top:1.5rem;max-width:330px}}
 @media(max-width:630px){.workbench{width:calc(100% - 1.4rem);padding-top:2rem}.workbench-intro h1{font-size:3.1rem}.lab-toolbar{padding:.8rem}.toolbar-group{flex-wrap:wrap}.toolbar-group select{width:100%;max-width:none}.lab-layout{display:flex;flex-direction:column}.operations,.recipe{min-height:220px}.operation-list,.recipe-list{max-height:340px}.io-panel{display:flex;flex-direction:column}.io-section{min-height:310px}.io-divider{grid-column:auto;grid-row:auto}.lab-explainer{gap:1rem}}
+
+/* Visual drop targets, with keyboard/touch arrows retained. */
+.recipe-step.drop-target{border-color:var(--lime);box-shadow:0 0 0 2px #b7f76855;background:#24372b}
+.operation-item[draggable],.recipe-step[draggable]{cursor:grab}
+.operation-item[draggable]:active,.recipe-step[draggable]:active{cursor:grabbing}

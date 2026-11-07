@@ -31,7 +31,7 @@ for(const page of pages){
     }catch(e){failures.push(path.relative(root,page)+": broken local asset or link "+uri);}
   }
 }
-for(const required of ["index.html","guide/index.html","podcast/index.html","toolbox/index.html","toolbox/manual/index.html","docs/index.html","toolbox/app.mjs","toolbox/transforms.mjs","downloads/RESTLESS_42_Field_Guide_EN.md","downloads/RESTLESS_42_Browser_Toolbox_EN.md","downloads/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt"]){
+for(const required of ["index.html","guide/index.html","podcast/index.html","toolbox/index.html","toolbox/manual/index.html","docs/index.html","contract/index.html","contract/app.mjs","contract/engine.mjs","toolbox/app.mjs","toolbox/transforms.mjs","downloads/RESTLESS_42_Field_Guide_EN.md","downloads/RESTLESS_42_Browser_Toolbox_EN.md","downloads/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt"]){
   try{const info=await stat(path.join(root,required));if(!info.isFile())throw Error("not file");}
   catch{failures.push("Missing site asset: "+required);}
 }

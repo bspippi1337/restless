@@ -131,7 +131,7 @@ test("Native Go library retains documented request and response samples, without
  const model=readAPI(JSON.stringify(source));
  const op=model.operations[0],example=makeExample(model,op);
  assert.equal(model.networkRequests,0);
- assert.deepEqual(example.body,{name:"Pixel",quantity:4});
+ assert.deepEqual({...example.body},{name:"Pixel",quantity:4});
  assert.equal(example.contentType,"application/json");
  assert.equal(op.responses.length,2);
  assert.equal(op.responses[0].status,"201");
@@ -191,5 +191,5 @@ test("Untrusted header values containing newlines are refused",()=>{
  {name:"X-Custom",in:"header",schema:{type:"string"}}
  ]}}}};
  const model=readAPI(doc);
- assert.throws(()=>buildRequestPreview(model,model.operations[0],{values:{"header:X-Custom":"x\\r\\nExploit: yes"}}),/Unsafe or multiline/);
+ assert.throws(()=>buildRequestPreview(model,model.operations[0],{values:{"header:X-Custom":"x"+String.fromCharCode(13,10)+"Exploit: yes"}}),/Unsafe or multiline/);
 });

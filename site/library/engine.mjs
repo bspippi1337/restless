@@ -42,7 +42,8 @@ function normalizeOperation(raw,source,sha){
    security:Array.isArray(raw.security)?raw.security:[],authSpecified:!!raw.auth_specified,
    sourceURL:String(raw.source_url||source||""),sourceSHA256:String(raw.source_sha256||sha||""),
    unresolvedRefs:!!(raw.unresolved_refs||raw.unresolvedRefs),requestBody:isObj(raw.requestBody)?raw.requestBody:null,
-   responses:isObj(raw.responses)?raw.responses:null
+   request:isObj(raw.request)?raw.request:null,
+   responses:Array.isArray(raw.responses)?raw.responses:isObj(raw.responses)?raw.responses:null
  };
 }
 function documentedServer(spec){
@@ -149,6 +150,12 @@ export function makeExample(model,op){
  const url=host.replace(/\/$/,"")+path;
  const headers=[{name:"Accept",value:"application/json"}];
  let body=null,contentType="";
+ if(op.request&&isObj(op.request)){
+   contentType=String(op.request.content_type||"");
+   if(contentType)headers.push({name:"Content-Type",value:contentType});
+   if(Object.hasOwn(op.request,"example"))body=op.request.example;
+   if(op.request.unresolved_ref)body={unresolvedRef:op.request.unresolved_ref,warning:"Reference was not resolved in the source catalog"};
+ }
  if(op.requestBody){
    const content=op.requestBody.content;
    if(isObj(content)){

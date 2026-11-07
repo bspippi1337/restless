@@ -39,7 +39,7 @@ Network behavior is bounded:
 | Headers | Up to 20 custom string headers in an 8 KB JSON object |
 | Persistence | No automatic storage, telemetry, tracking or backend processor |
 
-A request is initiated only by a human action. Response results remain in memory until you clear or close the page.
+A request is initiated only by a human action. The engine initiates one browser `fetch` call, but the browser may automatically send a CORS preflight OPTIONS request first; this is governed by the browser and is not a second API probe from RESTLESS. Response results remain in memory until you clear or close the page.
 
 ## 3. Custom headers and credential safety
 

@@ -63,6 +63,9 @@ jobs:
           test ! -e "$tmp/build"
           test ! -e "$tmp/dist"
           test -f "$tmp/README.md"
+      - name: Makefile audit integration smoke
+        if: matrix.os == 'ubuntu-latest'
+        run: make garden
       - name: Full non-mutating Go doctor
         if: matrix.os == 'ubuntu-latest'
         run: go run ./cmd/restless-doctor --timeout=10m
@@ -78,3 +81,12 @@ jobs:
           cache: true
       - run: go test ./cmd/restless-doctor
       - run: go run ./cmd/restless-doctor --audit-only
+      - name: Compile native C cleaner (Windows LLVM)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $compiler = (Get-Command clang.exe -ErrorAction Stop).Source
+          & $compiler -std=c11 -Wall -Wextra -Werror -o "$env:RUNNER_TEMP\restless-clean.exe" tools/c/restless-clean.c
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & "$env:RUNNER_TEMP\restless-clean.exe" --dry-run
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

@@ -33,7 +33,7 @@ type Config struct {
 	Delay       time.Duration
 	Authorized  bool
 	Client      *http.Client // Tests may inject a local client. Production defaults to a public-IP-only dialer.
-	OnDocument  func(Record)  // Optional UI progress callback after successful archive append.
+	OnDocument  func(Record) // Optional UI progress callback after successful archive append.
 }
 
 type Record struct {

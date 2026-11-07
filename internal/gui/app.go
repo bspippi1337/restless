@@ -1,3 +1,6 @@
+//go:build fyne
+// +build fyne
+
 package gui
 
 import (

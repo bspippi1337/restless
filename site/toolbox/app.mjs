@@ -24,6 +24,8 @@ function renderPalette(){
     if(op.group!==group){group=op.group;ui.operations.append(element("h3","operation-group",group));}
     const button=element("button","operation-item");button.type="button";button.title=op.description;button.setAttribute("aria-label","Add "+op.label+" to recipe");
     button.append(element("span","",op.label),element("span","add-icon","+"));
+    button.draggable=true;
+    button.addEventListener("dragstart",e=>{e.dataTransfer.setData("application/x-restless-op",op.id);e.dataTransfer.effectAllowed="copy";});
     button.addEventListener("click",()=>{if(recipe.length>=24){setStatus("Recipe limit: 24 operations.","error");return;}recipe.push({id:op.id,enabled:true,option:op.defaultOption||""});renderRecipe();queueBake();setStatus("Added "+op.label+".");});
     ui.operations.append(button);
   }
@@ -38,6 +40,24 @@ function renderRecipe(){
   recipe.forEach((item,i)=>{
     const op=OPERATION_BY_ID.get(item.id);
     const li=element("li","recipe-step");li.dataset.index=String(i);if(!item.enabled)li.dataset.disabled="true";
+    li.draggable=true;
+    li.title="Drag to reorder this step. Arrow buttons also work.";
+    li.addEventListener("dragstart",e=>{e.stopPropagation();e.dataTransfer.setData("application/x-restless-step",String(i));e.dataTransfer.effectAllowed="move";});
+    li.addEventListener("dragover",e=>{if(e.dataTransfer.types.includes("application/x-restless-step")||e.dataTransfer.types.includes("application/x-restless-op")){e.preventDefault();li.classList.add("drop-target");}});
+    li.addEventListener("dragleave",()=>li.classList.remove("drop-target"));
+    li.addEventListener("drop",e=>{
+      e.preventDefault();e.stopPropagation();li.classList.remove("drop-target");
+      const existing=e.dataTransfer.getData("application/x-restless-step");
+      const operation=e.dataTransfer.getData("application/x-restless-op");
+      if(existing!==""){
+        const from=Number(existing);if(!Number.isInteger(from)||from<0||from>=recipe.length)return;
+        const moved=recipe.splice(from,1)[0];recipe.splice(from<i?i-1:i,0,moved);
+      }else if(OPERATION_BY_ID.has(operation)){
+        if(recipe.length>=24){setStatus("Recipe limit: 24 operations.","error");return;}
+        const opToAdd=OPERATION_BY_ID.get(operation);recipe.splice(i,0,{id:operation,enabled:true,option:opToAdd.defaultOption||""});
+      }else return;
+      renderRecipe();queueBake();setStatus("Recipe updated.");
+    });
     const main=element("div","step-main");
     const name=element("span","step-title",op.label),controls=element("div","step-tools");
     const swap=(to)=>{const tmp=recipe[i];recipe[i]=recipe[to];recipe[to]=tmp;renderRecipe();queueBake();};
@@ -83,6 +103,17 @@ function preset(name){
 }
 function bind(){
   ui.search.addEventListener("input",renderPalette);
+  ui.recipe.addEventListener("dragover",e=>{if(e.dataTransfer.types.includes("application/x-restless-op"))e.preventDefault();});
+  ui.recipe.addEventListener("drop",e=>{
+    if(e.target.closest(".recipe-step"))return;
+    const opId=e.dataTransfer.getData("application/x-restless-op");
+    if(!OPERATION_BY_ID.has(opId))return;
+    e.preventDefault();
+    if(recipe.length>=24){setStatus("Recipe limit: 24 operations.","error");return;}
+    const op=OPERATION_BY_ID.get(opId);
+    recipe.push({id:opId,enabled:true,option:op.defaultOption||""});
+    renderRecipe();queueBake();setStatus("Added "+op.label+" to recipe.");
+  });
   ui.input.addEventListener("input",()=>{refreshInputMeta();queueBake();});
   ui.auto.addEventListener("change",()=>{if(ui.auto.checked)queueBake();else{if(timer)clearTimeout(timer);timer=null;setStatus("Auto-bake disabled. Use Bake recipe to process.");}});
   $("bake").addEventListener("click",bake);

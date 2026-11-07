@@ -40,7 +40,8 @@ go build -o build/restless ./cmd/restless
 # Preview only (zero network calls)
 ./build/restless harvest \
   https://petstore3.swagger.io/api/v3/openapi.json \
-  --host petstore3.swagger.io
+  --host petstore3.swagger.io \
+  --out ./archive
 
 # After an authorized harvest:
 ./build/restless index --dir ./archive

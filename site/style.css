@@ -107,5 +107,5 @@ p{margin:.65rem 0 1.1rem}
 .docs-grid article:hover{border-color:#7ab479}
 .docs-grid article h3{margin:.7rem 0}
 .docs-grid article p:not(.step){color:#aebbd0;font-size:.91rem;flex:1;margin-bottom:1.1rem}
-.docs-grid article>a{color:#bef6a7;font-size:.88rem;font-weight:750;text-decoration:none}
+.docs-grid article>a{display:block;margin-top:.3rem;color:#bef6a7;font-size:.88rem;font-weight:750;text-decoration:none}
 .docs-grid article>a:hover{text-decoration:underline}

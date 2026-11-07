@@ -1,0 +1,80 @@
+name: Repository Garden
+
+on:
+  push:
+    paths:
+      - 'cmd/restless-doctor/**'
+      - 'tools/c/restless-clean.c'
+      - 'docs/repo-garden.md'
+      - '.github/workflows/repo-garden.yml'
+      - 'archive/historical/**'
+      - '*.md'
+      - '*.sh'
+  pull_request:
+  schedule:
+    - cron: '31 4 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable-unix:
+    name: Repo audit and C11 cleaner (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+      - name: Go audit unit tests
+        run: go test ./cmd/restless-doctor
+      - name: Confirm root is clean
+        run: go run ./cmd/restless-doctor --audit-only
+      - name: C11 build (no shell libraries)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cc -std=c11 -D_DEFAULT_SOURCE -D_DARWIN_C_SOURCE -Wall -Wextra -Werror -pedantic             -o "$RUNNER_TEMP/restless-clean" tools/c/restless-clean.c
+          "$RUNNER_TEMP/restless-clean" --dry-run
+      - name: C11 cleaner fails closed and keeps source intact
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          mkdir -p "$tmp/.git" "$tmp/build/subdir" "$tmp/dist"
+          printf 'module example.org/garden\n' > "$tmp/go.mod"
+          printf 'preserve\n' > "$tmp/README.md"
+          printf 'generated\n' > "$tmp/build/subdir/output"
+          ln -s "$RUNNER_TEMP" "$tmp/dist/unsafe-link"
+          if "$RUNNER_TEMP/restless-clean" --root "$tmp" --apply; then
+            echo "C cleaner incorrectly followed a symlink" >&2
+            exit 1
+          fi
+          test -f "$tmp/build/subdir/output"
+          rm "$tmp/dist/unsafe-link"
+          "$RUNNER_TEMP/restless-clean" --root "$tmp" --apply
+          test ! -e "$tmp/build"
+          test ! -e "$tmp/dist"
+          test -f "$tmp/README.md"
+      - name: Full non-mutating Go doctor
+        if: matrix.os == 'ubuntu-latest'
+        run: go run ./cmd/restless-doctor --timeout=10m
+
+  portable-windows:
+    name: Go doctor (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+      - run: go test ./cmd/restless-doctor
+      - run: go run ./cmd/restless-doctor --audit-only

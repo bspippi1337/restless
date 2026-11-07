@@ -55,7 +55,7 @@
 <div><label for="body">Response body (text/UTF-8, binary hex preview)</label><textarea id="body" readonly spellcheck="false"></textarea></div>
 <div><label for="response-headers">Headers visible to the browser</label><textarea id="response-headers" readonly spellcheck="false"></textarea></div>
 </div>
-<p class="fine-print">Only CORS-exposed response headers can be read. A successful HTTP response does not imply the API is authorized for automation or scanning. A 4xx/5xx response is recorded, not retried.</p>
+<p class="fine-print">One user-triggered fetch may cause a browser-managed CORS preflight. Only CORS-exposed response headers can be read. A successful HTTP response does not imply the API is authorized for automation or scanning. A 4xx/5xx response is recorded, not retried.</p>
 </section>
 <section class="request-bottom">
 <div><h2>Quiet by default.<br>Explicit when needed.</h2><p>RESTLESS's normal browser Toolbox and Contract Lab remain offline with <code>connect-src 'none'</code>. Request Lab lives on its own route and supports network access only from a deliberate button press and with clear safeguards.</p></div>

@@ -1,0 +1,40 @@
+name: Format Botanical Engine
+on:
+  push:
+    branches:
+      - integration/blckswan-unification-42
+    paths:
+      - .github/workflows/botanical-format.yml
+      - internal/botanical/**
+      - internal/cli/harvest.go
+      - internal/cli/root.go
+permissions:
+  contents: write
+concurrency:
+  group: botanical-formatter-integration
+  cancel-in-progress: false
+jobs:
+  gofmt:
+    if: github.repository == 'bspippi1337/restless'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Format new files only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gofmt -w internal/botanical/*.go internal/cli/harvest.go internal/cli/root.go
+          if git diff --quiet; then
+            echo "Already formatted"
+            exit 0
+          fi
+          git config user.name "restless-format[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add internal/botanical/*.go internal/cli/harvest.go internal/cli/root.go
+          git commit -m "style(botanical): gofmt new crawler and CLI"
+          git push origin HEAD:integration/blckswan-unification-42

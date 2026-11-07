@@ -100,7 +100,7 @@ node --test tests/request.test.mjs
 
 Tests verify permission gates, method restrictions, public DNS hostname allowlist, custom headers, no request retries, byte caps, timeouts, SHA-256 evidence and CORS/network failure handling using mocked responses. They do **not** send live HTTP traffic to an external API during CI.
 
-For general RESTLESS 42 architecture, see [The Field Guide to Quiet API Discovery](RESTLESS_42_Field_Guide_EN.md). For the native Android application, see [android/README.md](../android/README.md).
+For general RESTLESS 42 architecture, see [The Field Guide to Quiet API Discovery](../../guide/). For the native Android application, see [Android native app guide](https://github.com/bspippi1337/restless/blob/main/android/README.md).
 
 ## 8. Troubleshooting
 

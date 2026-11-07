@@ -38,23 +38,23 @@ func (t atlasTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Colo
 }
 
 type screen struct {
-	win        fyne.Window
-	input      *widget.Entry
-	output     *widget.Entry
-	pages      *widget.Select
-	depth      *widget.Select
-	consent    *widget.Check
-	status     *widget.Label
-	counter    *widget.Label
-	details    *widget.Entry
-	logs       *widget.Entry
-	search     *widget.Entry
-	tree       *widget.Tree
-	nodes      map[string][]string
-	nodeLabels map[string]string
-	operations map[string]botanical.Operation
-	current    library.Summary
-	inProgress bool
+	win         fyne.Window
+	input       *widget.Entry
+	output      *widget.Entry
+	pages       *widget.Select
+	depth       *widget.Select
+	consent     *widget.Check
+	status      *widget.Label
+	counter     *widget.Label
+	details     *widget.Entry
+	logs        *widget.Entry
+	search      *widget.Entry
+	tree        *widget.Tree
+	nodes       map[string][]string
+	nodeLabels  map[string]string
+	operations  map[string]botanical.Operation
+	current     library.Summary
+	inProgress  bool
 	lastExample string
 }
 

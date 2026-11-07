@@ -113,7 +113,8 @@ try{
   assert.match(await desktop.locator("#atlas-status").innerText(),/ZERO network requests/i);
   assert.equal(await desktop.locator("#fetch-doc").isDisabled(),true,"Domain-only input must not start web crawling");
   await desktop.locator("#search").fill("");
-  await desktop.evaluate(()=>window.scrollTo(0,0));
+  await desktop.evaluate(()=>{document.documentElement.style.scrollBehavior="auto";window.scrollTo({top:0,behavior:"instant"});});
+  await desktop.waitForFunction(()=>window.scrollY===0);
   await desktop.screenshot({path:path.join(screens,"RESTLESS-42-API-Atlas-desktop.png"),fullPage:true});
   assert.equal(errors.length,0,"API Atlas JS errors: "+errors.join(" | "));
   assert.equal(externalRequests.length,0,"API Atlas demo/preview must not contact external servers.");
@@ -122,7 +123,8 @@ try{
   await mobile.locator("#load-demo").click();
   await mobile.locator("#dashboard").waitFor({state:"visible"});
   assert.ok(await mobile.locator(".graph-node").count()>=5);
-  await mobile.evaluate(()=>window.scrollTo(0,0));
+  await mobile.evaluate(()=>{document.documentElement.style.scrollBehavior="auto";window.scrollTo({top:0,behavior:"instant"});});
+  await mobile.waitForFunction(()=>window.scrollY===0);
   await mobile.screenshot({path:path.join(screens,"RESTLESS-42-API-Atlas-mobile.png"),fullPage:true});
   assert.equal(mobileErrors.length,0,"Mobile Atlas JS errors: "+mobileErrors.join(" | "));
 

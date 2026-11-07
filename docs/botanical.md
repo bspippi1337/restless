@@ -1,45 +1,64 @@
-# RESTLESS 42 Botanical Harvest (experimental)
+# RESTLESS 42 Botanical (experimental)
 
-A deliberately conservative documentation crawler. Its purpose is to collect API specifications, developer guides, public white papers, and standards **without guessing endpoints or fuzzing**.
+A conservative offline-first knowledge and discovery pipeline for documented API surfaces:
 
-## Usage
+**Harvest → verify → index → search → plan**.
 
-Preview only; **no network traffic**:
+The goal is to answer "what does this API already support?" from official documentation instead of trying unlisted paths or fuzzing. This is an experimental component on the draft integration branch.
 
-```sh
-restless harvest https://docs.example.org/ --host docs.example.org
-```
-
-Fetch only when you have checked the site's terms, licensing, and authority to access the material:
+## Quick start
 
 ```sh
-restless harvest https://docs.example.org/ --host docs.example.org \
-  --max-pages 5 --max-depth 1 --delay 3s \
-  --out .restless/botanical --execute --authorized
+go build -o bin/restless ./cmd/restless
+DIR="$HOME/.local/share/restless-42/botanical"
+
+# Network-free preview (default)
+bin/restless harvest https://petstore3.swagger.io/api/v3/openapi.json --host petstore3.swagger.io --out "$DIR"
+
+# One explicitly approved, public demo specification
+# Only after independently checking access rights, terms, licensing and purpose.
+bin/restless harvest https://petstore3.swagger.io/api/v3/openapi.json \
+  --host petstore3.swagger.io --out "$DIR" \
+  --max-pages 1 --max-depth 0 --execute --authorized
+
+# These three operations are OFFLINE: no network requests.
+bin/restless index --dir "$DIR"
+bin/restless search "find pets by status" --dir "$DIR" --limit 5
+bin/restless plan "find pet by id" --dir "$DIR" --limit 3
 ```
 
-Produces an append-only `index.jsonl` with timestamp, source URL, source page, status, MIME type, SHA-256, document size, and an archive filename under `sha256/`. Repeated runs may append duplicate index entries; content hashes deduplicate filenames, not log records. PDFs are stored as bytes, **not yet text-extracted**.
+## Archive and provenance
 
-## Safe-by-default rules
+- Harvest saves documents under `sha256/<digest>` and appends URL, content type, depth, source and SHA-256 provenance to `index.jsonl`.
+- Index rereads local archives, verifies SHA-256 for **every document**, and rejects invalid provenance/path traversal before indexing anything.
+- `catalog.json` is atomically replaced and stores documents alongside explicitly documented OpenAPI 3 HTTP operations. It includes method, path, summary, tags, required parameters, declared security requirements, source URL and hash.
+- Duplicate URLs in the manifest take the last entry. No network access occurs during indexing.
+- Plain text / HTML / Markdown are indexed only for reference terms. PDF bytes are marked `pdf-unparsed`; PDF text extraction is **not implemented**. Neither arbitrary prose nor PDF creates API endpoints.
+- Only OpenAPI **3.x** paths are recognized currently. Referenced path items are skipped; unresolved parameter/body references are flagged for human review; schema resolution and server selection are not implemented.
 
-- Nothing accesses the network without both `--execute` and `--authorized`. The default command is a dry-run.
-- Explicit `--host` must match the seed's hostname, and every discovered URL must use the *same origin*, including scheme and port.
-- Production requests use HTTPS only, reject credentials and query-bearing URLs, reject local/private/reserved destination IP addresses, do not use ambient proxies, and do not follow redirects.
-- Read `/robots.txt` first. Honor its applicable allow/disallow groups and optional crawl-delay. A missing file (404/410) permits crawling under RFC 9309; other statuses or a retrieval failure stop the crawl. The implementation is conservative and does not claim exhaustive RFC 9309 percent-encoding coverage yet.
-- Maximum **total page requests** is 25; default 5. Depth is at most 3; default 1. Request pacing is at least 2 seconds. Each response has a 2 MiB archive cap.
-- Stop immediately on HTTP 429 or 5xx (no automatic retry). Ignore other failed page responses.
-- Follow only document-like HTML links, never arbitrary API operation URLs. No login, browser automation, active probing, hidden-path guessing, or fuzzing.
+## Offline search and probe planning
 
-`robots.txt` is **not a legal permission grant**. Operators must independently ensure applicable permission, terms of service, privacy rules, copyright/license restrictions, and data protection compliance. Do not collect personal or protected information.
+`restless search` uses deterministic weighted lexical ranking of documented operations (operation ID, method, path, summary, tags, description, parameter names). It is not embedding-based or LLM semantic search yet.
 
-## Current implementation limits
+`restless plan` returns ranked candidates and evidence links. Each candidate includes its documented method/path, source hash, declared authentication, required parameters and review warnings. Non-read methods, credentials, path parameters and unresolved references demand manual review. **Plan never makes requests, runs scripts or resolves URLs.** The JSON field `network_requests` is always zero.
 
-This first slice is a scope-locked **document harvester**, not yet a search engine or OpenAPI operation planner. It recognizes HTML links and archives selected text, JSON, YAML and small PDF resources, but does not parse PDF text, provide incremental ETag updates, or verify license metadata. These are the next stages before production use.
+A plan is not approval to call an API. A documented GET may have real side effects; explicit operator authorization and target scoping remain mandatory for later live probing.
 
-Run focused tests:
+## Harvester safety limits
+
+- Dry-run by default. Both `--execute` and `--authorized` are required to enable network access.
+- Explicit `--host` must match seed hostname; discovered URLs use the same scheme, hostname and port.
+- Production enforces HTTPS, no credentials or query-bearing URLs, rejects private/local/reserved IP destinations, avoids ambient proxies, and never follows redirects.
+- Read robots.txt first. A 404 or 410 permits crawling under RFC 9309, otherwise unavailable/blocked robots stops collection. Optional `crawl-delay` is honored. The robots parser does not claim exhaustive RFC 9309 percent-encoding conformance.
+- Maximum 25 total page attempts; default 5. Depth at most 3; default 1. At least 2 seconds between page requests. Maximum response archive size 2 MiB.
+- HTTP 429 and 5xx stop the crawl without retries. Only documentation-like links are followed, no hidden endpoint guessing, login, browser automation, or fuzzing.
+- robots.txt is not permission: honor site policy, applicable law, copyright, licensing, privacy and data protection.
+
+## Tests
 
 ```sh
-go test ./internal/botanical
+go test ./internal/botanical ./internal/cli
+go vet ./...
 ```
 
-The integration branch remains a draft PR until formatting, tests, security review, and merge conflict review pass.
+This draft PR must not be merged to main before tests, documentation review, and scope/security review pass.

@@ -1,0 +1,162 @@
+name: RESTLESS 42 Complete Release Candidate
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/release-42.yml'
+      - 'tools/pages/**'
+      - 'site/index.html'
+      - 'docs/RELEASE_NOTES_v0.5.0-rc.1.md'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-42.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: restless42-release-candidate
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: Test, build and package all release assets
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.13'
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: Install documentation tooling
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y pandoc
+      - name: Install Android SDK dependencies
+        run: |
+          test -n "$ANDROID_HOME"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Test Go and browser engines
+        run: |
+          set -euo pipefail
+          go mod verify
+          go vet ./...
+          go test ./...
+          node --check site/toolbox/app.mjs
+          node --check site/toolbox/transforms.mjs
+          node --check site/contract/app.mjs
+          node --check site/contract/engine.mjs
+          node --test tests/toolbox.test.mjs tests/contract.test.mjs
+          if [ -e tests/request.test.mjs ]; then node --test tests/request.test.mjs; fi
+      - name: Render and validate complete website
+        run: |
+          node tools/pages/build-site.mjs
+          node tools/pages/site-check.mjs site
+      - name: Install pinned browser automation
+        run: npm install --prefix "$RUNNER_TEMP/restless-playwright" --no-package-lock --no-save --silent playwright@1.56.1
+      - name: Test working Toolbox homepage in real Chrome
+        run: |
+          PLAYWRIGHT_PACKAGE="$RUNNER_TEMP/restless-playwright/node_modules/playwright/index.mjs" \
+            node tools/pages/browser-smoke.mjs site "$RUNNER_TEMP/restless-screenshots"
+      - name: Build Android APK
+        run: gradle --no-daemon -p android :app:assembleDebug
+      - name: Verify APK signature and permissions
+        run: |
+          set -euo pipefail
+          APK=android/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          unzip -t "$APK" >/dev/null
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | grep -E 'package:|sdkVersion:|targetSdkVersion:|launchable-activity:'
+          if "$ANDROID_HOME/build-tools/35.0.0/aapt" dump permissions "$APK" | grep -qE 'INTERNET|READ_EXTERNAL_STORAGE|WRITE_EXTERNAL_STORAGE|ACCESS_NETWORK_STATE'; then
+            echo 'ERROR: unexpected Android permissions' >&2
+            exit 1
+          fi
+      - name: Package CLI, APK and offline website with SHA256SUMS
+        run: |
+          set -euo pipefail
+          TAG=v0.5.0-rc.1
+          mkdir -p dist
+          SOURCE_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-12)"
+          VPKG=github.com/bspippi1337/restless/internal/version
+          LDFLAGS="-s -w -X $VPKG.Version=0.5.0-rc.1 -X $VPKG.Commit=$SHORT_SHA -X $VPKG.Date=$SOURCE_DATE"
+          while read -r GOOS GOARCH; do
+            [ -n "$GOOS" ] || continue
+            package="RESTLESS-42-$TAG-$GOOS-$GOARCH"
+            staging="$(mktemp -d)"
+            mkdir -p "$staging/$package"
+            extension=""
+            if [ "$GOOS" = windows ]; then extension=".exe"; fi
+            CGO_ENABLED=0 GOOS="$GOOS" GOARCH="$GOARCH" \
+              go build -trimpath -ldflags="$LDFLAGS" -o "$staging/$package/restless$extension" ./cmd/restless
+            cp README.md LICENSE "$staging/$package/"
+            if [ "$GOOS" = windows ]; then
+              (cd "$staging" && zip -q -r "$GITHUB_WORKSPACE/dist/$package.zip" "$package")
+              unzip -t "$GITHUB_WORKSPACE/dist/$package.zip" >/dev/null
+            else
+              tar -czf "dist/$package.tar.gz" -C "$staging" "$package"
+              tar -tzf "dist/$package.tar.gz" >/dev/null
+            fi
+            rm -rf "$staging"
+          done <<'PLATFORMS'
+          linux amd64
+          linux arm64
+          darwin amd64
+          darwin arm64
+          windows amd64
+          PLATFORMS
+          cp android/app/build/outputs/apk/debug/app-debug.apk "dist/RESTLESS-42-$TAG-Android-debug.apk"
+          zip -q -r "dist/RESTLESS-42-$TAG-offline-website.zip" site README.md LICENSE docs/RELEASE_NOTES_v0.5.0-rc.1.md
+          unzip -t "dist/RESTLESS-42-$TAG-offline-website.zip" >/dev/null
+          (cd dist && sha256sum -- * | grep -v 'SHA256SUMS.txt' > SHA256SUMS.txt)
+          test "$(wc -l < dist/SHA256SUMS.txt)" -eq 7
+          ls -lh dist/
+      - name: Upload complete bundle for PR and user download
+        uses: actions/upload-artifact@v4
+        with:
+          name: RESTLESS-42-v0.5.0-rc.1-COMPLETE
+          path: dist/*
+          retention-days: 30
+          if-no-files-found: error
+      - name: Upload desktop and mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: RESTLESS-42-v0.5.0-rc.1-Browser-QA
+          path: ${{ runner.temp }}/restless-screenshots/*.png
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Publish GitHub pre-release with all downloadable assets
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG=v0.5.0-rc.1
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::Release $TAG already exists, refusing to overwrite published assets."
+            exit 1
+          fi
+          gh release create "$TAG" dist/* \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --title "RESTLESS 42 v0.5.0 RC1 | Toolbox + Android + CLI" \
+            --notes-file docs/RELEASE_NOTES_v0.5.0-rc.1.md
+          gh release view "$TAG" --json tagName,url,assets --jq '{tagName,url,assetCount:(.assets | length)}'

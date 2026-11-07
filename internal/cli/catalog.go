@@ -81,3 +81,25 @@ func NewPlanCmd() *cobra.Command {
 	cmd.Flags().IntVar(&limit, "limit", 5, "max plan candidates (1..50)")
 	return cmd
 }
+
+func NewRefsCmd() *cobra.Command {
+ var dir string
+ var limit int
+ cmd:=&cobra.Command{
+  Use:"refs <keywords>",
+  Short:"Search locally archived reference documents and whitepapers",
+  Args:cobra.ExactArgs(1),
+  RunE:func(cmd *cobra.Command,args []string)error{
+   c,err:=botanical.LoadCatalog(dir)
+   if err!=nil{return err}
+   results,err:=botanical.RankReferences(c,args[0],limit)
+   if err!=nil{return err}
+   encoder:=json.NewEncoder(cmd.OutOrStdout())
+   encoder.SetIndent("","  ")
+   return encoder.Encode(results)
+  },
+ }
+ cmd.Flags().StringVar(&dir,"dir",".restless/botanical","catalog directory")
+ cmd.Flags().IntVar(&limit,"limit",10,"max reference results (1..50)")
+ return cmd
+}

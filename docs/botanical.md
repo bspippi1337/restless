@@ -38,6 +38,8 @@ bin/restless diff --before "$HOME/restless-archives/v1" --after "$HOME/restless-
 - Index rereads local archives, verifies SHA-256 for **every document**, and rejects invalid provenance/path traversal before indexing anything.
 - `catalog.json` is atomically replaced and stores documents alongside explicitly documented OpenAPI 3 HTTP operations. It includes method, path, summary, tags, required parameters, declared security requirements, source URL and hash.
 - Duplicate URLs in the manifest take the last entry. No network access occurs during indexing.
+- Repeated authorized harvest runs can use a locally verified ETag and/or Last-Modified validator. Restless then sends conditional GET; HTTP 304 reuses the SHA-256-verified local body and appends an audit record with `response_status: 304`. An unexpected 304 or corrupt/missing cached body stops the crawl.
+- Harvest always checks `robots.txt` for each run. Conditional requests still count against page/rate limits, and archive integrity is checked before sending a validator. No extra hosts or API operations are probed.
 - Plain text / HTML / Markdown are indexed as searchable reference terms, exposed through `restless refs`. PDF bytes are marked `pdf-unparsed`; PDF text extraction is **not implemented**. Neither arbitrary prose nor PDF creates API endpoints.
 - Only OpenAPI **3.x** paths are recognized currently. Local parameter references under `#/components/parameters` are resolved offline with cycle and depth checks; external, missing or cyclic parameter references are flagged for manual review. Referenced path items are skipped, and unresolved request-body references are flagged; schema resolution and server selection are not implemented.
 

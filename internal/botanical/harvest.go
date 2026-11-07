@@ -36,15 +36,18 @@ type Config struct {
 }
 
 type Record struct {
-	URL         string    `json:"url"`
-	Source      string    `json:"source"`
-	Status      int       `json:"status"`
-	ContentType string    `json:"content_type"`
-	SHA256      string    `json:"sha256"`
-	ArchivePath string    `json:"archive_path"`
-	Bytes       int       `json:"bytes"`
-	Depth       int       `json:"depth"`
-	FetchedAt   time.Time `json:"fetched_at"`
+	URL            string    `json:"url"`
+	Source         string    `json:"source"`
+	Status         int       `json:"status"`
+	ContentType    string    `json:"content_type"`
+	SHA256         string    `json:"sha256"`
+	ArchivePath    string    `json:"archive_path"`
+	Bytes          int       `json:"bytes"`
+	Depth          int       `json:"depth"`
+	FetchedAt      time.Time `json:"fetched_at"`
+	ETag           string    `json:"etag,omitempty"`
+	LastModified   string    `json:"last_modified,omitempty"`
+	ResponseStatus int       `json:"response_status,omitempty"`
 }
 
 type queued struct {
@@ -86,6 +89,10 @@ func Crawl(ctx context.Context, cfg Config) ([]Record, error) {
 	}
 	if cfg.OutputDir == "" {
 		cfg.OutputDir = ".restless/botanical"
+	}
+	cached, err := readCachedRecords(cfg.OutputDir)
+	if err != nil {
+		return nil, fmt.Errorf("read existing archive manifest: %w", err)
 	}
 
 	client := cfg.Client
@@ -165,6 +172,26 @@ func Crawl(ctx context.Context, cfg Config) ([]Record, error) {
 		request.Header.Set("User-Agent", cfg.Agent)
 		request.Header.Set("Accept", "text/html, application/json, application/pdf, text/plain, application/yaml, text/yaml")
 		request.Header.Set("Cache-Control", "no-cache")
+		var cachedBody []byte
+		var previous Record
+		haveCached := false
+		if old, ok := cached[key]; ok {
+			etag := boundedETag(old.ETag)
+			modified := boundedLastModified(old.LastModified)
+			if etag != "" || modified != "" {
+				cachedBody, err = verifiedCachedBody(cfg.OutputDir, old)
+				if err != nil {
+					return records, fmt.Errorf("refuse to revalidate corrupt cache for %s: %w", key, err)
+				}
+				previous, haveCached = old, true
+				if etag != "" {
+					request.Header.Set("If-None-Match", etag)
+				}
+				if modified != "" {
+					request.Header.Set("If-Modified-Since", modified)
+				}
+			}
+		}
 		response, err := client.Do(request)
 		last = time.Now()
 		if err != nil {
@@ -174,36 +201,60 @@ func Crawl(ctx context.Context, cfg Config) ([]Record, error) {
 			response.Body.Close()
 			return records, fmt.Errorf("server requested pause (HTTP %d): stopped without retrying", response.StatusCode)
 		}
-		if response.StatusCode != http.StatusOK {
+		var body []byte
+		var ct string
+		var record Record
+		if response.StatusCode == http.StatusNotModified {
+			response.Body.Close()
+			if !haveCached {
+				return records, fmt.Errorf("unexpected HTTP 304 without verified cache for %s", key)
+			}
+			body = cachedBody
+			record = previous
+			record.Source, record.Depth = item.source, item.depth
+			record.FetchedAt = time.Now().UTC()
+			record.ResponseStatus = http.StatusNotModified
+			if etag := boundedETag(response.Header.Get("ETag")); etag != "" {
+				record.ETag = etag
+			}
+			if lm := boundedLastModified(response.Header.Get("Last-Modified")); lm != "" {
+				record.LastModified = lm
+			}
+			ct = record.ContentType
+		} else if response.StatusCode == http.StatusOK {
+			ct = strings.ToLower(strings.TrimSpace(strings.SplitN(response.Header.Get("Content-Type"), ";", 2)[0]))
+			if !supportedType(ct) {
+				response.Body.Close()
+				continue
+			}
+			body, err = io.ReadAll(io.LimitReader(response.Body, maxDocumentBytes+1))
+			response.Body.Close()
+			if err != nil {
+				return records, err
+			}
+			if int64(len(body)) > maxDocumentBytes {
+				continue // Never archive a partial document.
+			}
+			digest := sha256.Sum256(body)
+			hash := hex.EncodeToString(digest[:])
+			archivePath := filepath.Join("sha256", hash)
+			if err := os.MkdirAll(filepath.Join(cfg.OutputDir, "sha256"), 0700); err != nil {
+				return records, err
+			}
+			if err := os.WriteFile(filepath.Join(cfg.OutputDir, archivePath), body, 0600); err != nil {
+				return records, err
+			}
+			record = Record{
+				URL: key, Source: item.source, Status: http.StatusOK,
+				ContentType: ct, SHA256: hash, ArchivePath: archivePath,
+				Bytes: len(body), Depth: item.depth, FetchedAt: time.Now().UTC(),
+				ETag:           boundedETag(response.Header.Get("ETag")),
+				LastModified:   boundedLastModified(response.Header.Get("Last-Modified")),
+				ResponseStatus: http.StatusOK,
+			}
+		} else {
 			response.Body.Close()
 			continue
-		}
-		ct := strings.ToLower(strings.TrimSpace(strings.SplitN(response.Header.Get("Content-Type"), ";", 2)[0]))
-		if !supportedType(ct) {
-			response.Body.Close()
-			continue
-		}
-		body, err := io.ReadAll(io.LimitReader(response.Body, maxDocumentBytes+1))
-		response.Body.Close()
-		if err != nil {
-			return records, err
-		}
-		if int64(len(body)) > maxDocumentBytes {
-			continue // Never archive a partial document.
-		}
-		digest := sha256.Sum256(body)
-		hash := hex.EncodeToString(digest[:])
-		archivePath := filepath.Join("sha256", hash)
-		if err := os.MkdirAll(filepath.Join(cfg.OutputDir, "sha256"), 0700); err != nil {
-			return records, err
-		}
-		if err := os.WriteFile(filepath.Join(cfg.OutputDir, archivePath), body, 0600); err != nil {
-			return records, err
-		}
-		record := Record{
-			URL: key, Source: item.source, Status: response.StatusCode,
-			ContentType: ct, SHA256: hash, ArchivePath: archivePath,
-			Bytes: len(body), Depth: item.depth, FetchedAt: time.Now().UTC(),
 		}
 		if err := appendRecord(filepath.Join(cfg.OutputDir, "index.jsonl"), record); err != nil {
 			return records, err

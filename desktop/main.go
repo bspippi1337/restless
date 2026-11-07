@@ -95,8 +95,7 @@ func(s *screen)initialize(){
    },
  )
  s.tree.OnSelected=func(id widget.TreeNodeID){
-   if op,ok:=s.operations[id];ok{s.selectOperation(op)}
-   else if id!=""{s.details.SetText("RESOURCE\n"+id+"\n\nExpand this node to inspect documented HTTP methods.\n\nNo method is executed when you select it.")}
+   if op,ok:=s.operations[id];ok{s.selectOperation(op)} else if id!=""{s.details.SetText("RESOURCE\n"+id+"\n\nExpand this node to inspect documented HTTP methods.\n\nNo method is executed when you select it.")}
  }
  // Logo and consistent signal language, without embedding a website.
  brand:=canvas.NewText("R.",color.NRGBA{R:183,G:247,B:104,A:255})

@@ -128,3 +128,28 @@ check: modcheck fmt vet test build
 
 ## doctor
 doctor: check race
+
+# Repository Garden: safe native tools instead of old destructive shell scripts.
+GARDEN_C := .restless/bin/restless-clean
+
+.PHONY: garden garden-check garden-preview garden-apply
+
+$(GARDEN_C): tools/c/restless-clean.c
+	mkdir -p .restless/bin
+	$(CC) -std=c11 -D_DEFAULT_SOURCE -O2 -Wall -Wextra -Werror -o $(GARDEN_C) tools/c/restless-clean.c
+
+## garden
+garden: $(GARDEN_C)
+	$(GO) run ./cmd/restless-doctor --audit-only
+	$(GARDEN_C) --dry-run
+
+## garden-check
+garden-check:
+	$(GO) run ./cmd/restless-doctor --timeout=10m
+
+## garden-preview
+garden-preview: garden
+
+## garden-apply (explicitly removes only known generated directories)
+garden-apply: $(GARDEN_C)
+	$(GARDEN_C) --apply

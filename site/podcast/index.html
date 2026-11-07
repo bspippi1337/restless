@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10131b">
+<meta name="description" content="Turn the RESTLESS 42 field guide into a source-grounded English NotebookLM audio discussion with a ready-to-copy two-host podcast brief.">
+<meta property="og:title" content="RESTLESS 42 | NotebookLM Podcast Kit">
+<meta property="og:description" content="The API Gardener Who Refused to Fuzz: a ready-to-use English podcast brief and technical sources.">
+<title>NotebookLM Podcast Kit | RESTLESS 42</title>
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to podcast instructions</a>
+<header class="site-header"><div class="container header-inner">
+<a class="brand" href="../" aria-label="RESTLESS 42 home"><span class="brand-glyph" aria-hidden="true">R<span class="brand-dot">.</span></span><span>RESTLESS <strong>42</strong></span></a>
+<nav class="nav" aria-label="Main navigation"><a href="../">Home</a><a href="../guide/">Field guide</a><a href="https://github.com/bspippi1337/restless">GitHub ↗</a></nav>
+</div></header>
+<main id="main">
+<section class="page-hero container">
+<p class="eyebrow">THE AUDIO FIELD GUIDE</p>
+<p class="audio-label">NOTEBOOKLM READY · ENGLISH</p>
+<h1>The API Gardener<br><span class="gradient-text">Who Refused to Fuzz.</span></h1>
+<p class="lede">Turn a practical API handbook into a thoughtful conversation between two curious, technically literate hosts. The facts come from the guide, not from invented benchmarks or product promises.</p>
+<div class="button-row">
+<a class="button primary" href="https://notebooklm.google.com/" target="_blank" rel="noopener noreferrer">Open Google NotebookLM ↗</a>
+<a class="button ghost" href="../guide/">Read the source manual</a>
+</div>
+</section>
+<section class="container site-copy">
+<h2>Build the episode in four moves</h2>
+<ol class="small-steps">
+<li><strong>Create a notebook.</strong> In Google NotebookLM, create a notebook named <em>RESTLESS 42: Quiet API Discovery</em>.</li>
+<li><strong>Add a grounded source.</strong> Import the published <a href="../guide/">field guide webpage</a>, or download and upload the <a href="../downloads/RESTLESS_42_Field_Guide_EN.md" download>original Markdown manual</a>. The manual includes the relevant technical caveats.</li>
+<li><strong>Choose an Audio Overview.</strong> Select an English two-host Deep Dive, if those settings are available. In the customization field, use the brief below.</li>
+<li><strong>Review before sharing.</strong> Confirm the hosts distinguish documented operations from live-verified endpoints, respect authorization boundaries, and do not claim that lexical ranking is semantic AI.</li>
+</ol>
+<div class="content-panel">
+<h3>Episode premise</h3>
+<p>At 2 a.m., an engineer can't remember the name of an endpoint they wrote six months ago. Instead of firing guesses into a production API, they let the documentation lead. What if the cleverest probe is the one you never send?</p>
+</div>
+<h2>The full podcast brief</h2>
+<p>This is the exact English narration brief supplied with the RESTLESS 42 handbook. Copy it into NotebookLM's Audio Overview customization box. If its interface changes, use the nearest equivalent instructions field.</p>
+<div class="button-row">
+<button type="button" class="button primary" id="copy-brief" disabled>Loading brief…</button>
+<a class="button ghost" href="../downloads/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt" download>Download TXT brief</a>
+</div>
+<p id="copy-status" role="status" aria-live="polite" class="fine-print"></p>
+<pre class="brief-block" id="brief" tabindex="0">Loading the narration brief…</pre>
+<h2>What the hosts must not say</h2>
+<p>Do not imply RESTLESS has independently verified live API endpoints, performed autonomous security scanning, or parsed every PDF. Probe plans are offline. The ranking is lexical. An API specification is evidence of documentation, not proof of production availability.</p>
+<div class="content-panel"><h3>Recommended supporting sources</h3>
+<p><a href="../guide/">RESTLESS 42 Field Guide</a>, <a href="https://github.com/bspippi1337/restless/blob/main/docs/botanical.md">Botanical implementation notes</a> and <a href="https://github.com/bspippi1337/restless/blob/main/docs/repo-garden.md">Repository Garden</a>. Avoid importing obsolete experimental documents from the historical archive as current fact.</p></div>
+</section>
+</main>
+<footer class="footer"><div class="container footer-inner"><div><strong>RESTLESS 42</strong><p>Source-backed stories make better engineering stories.</p></div><div class="footer-links"><a href="../">Home</a><a href="../guide/">Field guide</a><a href="https://github.com/bspippi1337/restless">GitHub</a></div></div></footer>
+<script>
+(function(){
+  const pre=document.getElementById("brief"), button=document.getElementById("copy-brief"),status=document.getElementById("copy-status");
+  const source="../downloads/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt";
+  fetch(source).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.text()}).then(text=>{
+    pre.textContent=text;button.disabled=false;button.textContent="Copy podcast brief";
+    button.addEventListener("click",async()=>{
+      try{await navigator.clipboard.writeText(pre.textContent);status.textContent="Copied. Paste into NotebookLM's customization box.";}
+      catch(e){status.textContent="Clipboard unavailable. Select the text in the box or download the TXT brief.";}
+    });
+  }).catch(()=>{pre.textContent="The brief could not be loaded. Use the TXT download link above.";button.textContent="Brief unavailable";status.textContent="Check the downloadable text file if this page is being previewed locally.";});
+})();
+</script>
+</body></html>

@@ -138,7 +138,7 @@ public final class ToolboxEngine {
         if(value instanceof Number||value instanceof Boolean)return String.valueOf(value);
         throw new IllegalArgumentException("Unsupported primitive JSON value");
     }
-    private static String pretty(Object value) {
+    private static String pretty(Object value) throws Exception {
         if(value instanceof JSONObject)return ((JSONObject)value).toString(2);
         if(value instanceof JSONArray)return ((JSONArray)value).toString(2);
         return primitive(value);

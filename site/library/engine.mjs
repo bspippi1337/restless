@@ -34,6 +34,7 @@ function normalParam(p){
 }
 function normalizeOperation(raw,source,sha){
  if(!METHODS.includes(String(raw?.method||"").toUpperCase())||typeof raw?.path!=="string"||!raw.path.startsWith("/"))return null;
+ if(raw.path.length>1024||raw.path.split("/").length>34)throw Error("Documented API path exceeds the 1,024-character or 32-segment safety limit.");
  return {
    method:raw.method.toUpperCase(),path:raw.path,operationId:String(raw.operationId||raw.operation_id||""),
    summary:String(raw.summary||""),description:String(raw.description||"").slice(0,2000),
@@ -78,7 +79,7 @@ export function readAPI(input){
    version=String(doc.generated_at||"");
    operations=doc.operations.map(x=>normalizeOperation(x,x?.source_url,x?.source_sha256)).filter(Boolean);
    documents=Array.isArray(doc.documents)?doc.documents.filter(isObj).slice(0,1000):[];
-   warnings.push("Imported from RESTLESS native crawler with per-document SHA-256 provenance.");
+   warnings.push("Imported from RESTLESS crawler export: SHA-256 values are supplied by the archive, but the browser cannot verify them without original archived bytes.");
    warnings.push("The library records documented methods. It has not called the documented operations.");
  }else if(doc.version===1&&Array.isArray(doc.operations)&&Array.isArray(doc.documents)){
    kind="RESTLESS_CATALOG";apiName="Imported API catalog";
@@ -223,10 +224,10 @@ export function buildRequestPreview(model,op,input={}){
    "console.log(response.status, await response.text());\n"+
    "// Review the documented method, target, authorization and possible side effects before using.";
  const pyHeaders=Object.fromEntries(headers.map(h=>[h.name,h.value]));
- const python="import requests\n"+
+ const python="import json\nimport requests\n"+
    "response = requests.request("+JSON.stringify(op.method)+", "+JSON.stringify(url)+
    ", headers="+JSON.stringify(pyHeaders)+
-   (body===null?"":", json="+JSON.stringify(body))+
+   (body===null?"":", json=json.loads("+JSON.stringify(JSON.stringify(body))+")")+
    ", timeout=10, allow_redirects=False)\nprint(response.status_code, response.text)\n"+
    "# Illustrative code only. Validate permission and authentication first.";
  return {

@@ -1,0 +1,42 @@
+name: Temporary Go Formatter (RESTLESS 42 feature branch)
+
+on:
+  push:
+    branches: [feature/domain-library-native-ui-42]
+    paths:
+      - 'internal/library/**'
+      - 'internal/cli/library.go'
+      - 'internal/botanical/harvest.go'
+      - 'internal/cli/root.go'
+      - 'desktop/**'
+      - '.github/workflows/goformat-feature.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/domain-library-native-ui-42
+          persist-credentials: true
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.13'
+      - name: Format new Go sources and commit only actual changes
+        run: |
+          set -Eeuo pipefail
+          gofmt -w internal/library/*.go internal/cli/library.go internal/cli/root.go internal/botanical/harvest.go
+          if [ -d desktop ]; then find desktop -name '*.go' -print0 | xargs -0 -r gofmt -w; fi
+          if git diff --quiet -- internal/library internal/cli/library.go internal/cli/root.go internal/botanical/harvest.go desktop; then
+            echo 'All sources were already formatted'
+            exit 0
+          fi
+          git config user.name 'restless-42-ci'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add internal/library internal/cli/library.go internal/cli/root.go internal/botanical/harvest.go
+          if [ -d desktop ]; then git add desktop; fi
+          git commit -m 'style: gofmt new library and native GUI code'
+          git push origin HEAD:feature/domain-library-native-ui-42

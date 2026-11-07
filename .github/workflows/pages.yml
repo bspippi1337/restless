@@ -70,7 +70,15 @@ jobs:
             --metadata title="Browser Toolbox Manual" \
             --template=tools/pages/toolbox-template.html \
             --output=site/toolbox/manual/index.html
+          mkdir -p site/request/manual
+          pandoc docs/RESTLESS_42_Request_Lab_EN.md \
+            --from=gfm --to=html5 --standalone \
+            --toc --toc-depth=2 \
+            --metadata title="Request Lab Manual" \
+            --template=tools/pages/request-template.html \
+            --output=site/request/manual/index.html
           cp docs/RESTLESS_42_Field_Guide_EN.md site/downloads/RESTLESS_42_Field_Guide_EN.md
+          cp docs/RESTLESS_42_Request_Lab_EN.md site/downloads/RESTLESS_42_Request_Lab_EN.md
           cp docs/RESTLESS_42_Browser_Toolbox_EN.md site/downloads/RESTLESS_42_Browser_Toolbox_EN.md
           cp docs/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt site/downloads/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt
       - name: Validate site and all local links

@@ -1,40 +1,84 @@
-name: Pages
+name: Pages | RESTLESS 42 Documentation & Toolbox
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'site/**'
+      - 'tools/pages/**'
+      - 'docs/RESTLESS_42_*'
+      - 'tests/toolbox.test.mjs'
+      - '.github/workflows/pages.yml'
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'tools/pages/**'
+      - 'docs/RESTLESS_42_*'
+      - 'tests/toolbox.test.mjs'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
+
+concurrency:
+  group: pages-restless-42
+  cancel-in-progress: false
 
 jobs:
   build:
+    name: Build and validate static site
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Generate site
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install documentation renderer
         run: |
-          mkdir -p site
-          echo '<h1>RESTLESS</h1>' > site/index.html
-
-      - name: Upload artifact
+          sudo apt-get update -qq
+          sudo apt-get install -y pandoc
+      - name: Test all browser transforms and OpenAPI tools
+        run: |
+          node --check site/toolbox/transforms.mjs
+          node --check site/toolbox/app.mjs
+          node --test tests/toolbox.test.mjs
+      - name: Render the full field guide into HTML and copy NotebookLM sources
+        run: |
+          set -Eeuo pipefail
+          mkdir -p site/guide site/downloads
+          pandoc docs/RESTLESS_42_Field_Guide_EN.md \
+            --from=gfm --to=html5 --standalone \
+            --toc --toc-depth=2 \
+            --metadata title="The Field Guide to Quiet API Discovery" \
+            --template=tools/pages/guide-template.html \
+            --output=site/guide/index.html
+          mkdir -p site/toolbox/manual
+          pandoc docs/RESTLESS_42_Browser_Toolbox_EN.md \
+            --from=gfm --to=html5 --standalone \
+            --toc --toc-depth=2 \
+            --metadata title="Browser Toolbox Manual" \
+            --template=tools/pages/toolbox-template.html \
+            --output=site/toolbox/manual/index.html
+          cp docs/RESTLESS_42_Field_Guide_EN.md site/downloads/RESTLESS_42_Field_Guide_EN.md
+          cp docs/RESTLESS_42_Browser_Toolbox_EN.md site/downloads/RESTLESS_42_Browser_Toolbox_EN.md
+          cp docs/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt site/downloads/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt
+      - name: Validate site and all local links
+        run: node tools/pages/site-check.mjs site
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
   deploy:
+    name: Deploy GitHub Pages
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
-
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v4

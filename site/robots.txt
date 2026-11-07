@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bspippi1337.github.io/restless/sitemap.xml

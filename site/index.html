@@ -1,44 +1,139 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Restless</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131b">
+  <meta name="description" content="RESTLESS 42: documentation-first API discovery. Harvest approved docs, verify provenance, index OpenAPI, find operations, and plan without blind probing.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="RESTLESS 42 | Quiet API Discovery">
+  <meta property="og:description" content="Find the API calls you forgot, without guessing at endpoints.">
+  <title>RESTLESS 42 | Quiet API Discovery</title>
+  <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-<header>
-<h1>Restless</h1>
-<p>Terminal-First API Workbench</p>
-<span class="version">v4.0.4</span>
-</header>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="./" aria-label="RESTLESS 42 home">
+        <span class="brand-glyph" aria-hidden="true">R<span class="brand-dot">.</span></span>
+        <span>RESTLESS <strong>42</strong></span>
+      </a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="#workflow">Workflow</a>
+        <a href="./docs/">Docs</a>
+        <a href="./toolbox/">Toolbox</a>
+        <a href="./podcast/">Podcast</a>
+        <a href="https://github.com/bspippi1337/restless">GitHub <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
 
-<section>
-<h2>What is Restless?</h2>
-<p>
-Restless is a modular, OpenAPI-first execution engine built for developers who prefer precision over pixels.
-</p>
-</section>
+  <main id="main">
+    <section class="hero container">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="pulse" aria-hidden="true"></span> OPEN SOURCE · GO CLI · DOCUMENTATION FIRST</p>
+        <h1>Discover less.<br><span class="gradient-text">Understand more.</span></h1>
+        <p class="lede">RESTLESS 42 helps developers remember what an API already documents. Collect approved references, verify their origin, identify real OpenAPI operations, and plan what to review <em>before</em> sending a request.</p>
+        <div class="button-row">
+          <a class="button primary" href="./toolbox/">Open browser toolbox <span aria-hidden="true">→</span></a>
+          <a class="button ghost" href="./guide/">Read the field guide</a>
+        </div>
+        <p class="hero-note">Built for careful exploration. The Botanical planner makes <strong>zero</strong> live API calls.</p>
+      </div>
+      <div class="terminal" aria-label="Example RESTLESS commands">
+        <div class="terminal-top"><div class="terminal-dots" aria-hidden="true"><i></i><i></i><i></i></div><span>restless / botanical</span><span class="terminal-status">local-first</span></div>
+        <div class="terminal-body">
+          <div class="prompt-line"><span class="prompt">$</span> restless harvest <span class="term-muted">https://docs.example.org/openapi.json</span> <span class="term-accent">--host docs.example.org</span></div>
+          <div class="term-output">DRY RUN: zero network requests</div>
+          <div class="prompt-line"><span class="prompt">$</span> restless index <span class="term-accent">--dir .restless/botanical</span></div>
+          <div class="term-output">Verified documents → catalog.json</div>
+          <div class="prompt-line"><span class="prompt">$</span> restless plan <span class="term-highlight">"find customer orders"</span> <span class="term-accent">--dir .restless/botanical</span></div>
+          <div class="term-output">DOCUMENTATION_ONLY_NO_EXECUTION</div>
+          <div class="term-output term-good">✓ source URL&nbsp; ✓ SHA-256&nbsp; ✓ review flags</div>
+          <div class="terminal-caret" aria-hidden="true">▮</div>
+        </div>
+      </div>
+    </section>
 
-<section>
-<h2>Core Features</h2>
-<ul>
-<li>OpenAPI import & execution</li>
-<li>Profiles & environment isolation</li>
-<li>Session templating</li>
-<li>Strict CI mode</li>
-<li>Latency histogram benchmarking</li>
-<li>Cross-platform static binaries</li>
-</ul>
-</section>
+    <section class="metric-row container" aria-label="Key operating principles">
+      <div><strong>0</strong><span>requests from offline plans</span></div>
+      <div><strong>SHA-256</strong><span>document provenance</span></div>
+      <div><strong>OpenAPI 3</strong><span>documented contracts</span></div>
+      <div><strong>Opt-in</strong><span>authorized crawling only</span></div>
+    </section>
 
-<section>
-<h2>Install</h2>
-<pre>go build -o restless ./cmd/restless</pre>
-</section>
+    <section class="section feature-strip" aria-labelledby="toolbox-feature-title">
+      <div class="container feature-inner">
+        <div>
+          <p class="eyebrow">THE RESTLESS LAB · 32 WORKING OPERATIONS</p>
+          <h2 id="toolbox-feature-title">An API Swiss Army knife.<br>Running right in your browser.</h2>
+          <p>CyberChef-inspired recipes for Base64, JSON, CSV, SHA-256/512, JWT inspection and documentation-only OpenAPI analysis. Chain transformations, import a local file, export a recipe and keep your data on your machine.</p>
+        </div>
+        <div class="feature-actions">
+          <a class="button primary" href="./toolbox/">Launch the toolbox →</a>
+          <a class="button ghost" href="./docs/">Documentation center</a>
+          <a class="button ghost" href="./podcast/">NotebookLM podcast kit</a>
+        </div>
+      </div>
+    </section>
+    <section class="section light-section" id="workflow">
+      <div class="container">
+        <div class="section-heading">
+          <p class="eyebrow">THE BOTANICAL WORKFLOW</p>
+          <h2>Six stages. One defensible trail.</h2>
+          <p>Forget random endpoint guessing. Build a library of what the documentation actually says, and keep the evidence attached.</p>
+        </div>
+        <ol class="workflow-grid">
+          <li><span class="step">01 / COLLECT</span><h3>Harvest</h3><p>Scope-locked, robots-aware retrieval of approved public API docs. Dry-run until explicitly authorized.</p></li>
+          <li><span class="step">02 / REMEMBER</span><h3>Archive</h3><p>Store document bytes under SHA-256 and retain source URLs in a JSONL audit manifest.</p></li>
+          <li><span class="step">03 / UNDERSTAND</span><h3>Index</h3><p>Extract documented OpenAPI 3 methods, paths, parameters and declared security requirements.</p></li>
+          <li><span class="step">04 / RETRIEVE</span><h3>Search</h3><p>Rank known operations and find reference documents locally, with explainable lexical matching.</p></li>
+          <li><span class="step">05 / THINK</span><h3>Plan</h3><p>Build source-backed probe plans with human review flags. No requests executed.</p></li>
+          <li><span class="step">06 / COMPARE</span><h3>Diff</h3><p>Compare saved API contracts across versions and see additions, removals and changes offline.</p></li>
+        </ol>
+      </div>
+    </section>
 
-<footer>
-<p>Version 4.0.4 • MIT License</p>
-</footer>
+    <section class="section container" id="start">
+      <div class="split">
+        <div>
+          <p class="eyebrow">GET RUNNING</p>
+          <h2>Your first five minutes</h2>
+          <p>Requires Go 1.24 or newer. Clone the repository and build the CLI locally. The example below previews a documentation crawl without making a network request.</p>
+          <p class="fine-print">Only add <code>--execute --authorized</code> when permission, scope, license and site terms have been checked. The guide explains every step.</p>
+          <div class="button-row"><a class="button primary" href="./guide/#installing-and-building-restless">Installation guide <span aria-hidden="true">→</span></a></div>
+        </div>
+        <div class="code-card"><div class="code-header">Terminal · Linux / Debian WSL</div><pre><code>git clone https://github.com/bspippi1337/restless.git
+cd restless
+go build -o build/restless ./cmd/restless
 
+./build/restless harvest \
+  https://petstore3.swagger.io/api/v3/openapi.json \
+  --host petstore3.swagger.io</code></pre><p class="code-foot">Preview only · No network requests</p></div>
+      </div>
+    </section>
+
+    <section class="section feature-strip">
+      <div class="container feature-inner">
+        <div><p class="eyebrow">THE FIELD GUIDE</p><h2>Not a buzzword brochure.<br>An actual working manual.</h2><p>Read the English 18-chapter guide, complete with commands, clear limits, troubleshooting, and a source-grounded narration outline for NotebookLM.</p></div>
+        <div class="feature-actions">
+          <a class="button primary" href="./guide/">Open full manual</a>
+          <a class="button ghost" href="./downloads/RESTLESS_42_Field_Guide_EN.md" download>Get Markdown source</a>
+          <a class="button ghost" href="./podcast/">NotebookLM episode kit</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container">
+      <div class="split narrow-split">
+        <div><p class="eyebrow">THE RULE THAT MATTERS</p><h2>Documented is not deployed.</h2><p>RESTLESS distinguishes between what a specification <em>claims</em> exists and what a server has actually verified. Its Botanical search is deterministic lexical ranking, not an LLM semantic engine. A proposed plan is never evidence that an endpoint is live.</p></div>
+        <div class="ethics-card"><h3>Quiet by design</h3><ul><li>No blind endpoint fuzzing in Botanical</li><li>No automatic calls from a probe plan</li><li>No assumed authorization from robots.txt</li><li>No invented APIs when evidence is missing</li><li>Revalidation can reuse unchanged documents via HTTP 304</li></ul></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="container footer-inner"><div><strong>RESTLESS 42</strong><p>Documentation first. Requests second.</p></div><div class="footer-links"><a href="./docs/">Documentation</a><a href="./toolbox/">Toolbox</a><a href="./podcast/">Podcast kit</a><a href="https://github.com/bspippi1337/restless">Source code</a><a href="https://github.com/bspippi1337/restless/blob/main/LICENSE">MIT license</a></div></div><p class="container legal">RESTLESS 42 names the initiative, not necessarily the CLI's numeric version. Responsible-use guidance is educational, not permission to test another person's systems.</p></footer>
 </body>
 </html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10131b">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="description" content="RESTLESS 42 Toolbox: a private, CyberChef-style, browser-only pipeline for JSON, Base64, JWT inspection, hashes, URL tools, and offline OpenAPI planning.">
+<meta property="og:title" content="RESTLESS 42 | Browser Toolbox">
+<meta property="og:description" content="Combine 32 working text, encoding, crypto and OpenAPI operations. Your input never leaves your browser.">
+<title>Browser Toolbox | RESTLESS 42</title>
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="./toolbox.css">
+</head>
+<body>
+<a class="skip-link" href="#workbench">Skip to the toolbox</a>
+<header class="site-header"><div class="container header-inner">
+<a class="brand" href="../" aria-label="RESTLESS 42 home"><span class="brand-glyph" aria-hidden="true">R<span class="brand-dot">.</span></span><span>RESTLESS <strong>42</strong></span></a>
+<nav class="nav" aria-label="Main navigation"><a href="../">Home</a><a href="../docs/">Docs</a><a href="./manual/">Toolbox manual</a><a href="../guide/">Field guide</a><a href="../podcast/">Podcast</a><a href="https://github.com/bspippi1337/restless">GitHub ↗</a></nav>
+</div></header>
+<main id="workbench" class="workbench container">
+<section class="workbench-intro">
+  <div><p class="eyebrow">THE RESTLESS LAB · 100% CLIENT-SIDE</p><h1>Browser <span class="gradient-text">Toolbox.</span></h1>
+  <p class="lede">Compose real operations into reusable recipes. Inspect data, encode, hash, compare formats and extract documented OpenAPI operations. No account, backend or requests to an API.</p></div>
+  <div class="privacy-pill"><span class="pulse" aria-hidden="true"></span><strong>Local execution</strong><small>Inputs and recipes are not transmitted or saved automatically.</small></div>
+</section>
+<section class="lab-toolbar" aria-label="Toolbox controls">
+  <div class="toolbar-group">
+    <label for="preset">Example recipe</label>
+    <select id="preset"><option value="">Choose an example...</option><option value="json">Format and sort JSON</option><option value="encode">UTF-8 → Base64 → Hex</option><option value="jwt">Inspect a JWT (unverified)</option><option value="openapi">OpenAPI: offline probe plan</option><option value="csv">CSV → JSON</option><option value="digest">SHA-256 fingerprint</option></select>
+  </div>
+  <label class="auto-toggle"><input type="checkbox" id="autobake" checked> Auto-bake</label>
+  <div class="toolbar-actions"><button class="lab-button" type="button" id="import-recipe">Import recipe</button><button class="lab-button" type="button" id="export-recipe">Export recipe</button><button class="lab-button ghost-danger" type="button" id="clear-recipe">Clear recipe</button></div>
+  <input id="recipe-file" type="file" accept=".json,application/json" hidden>
+</section>
+<div class="lab-layout">
+<aside class="lab-panel operations" aria-labelledby="operations-heading">
+  <div class="panel-header"><div><span class="panel-eyebrow">LIBRARY</span><h2 id="operations-heading">Operations</h2></div><span class="small-count" id="operation-count">32</span></div>
+  <label class="search-label" for="operation-search">Find a tool</label>
+  <input id="operation-search" type="search" placeholder="Search transformations..." autocomplete="off">
+  <div id="operation-list" class="operation-list" aria-label="Available operations"></div>
+</aside>
+<section class="lab-panel recipe" aria-labelledby="recipe-heading">
+  <div class="panel-header"><div><span class="panel-eyebrow">PIPELINE</span><h2 id="recipe-heading">Recipe</h2></div><span class="small-count" id="recipe-count">0 steps</span></div>
+  <p class="panel-description">Click or drag operations into a recipe. Reorder by dragging or using the arrow buttons; disable or remove any step.</p>
+  <ol id="recipe-list" class="recipe-list" aria-live="polite"></ol>
+  <div class="recipe-footer"><button class="lab-button primary-lab" type="button" id="bake">Bake recipe <span aria-hidden="true">▶</span></button><p class="shortcut">Ctrl / Cmd + Enter</p></div>
+</section>
+<section class="lab-panel io-panel" aria-label="Input and output">
+  <div class="io-section">
+    <div class="panel-header"><div><span class="panel-eyebrow">SOURCE</span><h2>Input</h2></div><div class="io-actions"><button class="small-action" id="load-file" type="button">Open file</button><button class="small-action" id="clear-input" type="button">Clear</button></div></div>
+    <label class="sr-only" for="input">Input text to process locally</label>
+    <textarea id="input" spellcheck="false" placeholder="Paste JSON, API documentation, encoded text, or drop a local text file here..."></textarea>
+    <div class="io-meta"><span id="input-meta">0 characters · UTF-8 text</span><span>Max 2 MB</span></div>
+    <input id="input-file" type="file" accept=".txt,.md,.json,.yaml,.yml,.csv,.xml,.log,.jwt,.har,.html,.js,.ts,text/*,application/json" hidden>
+  </div>
+  <div class="io-divider"><span>↓ RECIPE ↓</span><button id="output-to-input" class="small-action" type="button" title="Send previous output back to input">Use output as input ↗</button></div>
+  <div class="io-section">
+    <div class="panel-header"><div><span class="panel-eyebrow">RESULT</span><h2>Output</h2></div><div class="io-actions"><button class="small-action" id="copy-output" type="button">Copy</button><button class="small-action" id="save-output" type="button">Save .txt</button></div></div>
+    <label class="sr-only" for="output">Processed output</label>
+    <textarea id="output" spellcheck="false" readonly placeholder="Output will appear here..."></textarea>
+    <div class="io-meta"><span id="output-meta">No recipe executed</span><span id="timing"></span></div>
+  </div>
+</section>
+</div>
+<div id="status" class="lab-status" role="status" aria-live="polite">Ready. Add an operation or choose an example.</div>
+<section class="lab-explainer" aria-label="Toolbox security and limitations">
+<div><h2>Useful power. Clear boundaries.</h2><p>Transforms execute in this page with native browser APIs. SHA-256 and SHA-512 use Web Crypto. JWT inspection does not validate signatures, expiration or trust. OpenAPI analysis accepts JSON-format OpenAPI 3.x and <strong>never</strong> executes documented operations.</p></div>
+<div><h3>Private by design</h3><p>There is no form submission, analytics SDK, external font, remote script, localStorage or backend processing in the toolbox. Recipes are only downloaded if you request an export.</p><a href="./manual/">Read the browser toolbox manual →</a></div>
+</section>
+</main>
+<footer class="footer"><div class="container footer-inner"><div><strong>RESTLESS 42</strong><p>Keep the data local. Keep the decisions yours.</p></div><div class="footer-links"><a href="../guide/">Documentation</a><a href="../podcast/">Podcast</a><a href="https://github.com/bspippi1337/restless">Code</a></div></div></footer>
+<script type="module" src="./app.mjs"></script>
+</body></html>

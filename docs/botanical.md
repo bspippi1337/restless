@@ -4,7 +4,7 @@ A conservative offline-first knowledge and discovery pipeline for documented API
 
 **Harvest → verify → index → search → plan**.
 
-The goal is to answer "what does this API already support?" from official documentation instead of trying unlisted paths or fuzzing. This is an experimental component on the draft integration branch.
+The goal is to answer "what does this API already support?" from official documentation instead of trying unlisted paths or fuzzing. The Botanical component is experimental, but its implemented workflow is present on the main branch. For a full user tutorial, see [the English Field Guide](RESTLESS_42_Field_Guide_EN.md).
 
 ## Quick start
 
@@ -68,4 +68,4 @@ go test ./internal/botanical ./internal/cli
 go vet ./...
 ```
 
-This draft PR must not be merged to main before tests, documentation review, and scope/security review pass.
+The main-branch implementation is covered by Go CI and Debian/Docker smoke tests. Exercise independent judgment about licensing, service permissions, network scope, and release readiness.

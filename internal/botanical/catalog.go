@@ -89,8 +89,8 @@ type rawSpec struct {
 	Info    struct {
 		Title string `yaml:"title"`
 	} `yaml:"info"`
-	Security []map[string][]string `yaml:"security"`
-	Paths    map[string]rawPath    `yaml:"paths"`
+	Security   []map[string][]string `yaml:"security"`
+	Paths      map[string]rawPath    `yaml:"paths"`
 	Components struct {
 		Parameters map[string]Parameter `yaml:"parameters"`
 	} `yaml:"components"`

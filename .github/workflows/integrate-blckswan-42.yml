@@ -1,0 +1,94 @@
+name: Integrate BLCKSWAN Restless history
+on:
+  push:
+    branches:
+      - integration/blckswan-unification-42
+    paths:
+      - .github/workflows/integrate-blckswan-42.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: restless-blckswan-integration
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Merge unrelated history while preserving conflicting source versions
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "restless-integration[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add blckswan https://github.com/blckswan1337/restless.git
+          git fetch --no-tags blckswan main
+          if git merge-base --is-ancestor FETCH_HEAD HEAD; then
+            echo "History already merged"
+            exit 0
+          fi
+          echo "Source: blckswan1337/restless"
+          echo "Target: bspippi1337/restless"
+          mkdir -p docs/integration
+          # -X ours keeps the currently functioning CLI on textual conflicts,
+          # while adding independently named files from the source repository.
+          git merge --allow-unrelated-histories --no-commit --no-ff -X ours blckswan/main || true
+          mapfile -d '' conflicts < <(git diff --name-only --diff-filter=U -z)
+          printf '# BLCKSWAN merge conflicts\n\nSource: blckswan1337/restless main\n\n' > docs/integration/blckswan-merge-conflicts.md
+          for path in "${conflicts[@]}"; do
+            printf -- '- `%s`\n' "$path" >> docs/integration/blckswan-merge-conflicts.md
+            # Never discard source contents: preserve alternative version for review.
+            target="archive/integrations/blckswan1337/$path"
+            if git cat-file -e "blckswan/main:$path" 2>/dev/null; then
+              mkdir -p "$(dirname "$target")"
+              git show "blckswan/main:$path" > "$target"
+              git add -- "$target"
+            fi
+            if git cat-file -e "HEAD:$path" 2>/dev/null; then
+              git checkout HEAD -- "$path"
+              git add -- "$path"
+            elif git cat-file -e "blckswan/main:$path" 2>/dev/null; then
+              git checkout blckswan/main -- "$path"
+              git add -- "$path"
+            else
+              git rm -f -- "$path" || true
+            fi
+          done
+          # Imported workflows are retained for review, but NEVER enabled by the merge.
+          # This avoids workflow-token permission failures and unreviewed CI execution.
+          while IFS= read -r -d '' wf; do
+            dest="archive/integrations/blckswan1337/$wf"
+            mkdir -p "$(dirname "$dest")"
+            git show "blckswan/main:$wf" > "$dest"
+            git add -- "$dest"
+          done < <(git ls-tree -r --name-only -z blckswan/main -- .github/workflows)
+          git restore --source=HEAD --staged --worktree -- .github/workflows
+          git add docs/integration/blckswan-merge-conflicts.md
+          if test -n "$(git ls-files -u)"; then
+            echo "Unresolved merge entries remain; stopping safely"
+            exit 1
+          fi
+          git commit -m "merge: combine BLCKSWAN Restless history, preserve conflicting versions"
+          git push origin HEAD:integration/blckswan-unification-42
+      - name: Validate Go packages
+        continue-on-error: true
+        run: |
+          go version
+          go test ./... 2>&1 | tee integration-test.log
+      - name: Upload integration diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: restless-merge-diagnostics
+          path: |
+            docs/integration/blckswan-merge-conflicts.md
+            integration-test.log
+          if-no-files-found: ignore

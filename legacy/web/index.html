@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>Restless • Universal API Client</title>
+  <meta name="description" content="Restless: universal API-klient med proff TUI, raske workflows og automagi. CLI/TUI først. Bygd for fart, kontroll og ro." />
+  <meta property="og:title" content="Restless • Universal API Client" />
+  <meta property="og:description" content="Gjør API-kaos om til flyt. TUI/CLI/automation med automagi." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#0b0f16" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%A6%A2%3C/text%3E%3C/svg%3E">
+  <style>
+    :root{
+      --bg0:#070a0f;
+      --bg1:#0b0f16;
+      --card:rgba(255,255,255,.06);
+      --card2:rgba(255,255,255,.09);
+      --stroke:rgba(255,255,255,.12);
+      --text:rgba(255,255,255,.9);
+      --muted:rgba(255,255,255,.68);
+      --muted2:rgba(255,255,255,.55);
+      --accent:#7c4dff;
+      --accent2:#00d4ff;
+      --good:#55f3a5;
+      --warn:#ffd166;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius:18px;
+      --radius2:26px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(124,77,255,.22), transparent 60%),
+        radial-gradient(900px 600px at 85% 20%, rgba(0,212,255,.16), transparent 55%),
+        radial-gradient(900px 650px at 40% 95%, rgba(85,243,165,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    /* subtle grain */
+    body:before{
+      content:"";
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:.08;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      mix-blend-mode:overlay;
+    }
+
+    a{color:inherit}
+    .wrap{max-width:1120px; margin:0 auto; padding:28px 18px 80px}
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:14px;
+      position:sticky; top:0;
+      padding:14px 0;
+      backdrop-filter: blur(10px);
+      z-index:30;
+    }
+    .topbar:after{
+      content:"";
+      position:absolute; left:-24px; right:-24px; bottom:0;
+      height:1px;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+      opacity:.75;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      text-decoration:none;
+    }
+    .logo{
+      width:38px; height:38px; border-radius:12px;
+      background:
+        radial-gradient(12px 12px at 25% 30%, rgba(0,212,255,.8), transparent 70%),
+        radial-gradient(14px 14px at 70% 75%, rgba(124,77,255,.85), transparent 70%),
+        linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.16);
+      box-shadow: 0 14px 50px rgba(0,0,0,.35);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo:before{
+      content:"";
+      position:absolute; inset:-60%;
+      background:conic-gradient(from 180deg, transparent, rgba(255,255,255,.20), transparent);
+      animation: spin 10s linear infinite;
+      opacity:.35;
+    }
+    @keyframes spin {to{transform:rotate(360deg)}}
+
+    .brand h1{
+      font-size:14px; margin:0; letter-spacing:.22em; text-transform:uppercase;
+      color:rgba(255,255,255,.88);
+    }
+    .brand small{
+      display:block; margin-top:2px;
+      font-size:12px; color:var(--muted2);
+      letter-spacing:.02em;
+    }
+
+    .nav{
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      text-decoration:none;
+      font-size:12px;
+      padding:10px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      color:rgba(255,255,255,.82);
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
+      user-select:none;
+    }
+    .pill:hover{transform:translateY(-1px); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18)}
+    .pill.primary{
+      background:linear-gradient(135deg, rgba(124,77,255,.35), rgba(0,212,255,.22));
+      border-color:rgba(124,77,255,.45);
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:22px;
+      padding:26px 0 18px;
+      align-items:stretch;
+    }
+    @media (max-width: 920px){
+      .hero{grid-template-columns: 1fr; padding-top:14px}
+    }
+
+    .card{
+      background:linear-gradient(180deg, var(--card), rgba(255,255,255,.03));
+      border:1px solid var(--stroke);
+      border-radius:var(--radius2);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .card.pad{padding:26px}
+    .kicker{
+      display:flex; align-items:center; gap:10px;
+      font-family:var(--mono);
+      font-size:12px;
+      color:rgba(255,255,255,.66);
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:999px;
+      background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(255,255,255,.2));
+      box-shadow:0 0 0 4px rgba(124,77,255,.15);
+      border:1px solid rgba(255,255,255,.18);
+    }
+    .headline{
+      margin:14px 0 10px;
+      font-size:44px;
+      line-height:1.02;
+      letter-spacing:-.02em;
+    }
+    @media (max-width: 520px){
+      .headline{font-size:34px}
+    }
+    .sub{
+      margin:0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.6;
+      max-width:62ch;
+    }
+    .ctaRow{
+      display:flex; gap:10px; flex-wrap:wrap;
+      margin-top:18px;
+    }
+    .btn{
+      appearance:none; border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      color:rgba(255,255,255,.86);
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:13px;
+      cursor:pointer;
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
+      user-select:none;
+    }
+    .btn:hover{transform:translateY(-1px); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.20)}
+    .btn.primary{
+      background:linear-gradient(135deg, rgba(124,77,255,.42), rgba(0,212,255,.22));
+      border-color:rgba(124,77,255,.55);
+    }
+    .btn.good{
+      background:linear-gradient(135deg, rgba(85,243,165,.22), rgba(0,212,255,.14));
+      border-color:rgba(85,243,165,.45);
+    }
+
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:12px;
+      margin-top:18px;
+    }
+    @media (max-width: 920px){
+      .grid3{grid-template-columns:1fr}
+    }
+    .mini{
+      padding:14px;
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .mini b{display:block; font-size:13px; margin-bottom:6px}
+    .mini span{display:block; color:var(--muted2); font-size:13px; line-height:1.5}
+
+    .term{
+      display:flex; flex-direction:column;
+      min-height: 420px;
+    }
+    .termHeader{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    }
+    .windowDots{display:flex; gap:8px; align-items:center}
+    .wd{width:10px; height:10px; border-radius:999px; opacity:.9; border:1px solid rgba(255,255,255,.16)}
+    .wd.r{background:rgba(255,95,86,.8)}
+    .wd.y{background:rgba(255,189,46,.8)}
+    .wd.g{background:rgba(39,201,63,.75)}
+    .termTitle{
+      font-family:var(--mono);
+      font-size:12px;
+      color:rgba(255,255,255,.72);
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .termBody{
+      position:relative;
+      padding:16px;
+      flex:1;
+    }
+    pre{
+      margin:0;
+      font-family:var(--mono);
+      font-size:12.6px;
+      line-height:1.45;
+      color:rgba(255,255,255,.86);
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+    .hint{
+      margin-top:12px;
+      color:rgba(255,255,255,.55);
+      font-size:12px;
+    }
+    kbd{
+      font-family:var(--mono);
+      font-size:11px;
+      padding:2px 6px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.25);
+      color:rgba(255,255,255,.78);
+    }
+
+    /* glitch overlay */
+    .glitchLayer{
+      pointer-events:none;
+      position:absolute; inset:0;
+      opacity:0;
+      transition:opacity .18s ease;
+      mix-blend-mode:screen;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(0,212,255,.00),
+          rgba(0,212,255,.00) 2px,
+          rgba(0,212,255,.06) 3px,
+          rgba(0,212,255,.00) 6px
+        );
+      filter: blur(.2px) contrast(1.05);
+    }
+    .glitchOn .glitchLayer{opacity:1}
+
+    .slice{
+      position:absolute; left:-6%; right:-6%;
+      height:34px;
+      background:linear-gradient(90deg, rgba(124,77,255,.00), rgba(124,77,255,.12), rgba(0,212,255,.10), rgba(124,77,255,.00));
+      opacity:0;
+      transform:translateX(0);
+      mix-blend-mode:screen;
+      filter: blur(.3px);
+    }
+    .glitchOn .slice{
+      opacity:.85;
+      animation: sliceMove 1.8s infinite linear;
+    }
+    @keyframes sliceMove{
+      0%{transform:translateX(-6%)}
+      50%{transform:translateX(6%)}
+      100%{transform:translateX(-6%)}
+    }
+
+    section{margin-top:18px}
+    .sectionTitle{
+      display:flex; align-items:baseline; justify-content:space-between;
+      gap:12px;
+      margin:20px 0 10px;
+    }
+    .sectionTitle h2{
+      margin:0;
+      font-size:18px;
+      letter-spacing:-.01em;
+    }
+    .sectionTitle p{
+      margin:0;
+      color:var(--muted2);
+      font-size:13px;
+    }
+
+    .two{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 920px){ .two{grid-template-columns:1fr} }
+
+    .foot{
+      margin-top:26px;
+      display:flex; flex-wrap:wrap; gap:10px;
+      align-items:center; justify-content:space-between;
+      color:rgba(255,255,255,.55);
+      font-size:12px;
+    }
+    .foot a{color:rgba(255,255,255,.7); text-decoration:none}
+    .foot a:hover{text-decoration:underline}
+
+    /* reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .logo:before, .glitchOn .slice{animation:none}
+      .pill:hover, .btn:hover{transform:none}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <a class="brand" href="#top">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>RESTLESS</h1>
+          <small>universal api client • tui / cli / automation</small>
+        </div>
+      </a>
+      <nav class="nav" aria-label="navigasjon">
+        <a class="pill" href="#features">Funksjoner</a>
+        <a class="pill" href="#workflow">Workflow</a>
+        <a class="pill" href="#demo">Demo</a>
+        <a class="pill primary" href="https://github.com/bspippi1337/restless" rel="noreferrer">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="top" class="hero">
+      <div class="card pad">
+        <div class="kicker"><span class="dot" aria-hidden="true"></span><span>Bygd for fart, kontroll og ro i kroppen</span></div>
+        <h2 class="headline">Gjør API-kaos om til flyt.</h2>
+        <p class="sub">
+          Restless er en universal API-klient med proff TUI, raske workflows og automagi som føles som håndverk:
+          små detaljer, presise svar, og en UI som holder seg kald selv når nettet er varmt.
+        </p>
+
+        <div class="ctaRow">
+          <button class="btn primary" id="btnRun">Kjør demo</button>
+          <button class="btn good" id="btnGlitch" aria-pressed="false">Glitch: av</button>
+          <a class="btn" href="#install" style="text-decoration:none; display:inline-flex; align-items:center;">Kom i gang</a>
+        </div>
+
+        <div class="grid3" id="features">
+          <div class="mini">
+            <b>Request builder</b>
+            <span>Headers, auth, body, retries, templates. Ryddig som et verkstedbord.</span>
+          </div>
+          <div class="mini">
+            <b>Discovery & presets</b>
+            <span>Samler endepunkter, lagrer flows, og bygger “default good choices”.</span>
+          </div>
+          <div class="mini">
+            <b>CLI/TUI først</b>
+            <span>Funker i terminal, CI og på farten. Null stress, bare signal.</span>
+          </div>
+        </div>
+
+        <section id="workflow">
+          <div class="sectionTitle">
+            <h2>Workflow design</h2>
+            <p>Domene inn → struktur ut → trygt videre</p>
+          </div>
+
+          <div class="two">
+            <div class="mini">
+              <b>1) Skriv inn et domene</b>
+              <span>Restless starter med én ting du faktisk vet: hvor API-et bor.</span>
+            </div>
+            <div class="mini">
+              <b>2) Oppdag docs og endpoints</b>
+              <span>Leser og finner det som finnes, ikke det som “kanskje” finnes.</span>
+            </div>
+            <div class="mini">
+              <b>3) Verifiser forsiktig</b>
+              <span>Trygge metoder, harde budsjetter, ingen brute force, ingen auth-bypass.</span>
+            </div>
+            <div class="mini">
+              <b>4) Du får en seedet request</b>
+              <span>Du starter ikke fra null. Du starter fra et godt utgangspunkt.</span>
+            </div>
+          </div>
+        </section>
+
+        <section id="install">
+          <div class="sectionTitle">
+            <h2>Kom i gang</h2>
+            <p>Bygg lokalt eller kjør fra binær</p>
+          </div>
+
+          <div class="mini">
+            <pre><code>$ git clone https://github.com/bspippi1337/restless
+$ cd restless
+$ go mod tidy
+$ make build
+$ ./bin/restless</code></pre>
+            <div class="hint">Tips: I wizard, skriv domene og trykk <kbd>Ctrl</kbd>+<kbd>D</kbd> for discovery.</div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="card term" id="demo">
+        <div class="termHeader">
+          <div class="windowDots" aria-hidden="true">
+            <span class="wd r"></span><span class="wd y"></span><span class="wd g"></span>
+          </div>
+          <div class="termTitle">restless • live demo</div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn" id="btnReset" title="Restart demo">Reset</button>
+          </div>
+        </div>
+
+        <div class="termBody" id="term">
+          <div class="glitchLayer" aria-hidden="true"></div>
+          <div class="slice" style="top:18%"></div>
+          <div class="slice" style="top:52%"></div>
+          <div class="slice" style="top:76%"></div>
+
+          <pre id="screen"></pre>
+          <div class="hint">
+            Trykk <kbd>G</kbd> for glitch, <kbd>R</kbd> for reset, eller bruk knappene.
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="foot">
+      <div>© <span id="year"></span> blckswan • Restless</div>
+      <div>
+        <a href="https://github.com/bspippi1337/restless" rel="noreferrer">Repo</a>
+        &nbsp;·&nbsp;
+        <a href="https://bspippi1337.github.io/restless/" rel="noreferrer">GitHub Pages</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const screen = document.getElementById("screen");
+    const term = document.getElementById("term");
+    const btnRun = document.getElementById("btnRun");
+    const btnReset = document.getElementById("btnReset");
+    const btnGlitch = document.getElementById("btnGlitch");
+    const year = document.getElementById("year");
+
+    year.textContent = new Date().getFullYear();
+
+    const frames = [
+`auto-glitch: armed
+  ╔════════════════════╗
+  ║   BLCKSWAN / RESTLESS   ║
+  ╚════════════════════╝
+
+$ restless
+› domain: bankid.no
+› discover: ctrl+d
+`,
+`discovering docs…
+  • looking for OpenAPI / portals / doc pages
+  • extracting endpoints
+  • verifying safely (GET/HEAD/OPTIONS only)
+
+found: 12 endpoints
+saved preset: bankid.no (read-only)
+`,
+`request builder:
+  method: GET
+  url:    https://bankid.no/.well-known/…
+  headers:
+    user-agent: restless/0.2 (tui)
+    accept: application/json
+
+send?  (y/N)  y
+`,
+`response:
+  status: 200 OK
+  time:   132ms
+  bytes:  1842
+
+next:
+  • copy as curl
+  • save as snippet
+  • open in tui inspector
+`,
+`overlay-basert glitch (tekst forblir korrekt)
+tips: trykk G for glitch, R for reset
+`
+    ];
+
+    let t = 0;
+    let running = false;
+    let timer = null;
+
+    function setGlitch(on){
+      term.classList.toggle("glitchOn", on);
+      btnGlitch.setAttribute("aria-pressed", String(on));
+      btnGlitch.textContent = on ? "Glitch: på" : "Glitch: av";
+    }
+
+    function reset(){
+      running = false;
+      clearInterval(timer);
+      timer = null;
+      t = 0;
+      screen.textContent =
+`$ restless doctor
+✓ budgets: hard
+✓ writes: disabled by default
+✓ fuzzing: seed-only (disciplined)
+✓ ui: calm under heat
+
+try: press "Kjør demo"`;
+    }
+
+    function run(){
+      if(running) return;
+      running = true;
+      clearInterval(timer);
+      t = 0;
+      screen.textContent = "";
+      const step = () => {
+        screen.textContent = frames[t];
+        t++;
+        if(t >= frames.length){
+          running = false;
+          clearInterval(timer);
+          timer = null;
+        }
+      };
+      step();
+      timer = setInterval(step, 1600);
+    }
+
+    btnRun.addEventListener("click", run);
+    btnReset.addEventListener("click", reset);
+
+    btnGlitch.addEventListener("click", () => {
+      const on = !term.classList.contains("glitchOn");
+      setGlitch(on);
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if(e.key === "g" || e.key === "G"){
+        setGlitch(!term.classList.contains("glitchOn"));
+      }
+      if(e.key === "r" || e.key === "R"){
+        reset();
+      }
+    });
+
+    reset();
+  </script>
+</body>
+</html>

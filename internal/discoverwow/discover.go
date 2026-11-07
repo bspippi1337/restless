@@ -567,7 +567,7 @@ func normalizeTarget(raw string) (string, error) {
 			)
 		}
 
-		return "", fmt.Errorf(msg)
+		return "", fmt.Errorf("%s", msg)
 	}
 
 	if _, err := net.LookupHost(host); err != nil {

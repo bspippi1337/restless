@@ -37,8 +37,7 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 600
           script: |
-            cd android
-            gradle --no-daemon :app:connectedDebugAndroidTest
+            gradle --no-daemon -p android :app:connectedDebugAndroidTest
             adb shell am start -n org.restless42.app/.MainActivity
             sleep 3
             adb exec-out screencap -p > ../RESTLESS-42-Android-Emulator.png

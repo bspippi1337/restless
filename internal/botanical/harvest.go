@@ -53,7 +53,7 @@ type queued struct {
     source string
 }
 
-var hrefRE = regexp.MustCompile("(?i)\bhref\s*=\s*["']([^"']+)["']")
+var hrefRE = regexp.MustCompile(`(?i)\bhref\s*=\s*["']([^"']+)["']`)
 
 func Crawl(ctx context.Context, cfg Config) ([]Record, error) {
     if !cfg.Authorized {

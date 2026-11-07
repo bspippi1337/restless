@@ -189,6 +189,23 @@ function renderInspector(){
    textarea.addEventListener("input",()=>{state.bodyText=textarea.value;updateCode();});
    box.append(el("strong","",example.contentType||"Documented JSON request body"),label,textarea);inputs.append(box);
  }
+ const responsePanel=$("tab-responses");
+ responsePanel.replaceChildren();
+ const responses=Array.isArray(op.responses)?op.responses:
+   op.responses&&typeof op.responses==="object"?Object.entries(op.responses).map(([status,r])=>({
+     status,description:r?.description||"",content_type:Object.keys(r?.content||{})[0]||"",
+     example:r?.content?.["application/json"]?.example??r?.content?.["application/json"]?.schema?.example??null,
+     unresolved_ref:r?.$ref||""
+   })):[];
+ if(!responses.length)responsePanel.append(el("p","input-hint","No response formats declared in this source. RESTLESS does not assume a status or content type."));
+ for(const response of responses.slice(0,30)){
+   const card=el("div","param-row"),header=el("div","param-title");
+   header.append(el("strong","",String(response.status||"default")),el("span","",String(response.content_type||"No documented media type")));
+   card.append(header,el("p","",String(response.description||"Documented response")));
+   if(response.example!==null&&response.example!==undefined)card.append(el("pre","",JSON.stringify(response.example,null,2)));
+   if(response.unresolved_ref)card.append(el("p","small-warning","Unresolved reference: "+response.unresolved_ref));
+   responsePanel.append(card);
+ }
  const evidence=$("tab-source");evidence.replaceChildren();
  field(evidence,"SOURCE DOCUMENT",op.sourceURL||"Local OpenAPI 3 JSON import",true);
  field(evidence,"SHA-256 PROVENANCE",op.sourceSHA256||"Unavailable for pasted specification",true);

@@ -119,3 +119,27 @@ test("Editable query input and JSON request body generate valid previews",()=>{
  assert.match(body.javascript,/"body"/);
  assert.throws(()=>buildRequestPreview(model,post,{bodyText:"{invalid"}),/valid JSON/);
 });
+
+
+test("Native Go library retains documented request and response samples, without fetching",()=>{
+ const source={schema_version:1,target:{host:"api.example.net"},operations:[{
+  method:"POST",path:"/pets",operation_id:"createPet",source_url:"https://api.example.net/openapi.json",
+  source_sha256:"a".repeat(64),request:{required:true,content_type:"application/json",example:{name:"Pixel",quantity:4}},
+  responses:[{status:"201",description:"Created",content_type:"application/json",example:{id:42}},
+    {status:"400",description:"Bad Request"}]
+ }],documents:[{url:"https://api.example.net/openapi.json",sha256:"a".repeat(64)}]};
+ const model=readAPI(JSON.stringify(source));
+ const op=model.operations[0],example=makeExample(model,op);
+ assert.equal(model.networkRequests,0);
+ assert.deepEqual(example.body,{name:"Pixel",quantity:4});
+ assert.equal(example.contentType,"application/json");
+ assert.equal(op.responses.length,2);
+ assert.equal(op.responses[0].status,"201");
+ assert.equal(op.responses[0].example.id,42);
+ const preview=buildRequestPreview(model,op,{});
+ assert.match(preview.curl,/--data/);
+ assert.match(preview.javascript,/Pixel/);
+ const collection=toPostman(model);
+ assert.equal(collection.item[0].request.method,"POST");
+ assert.match(collection.item[0].request.body.raw,/Pixel/);
+});

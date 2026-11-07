@@ -335,14 +335,25 @@ func (s *screen) selectOperation(op botanical.Operation) {
 	// The preview is a DOCUMENT, not an HTTP operation.
 	endpoint := "https://" + host + op.Path
 	example := "curl --request " + op.Method + " --url '" + strings.ReplaceAll(endpoint, "'", "'\\''") + "' --header 'Accept: application/json'"
-	detail := fmt.Sprintf(
+	 requestNotes := "No request body declared.\n"
+ if op.Request != nil {
+  b,err:=json.MarshalIndent(op.Request,"","  ")
+  if err==nil {requestNotes=string(b)+"\n"}
+ }
+ responseNotes := "No response types declared.\n"
+ if len(op.Responses)>0 {
+  b,err:=json.MarshalIndent(op.Responses,"","  ")
+  if err==nil {responseNotes=string(b)+"\n"}
+ }
+detail := fmt.Sprintf(
 		"DOCUMENTED API OPERATION\n\n%s %s\n%s\n\nOperation ID: %s\n\n"+
 			"INPUT PARAMETERS\n%s\nDECLARED SECURITY\n%v\n\nUNRESOLVED REFERENCES: %t\n\n"+
+			"DOCUMENTED REQUEST BODY\n%s\nDOCUMENTED RESPONSES\n%s\n"+
 			"REQUEST EXAMPLE / PREVIEW ONLY\n%s\n\n"+
 			"SOURCE EVIDENCE\nURL: %s\nSHA256: %s\n\n"+
 			"IMPORTANT: This example is not executed. Replace placeholders, verify authorization, declared servers and effects before using any API client.",
 		op.Method, op.Path, op.Summary, op.OperationID, params, op.Security, op.UnresolvedRefs,
-		example, op.SourceURL, op.SourceSHA256)
+		requestNotes, responseNotes, example, op.SourceURL, op.SourceSHA256)
 	s.details.SetText(detail)
 }
 func (s *screen) searchFirst() {

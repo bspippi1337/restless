@@ -229,6 +229,10 @@ public final class AtlasActivity extends Activity {
                 .append(" (").append(p.optString("in")).append(p.optBoolean("required")?", required":"").append(")\n");
         }
         text.append("\nAUTH DECLARATIONS\n").append(op.optJSONArray("security")).append("\n");
+        JSONObject request=op.optJSONObject("request");
+        if(request!=null)text.append("\nREQUEST BODY EXAMPLE (NOT EXECUTED)\n").append(request.toString()).append("\n");
+        JSONArray responses=op.optJSONArray("responses");
+        if(responses!=null)text.append("\nDOCUMENTED RESPONSES\n").append(responses.toString()).append("\n");
         text.append("\nREQUEST PREVIEW (NEVER EXECUTED)\n");
         text.append("curl --request ").append(method).append(" --url 'https://")
             .append(host).append(path).append("' --header 'Accept: application/json'\n");

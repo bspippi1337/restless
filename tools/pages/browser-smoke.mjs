@@ -92,6 +92,13 @@ try{
   await desktop.locator("#dashboard").waitFor({state:"visible"});
   assert.equal(await desktop.locator(".operation-button").count(),9,"synthetic OpenAPI example should map 9 declared operations");
   assert.ok(await desktop.locator(".graph-node").count()>=5,"graph must contain actual resource nodes");
+  const initialZoom=Number(await desktop.locator("#api-graph").getAttribute("width"));
+  await desktop.locator("#zoom-in").click();
+  assert.ok(Number(await desktop.locator("#api-graph").getAttribute("width"))>initialZoom,"Zoom must change diagram size");
+  await desktop.locator("#fit-graph").click();
+  assert.match(await desktop.locator("#graph-zoom-state").innerText(),/%/);
+  await desktop.locator("#reset-graph").click();
+  assert.equal(await desktop.locator("#graph-zoom-state").innerText(),"100%");
   assert.match(await desktop.locator("#atlas-status").innerText(),/Zero API operations executed/i);
   await desktop.locator("#search").fill("remove");
   assert.equal(await desktop.locator(".operation-button").count(),1);
@@ -104,6 +111,7 @@ try{
   assert.match(await desktop.locator("#atlas-status").innerText(),/ZERO network requests/i);
   assert.equal(await desktop.locator("#fetch-doc").isDisabled(),true,"Domain-only input must not start web crawling");
   await desktop.locator("#search").fill("");
+  await desktop.evaluate(()=>window.scrollTo(0,0));
   await desktop.screenshot({path:path.join(screens,"RESTLESS-42-API-Atlas-desktop.png"),fullPage:true});
   assert.equal(errors.length,0,"API Atlas JS errors: "+errors.join(" | "));
   assert.equal(externalRequests.length,0,"API Atlas demo/preview must not contact external servers.");
@@ -112,6 +120,7 @@ try{
   await mobile.locator("#load-demo").click();
   await mobile.locator("#dashboard").waitFor({state:"visible"});
   assert.ok(await mobile.locator(".graph-node").count()>=5);
+  await mobile.evaluate(()=>window.scrollTo(0,0));
   await mobile.screenshot({path:path.join(screens,"RESTLESS-42-API-Atlas-mobile.png"),fullPage:true});
   assert.equal(mobileErrors.length,0,"Mobile Atlas JS errors: "+mobileErrors.join(" | "));
 

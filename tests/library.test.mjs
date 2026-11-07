@@ -143,3 +143,16 @@ test("Native Go library retains documented request and response samples, without
  assert.equal(collection.item[0].request.method,"POST");
  assert.match(collection.item[0].request.body.raw,/Pixel/);
 });
+
+test("Native source parser rejects oversized or excessively deep resource paths",()=>{
+ const root={schema_version:1,target:{host:"docs.example.net"},documents:[]};
+ assert.throws(()=>readAPI({...root,operations:[{method:"GET",path:"/"+("x".repeat(1025))}]}),/1,024-character/);
+ assert.throws(()=>readAPI({...root,operations:[{method:"GET",path:"/"+Array.from({length:35},()=> "a").join("/") }]}),/32-segment/);
+});
+test("Python code preview serializes JSON booleans via json.loads",()=>{
+ const model=readAPI(spec),post=model.operations.find(op=>op.method==="POST");
+ const preview=buildRequestPreview(model,post,{bodyText:'{"yes":true,"no":false,"none":null}'});
+ assert.match(preview.python,/import json/);
+ assert.match(preview.python,/json\.loads\(/);
+ assert.match(preview.python,/timeout=10/);
+});

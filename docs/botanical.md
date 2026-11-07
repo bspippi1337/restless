@@ -24,6 +24,7 @@ bin/restless harvest https://petstore3.swagger.io/api/v3/openapi.json \
 # These three operations are OFFLINE: no network requests.
 bin/restless index --dir "$DIR"
 bin/restless search "find pets by status" --dir "$DIR" --limit 5
+bin/restless refs "petstore" --dir "$DIR" --limit 5
 bin/restless plan "find pet by id" --dir "$DIR" --limit 3
 ```
 
@@ -33,12 +34,12 @@ bin/restless plan "find pet by id" --dir "$DIR" --limit 3
 - Index rereads local archives, verifies SHA-256 for **every document**, and rejects invalid provenance/path traversal before indexing anything.
 - `catalog.json` is atomically replaced and stores documents alongside explicitly documented OpenAPI 3 HTTP operations. It includes method, path, summary, tags, required parameters, declared security requirements, source URL and hash.
 - Duplicate URLs in the manifest take the last entry. No network access occurs during indexing.
-- Plain text / HTML / Markdown are indexed only for reference terms. PDF bytes are marked `pdf-unparsed`; PDF text extraction is **not implemented**. Neither arbitrary prose nor PDF creates API endpoints.
+- Plain text / HTML / Markdown are indexed as searchable reference terms, exposed through `restless refs`. PDF bytes are marked `pdf-unparsed`; PDF text extraction is **not implemented**. Neither arbitrary prose nor PDF creates API endpoints.
 - Only OpenAPI **3.x** paths are recognized currently. Referenced path items are skipped; unresolved parameter/body references are flagged for human review; schema resolution and server selection are not implemented.
 
-## Offline search and probe planning
+## Offline reference search, operation search and probe planning
 
-`restless search` uses deterministic weighted lexical ranking of documented operations (operation ID, method, path, summary, tags, description, parameter names). It is not embedding-based or LLM semantic search yet.
+`restless refs` searches local documentation records and returns source URL, document type, content hash and matching terms. `restless search` uses deterministic weighted lexical ranking of documented operations (operation ID, method, path, summary, tags, description, parameter names). It is not embedding-based or LLM semantic search yet.
 
 `restless plan` returns ranked candidates and evidence links. Each candidate includes its documented method/path, source hash, declared authentication, required parameters and review warnings. Non-read methods, credentials, path parameters and unresolved references demand manual review. **Plan never makes requests, runs scripts or resolves URLs.** The JSON field `network_requests` is always zero.
 

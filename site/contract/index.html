@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10131b">
+<meta name="description" content="RESTLESS 42 Contract Lab: compare OpenAPI 3 contracts, inspect documented methods, identify missing parameter references, and export offline reports. No server requests.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta property="og:title" content="RESTLESS 42 | API Contract Lab">
+<meta property="og:description" content="Document-first OpenAPI explorer and contract comparisons. Zero HTTP requests.">
+<title>API Contract Lab | RESTLESS 42</title>
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="./contract.css">
+</head>
+<body>
+<a class="skip-link" href="#contract-workspace">Skip to API Contract Lab</a>
+<header class="site-header"><div class="container header-inner">
+<a class="brand" href="../" aria-label="RESTLESS 42 home"><span class="brand-glyph" aria-hidden="true">R<span class="brand-dot">.</span></span><span>RESTLESS <strong>42</strong></span></a>
+<nav class="nav" aria-label="Main navigation"><a href="../">Home</a><a href="../docs/">Docs</a><a href="../toolbox/">Toolbox</a><a href="../guide/">Guide</a><a href="https://github.com/bspippi1337/restless">GitHub ↗</a></nav>
+</div></header>
+<main id="contract-workspace" class="container contract-workspace">
+<section class="contract-hero"><p class="eyebrow">API CONTRACT LAB · RESTLESS 42</p>
+<h1>Know what changed.<br><span class="gradient-text">Before you deploy.</span></h1>
+<p class="lede">Import OpenAPI 3 JSON documents, explore every documented operation, compare revisions and surface review flags. The analysis is entirely local. No requests. No assumptions about deployed servers.</p>
+<p class="privacy-line"><span class="pulse" aria-hidden="true"></span> Local analysis · no network calls · no account or upload</p>
+</section>
+<section class="source-panel" aria-labelledby="source-title">
+<div class="source-heading"><h2 id="source-title">Your contracts</h2>
+<div class="source-actions">
+<button type="button" class="contract-button" id="example">Load demo revisions</button>
+<button type="button" class="contract-button danger" id="clear">Clear</button>
+</div></div>
+<div class="source-grid">
+<div class="source-field">
+<div class="field-label"><label for="baseline">Baseline · previous specification</label><button type="button" class="light-button" id="import-before">Open .json</button></div>
+<textarea id="baseline" spellcheck="false" placeholder="Optional baseline OpenAPI 3 JSON for contract diffs..."></textarea>
+<p class="field-hint">Used by Compare versions. Local file limit: 2 MB.</p>
+</div>
+<div class="source-field">
+<div class="field-label"><label for="candidate">Candidate · current specification</label><button type="button" class="light-button" id="import-after">Open .json</button></div>
+<textarea id="candidate" spellcheck="false" placeholder="Paste the OpenAPI 3 JSON specification to inspect here..."></textarea>
+<p class="field-hint">Used by Explore and Compare. JSON only; YAML is not supported.</p>
+</div></div>
+<input type="file" id="file-before" accept=".json,application/json" hidden>
+<input type="file" id="file-after" accept=".json,application/json" hidden>
+<div class="controls">
+<button type="button" id="analyze" class="button primary">Explore candidate <span aria-hidden="true">→</span></button>
+<button type="button" id="compare" class="button ghost">Compare versions</button>
+<button type="button" id="export-report" class="button ghost" disabled>Export JSON report</button>
+</div>
+</section>
+<div class="lab-status" id="contract-status" role="status" aria-live="polite">Load an example or paste an OpenAPI 3 JSON specification to start.</div>
+<section id="results" class="result-panel" hidden>
+<div class="result-head">
+<div><p class="eyebrow" id="result-eyebrow">OFFLINE ANALYSIS</p><h2 id="result-heading">Results</h2><p id="result-subtitle">No network operations performed.</p></div>
+<span class="result-badge">NETWORK REQUESTS: 0</span>
+</div>
+<div id="summary" class="summary-grid" aria-label="Analysis summary"></div>
+<section id="explore-section" hidden>
+<div class="filter-bar">
+<label class="visually-hidden" for="operation-filter">Filter documented operations</label>
+<input id="operation-filter" type="search" placeholder="Find an endpoint, parameter or operation ID...">
+<label for="method-filter">Method</label>
+<select id="method-filter"><option>ALL</option><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option><option>HEAD</option><option>OPTIONS</option><option>TRACE</option></select>
+<label class="review-only"><input id="review-only" type="checkbox"> Review flags only</label>
+</div>
+<h3>Documented operations <span class="list-count" id="operation-total"></span></h3>
+<div class="operation-table-wrap"><table class="operations-table"><thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Operation</th><th scope="col">Status</th><th scope="col">Details</th></tr></thead><tbody id="operations-body"></tbody></table></div>
+<h3>Spec quality and review flags</h3><div id="findings" class="findings-list"></div>
+</section>
+<section id="compare-section" hidden>
+<h3>Contract changes <span class="list-count" id="change-total"></span></h3>
+<p class="fine-print">The risk indicator is heuristic and does not establish runtime compatibility, deployment state or actual breaking changes.</p>
+<div class="operation-table-wrap"><table class="operations-table"><thead><tr><th scope="col">Change</th><th scope="col">Operation</th><th scope="col">Review level</th><th scope="col">Explanation</th><th scope="col">Details</th></tr></thead><tbody id="changes-body"></tbody></table></div>
+</section>
+<details class="json-details"><summary>Selected record / JSON details</summary><pre id="details-json">Select an operation or contract change.</pre></details>
+</section>
+<section class="explain-panel">
+<div><h2>Difference in a document.<br>Not necessarily on a server.</h2><p>Contract Lab compares documented methods and paths. It highlights newly required parameters, removed operations and changes in declared security. That is valuable review evidence, but it cannot claim a server endpoint is deployed or determine true backward compatibility by itself.</p></div>
+<div><p class="eyebrow">SCOPE OF THIS TOOL</p><p>OpenAPI 3 JSON only. No remote reference resolution, authentication attempts, executable requests or arbitrary specification code. External <code>$ref</code> values remain unresolved and flagged for review.</p><a href="../guide/">Read the complete RESTLESS field guide →</a></div>
+</section>
+</main>
+<footer class="footer"><div class="container footer-inner"><div><strong>RESTLESS 42</strong><p>Measured curiosity. Verifiable evidence.</p></div><div class="footer-links"><a href="../toolbox/">Toolbox</a><a href="../docs/">Documentation</a><a href="https://github.com/bspippi1337/restless">GitHub</a></div></div></footer>
+<script type="module" src="./app.mjs"></script>
+</body></html>

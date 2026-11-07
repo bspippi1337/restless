@@ -102,4 +102,4 @@ Test the Go crawler with `go test ./internal/library ./internal/botanical`. Test
 
 The current API Atlas is not a complete Postman replacement yet. There is no built-in OAuth flow, server-side collaboration, arbitrary YAML import in the browser, remote schema reference dereferencing, live execution of imported mutation methods, or automated fuzzing. It offers the durable groundwork: authorized source collection, method inventory, graph navigation, evidence and interoperable exported requests.
 
-Sources: [RESTLESS repository](https://github.com/bspippi1337/restless), [Botanical architecture](botanical.md), [the Field Guide](RESTLESS_42_Field_Guide_EN.md).
+Sources: [RESTLESS repository](https://github.com/bspippi1337/restless), [Botanical architecture](https://github.com/bspippi1337/restless/blob/main/docs/botanical.md), [the Field Guide](https://bspippi1337.github.io/restless/guide/).

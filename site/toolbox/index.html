@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#10131b">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="description" content="RESTLESS 42 Toolbox: a private, CyberChef-style, browser-only pipeline for JSON, Base64, JWT inspection, hashes, URL tools, and offline OpenAPI planning.">
 <meta property="og:title" content="RESTLESS 42 | Browser Toolbox">
 <meta property="og:description" content="Combine 32 working text, encoding, crypto and OpenAPI operations. Your input never leaves your browser.">
@@ -41,7 +42,7 @@
 </aside>
 <section class="lab-panel recipe" aria-labelledby="recipe-heading">
   <div class="panel-header"><div><span class="panel-eyebrow">PIPELINE</span><h2 id="recipe-heading">Recipe</h2></div><span class="small-count" id="recipe-count">0 steps</span></div>
-  <p class="panel-description">Click operations to chain them. Reorder, disable or remove any step.</p>
+  <p class="panel-description">Click or drag operations into a recipe. Reorder by dragging or using the arrow buttons; disable or remove any step.</p>
   <ol id="recipe-list" class="recipe-list" aria-live="polite"></ol>
   <div class="recipe-footer"><button class="lab-button primary-lab" type="button" id="bake">Bake recipe <span aria-hidden="true">▶</span></button><p class="shortcut">Ctrl / Cmd + Enter</p></div>
 </section>

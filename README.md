@@ -86,6 +86,18 @@ Historical experiments and prototypes:
 
     archive/
 
+Old patch scripts and one-off migrations:
+
+    archive/historical/
+
+The live repository cleanup and verification tools are native C and Go:
+
+    make garden          # audit and dry-run preview, no deletions
+    make garden-check    # gofmt, vet, tests, and build
+    make garden-apply    # explicitly remove only generated directories
+
+See [Repository Garden](docs/repo-garden.md) for archival paths, safety limits, and cross-platform build notes.
+
 ## License
 
 MIT

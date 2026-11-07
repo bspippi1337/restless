@@ -1,6 +1,6 @@
 import {validateDomain,readAPI,makeTree,makeExample,buildRequestPreview,toPostman,toMermaid} from "./engine.mjs";
 const $=id=>document.getElementById(id),NS="http://www.w3.org/2000/svg";
-const state={model:null,tree:null,selected:null,search:"",method:"ALL",domain:null,lastCommand:"",tab:"parameters",inputs:Object.create(null),bodyText:"",code:"curl"};
+const state={model:null,tree:null,selected:null,search:"",method:"ALL",domain:null,lastCommand:"",tab:"parameters",inputs:Object.create(null),bodyText:"",code:"curl",graphZoom:1,graphBounds:null};
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n;}
 function svg(tag,attrs){const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs||{}))n.setAttribute(k,String(v));return n;}
 function notice(message,kind="info"){$("atlas-status").textContent=message;$("atlas-status").dataset.kind=kind;}
@@ -92,6 +92,7 @@ function load(model,source){
   const card=el("div","stat-card");card.append(el("strong","",value),el("span","",label));$("stat-bar").append(card);
  }
  renderFilters();renderResources();renderGraph();renderInspector();
+ if(window.matchMedia("(max-width:700px)").matches)fitGraph();
  notice("Mapped "+model.stats.operations+" documented operations across "+state.tree.nodes.length+" resource nodes. Zero API operations executed.","success");
  $("dashboard").scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -135,8 +136,11 @@ function renderGraph(){
   positions.set(n.id,{x:30+n.depth*217,y});ordered.push(n);
  }
  layout(tree.root);
- const width=Math.max(760,tree.maxDepth*217+255),height=Math.max(450,Math.min(30000,leaf*79+110));
- canvas.setAttribute("viewBox","0 0 "+width+" "+height);canvas.setAttribute("width",width);canvas.setAttribute("height",height);
+ const width=Math.max(760,tree.maxDepth*217+255),height=Math.max(450,leaf*79+110);
+ state.graphBounds={width,height};
+ canvas.setAttribute("viewBox","0 0 "+width+" "+height);
+ updateGraphZoom(false);
+ $("graph-count").textContent=tree.nodes.length+" documented resource nodes";
  for(const edge of tree.edges){
   const a=positions.get(edge.from),b=positions.get(edge.to);if(!a||!b)continue;
   canvas.append(svg("path",{class:"graph-edge",d:"M "+(a.x+172)+" "+a.y+" C "+(a.x+191)+" "+a.y+" "+(b.x-20)+" "+b.y+" "+b.x+" "+b.y}));
@@ -156,6 +160,29 @@ function renderGraph(){
   canvas.append(g);
  }
 }
+function updateGraphZoom(center=true){
+ if(!state.graphBounds)return;
+ const view=$("graph-viewport"),canvas=$("api-graph"),bounds=state.graphBounds;
+ const oldWidth=Number(canvas.getAttribute("width"))||bounds.width;
+ const oldHeight=Number(canvas.getAttribute("height"))||bounds.height;
+ const cx=(view.scrollLeft+view.clientWidth/2)/oldWidth,cy=(view.scrollTop+view.clientHeight/2)/oldHeight;
+ canvas.setAttribute("width",String(Math.round(bounds.width*state.graphZoom)));
+ canvas.setAttribute("height",String(Math.round(bounds.height*state.graphZoom)));
+ $("graph-zoom-state").textContent=Math.round(state.graphZoom*100)+"%";
+ if(center)view.scrollTo({left:Math.max(0,cx*bounds.width*state.graphZoom-view.clientWidth/2),
+  top:Math.max(0,cy*bounds.height*state.graphZoom-view.clientHeight/2)});
+}
+function zoomGraph(factor){
+ state.graphZoom=Math.max(.12,Math.min(2.4,Math.round(state.graphZoom*factor*100)/100));
+ updateGraphZoom();
+}
+function fitGraph(){
+ if(!state.graphBounds)return;
+ const view=$("graph-viewport"),b=state.graphBounds;
+ state.graphZoom=Math.max(.12,Math.min(2.4,Math.min((view.clientWidth-14)/b.width,(view.clientHeight-14)/b.height)));
+ updateGraphZoom(false);view.scrollTo({left:0,top:0});
+}
+
 function field(parent,label,value,asCode=false){
  const s=el("div","source-flag");s.append(el("strong","",label),el(asCode?"code":"span","",value));parent.append(s);
 }
@@ -236,6 +263,7 @@ function basename(){return(state.model.apiName||"api").replace(/[^a-zA-Z0-9_-]+/
 function saveGraph(){
  const graph=$("api-graph");if(!state.model||!graph.children.length)return;
  const clone=graph.cloneNode(true),style=svg("style");
+ if(state.graphBounds){clone.setAttribute("width",state.graphBounds.width);clone.setAttribute("height",state.graphBounds.height);}
  style.textContent=".graph-edge{fill:none;stroke:#7aa68f;stroke-width:2}.graph-node rect{fill:#1d3040;stroke:#63859b;rx:9}.graph-node.selected rect{fill:#28513b;stroke:#b7f768;stroke-width:2}.graph-label{fill:#eef8ed;font:700 12px monospace}.graph-sub{fill:#a2bdca;font:10px monospace}.graph-link-dot{fill:#b7f768}";
  clone.insertBefore(style,clone.firstChild);
  clone.insertBefore(svg("rect",{x:0,y:0,width:"100%",height:"100%",fill:"#0b1722"}),clone.firstChild);
@@ -250,7 +278,10 @@ $("load-demo").addEventListener("click",()=>load(readAPI(demo),"Synthetic local 
 $("open-json").addEventListener("click",()=>$("json-file").click());
 $("json-file").addEventListener("change",async e=>{const file=e.target.files?.[0];e.target.value="";await importFile(file);});
 $("search").addEventListener("input",()=>{state.search=$("search").value.trim();renderResources();});
-$("reset-graph").addEventListener("click",()=>$("graph-viewport").scrollTo({top:0,left:0,behavior:"smooth"}));
+$("reset-graph").addEventListener("click",()=>{state.graphZoom=1;updateGraphZoom(false);$("graph-viewport").scrollTo({top:0,left:0});});
+$("fit-graph").addEventListener("click",fitGraph);
+$("zoom-in").addEventListener("click",()=>zoomGraph(1.25));
+$("zoom-out").addEventListener("click",()=>zoomGraph(.8));
 $("save-graph").addEventListener("click",saveGraph);
 $("export-postman").addEventListener("click",()=>download(basename()+"-postman.json",JSON.stringify(toPostman(state.model),null,2)));
 $("export-mermaid").addEventListener("click",()=>download(basename()+"-map.mmd",toMermaid(state.model),"text/plain;charset=utf-8"));

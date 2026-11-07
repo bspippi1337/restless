@@ -82,10 +82,15 @@
 <section class="graph-panel" aria-labelledby="graph-heading">
 <div class="pane-head">
 <div><p>RELATIONSHIPS</p><h3 id="graph-heading">Resource map</h3></div>
-<div class="graph-actions"><button type="button" id="reset-graph" class="mini-button">Reset view</button><button type="button" id="save-graph" class="mini-button">Save SVG</button></div>
+<div class="graph-actions" role="group" aria-label="Graph zoom controls"><button type="button" id="zoom-out" class="mini-button" aria-label="Zoom out">−</button>
+<output id="graph-zoom-state" aria-live="polite">100%</output>
+<button type="button" id="zoom-in" class="mini-button" aria-label="Zoom in">+</button>
+<button type="button" id="fit-graph" class="mini-button">Fit</button>
+<button type="button" id="reset-graph" class="mini-button">100%</button>
+<button type="button" id="save-graph" class="mini-button">SVG ↓</button></div>
 </div>
 <div class="graph-viewport" id="graph-viewport"><svg id="api-graph" role="img" aria-label="Interactive documentation-derived API resource graph" xmlns="http://www.w3.org/2000/svg"></svg></div>
-<p class="pane-foot">Solid edges are documented path relationships. Select a node or operation to inspect evidence. Layout is a local visualization, not a network trace.</p>
+<p class="pane-foot"><span id="graph-count"></span>. Solid edges show documented resource relationships, not network traffic. Use the zoom controls to inspect a larger API.</p>
 </section>
 <aside class="inspector-panel">
 <div class="pane-head"><div><p>INSPECTOR</p><h3>Operation details</h3></div><span id="operation-indicator">SELECT</span></div>

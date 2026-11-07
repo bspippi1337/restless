@@ -181,3 +181,10 @@
 .atlas-hero-copy .lede{font-size:1rem}.hero-cta{margin-top:1.7rem}.hero-claims{margin-top:1.5rem}
 .atlas-art-frame{transform:none}.atlas-art-bar{font-size:.56rem}.atlas-hero .hero-metrics{flex-direction:row}
 .atlas-hero .hero-metrics strong{font-size:.92rem}.atlas-hero .hero-metrics span{font-size:.59rem}}
+
+/* Accessible vector map controls. Scales the diagram without remote libraries. */
+.graph-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:.3rem}
+.graph-actions .mini-button{padding:.3rem .45rem;min-width:28px;height:28px}
+#graph-zoom-state{font:800 .68rem ui-monospace,Consolas,monospace;color:#b7f768;min-width:36px;text-align:center}
+#api-graph{min-width:0;min-height:0;max-width:none}
+@media(max-width:700px){.graph-panel .pane-head{flex-wrap:wrap}.graph-actions{width:100%;justify-content:flex-start}}

@@ -14,6 +14,8 @@ RESTLESS helps a developer find the API operation they forgot **without guessing
 
 - **[Documentation center](https://bspippi1337.github.io/restless/docs/)** (when repository GitHub Pages is enabled)
 - **[32-operation browser toolbox](https://bspippi1337.github.io/restless/toolbox/)** (GitHub Pages)
+- **[API Atlas](https://bspippi1337.github.io/restless/library/)**: interactive Swagger-style resource graph, input examples, Postman export
+- **[API Atlas native/crawler guide](docs/RESTLESS_42_API_Atlas_EN.md)**: Go domain crawler, Windows/macOS/Linux desktop and Android companion
 - **[Complete English field guide](docs/RESTLESS_42_Field_Guide_EN.md)** (also available as a rendered web handbook)
 - **[Browser toolbox operation manual](docs/RESTLESS_42_Browser_Toolbox_EN.md)**
 - **[NotebookLM podcast source and brief](docs/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt)**
@@ -34,6 +36,22 @@ go build -o build/restless ./cmd/restless
 ```
 
 For Debian/WSL, install Git and Go via your package manager or the official Go distribution before building.
+
+## One domain → real API library
+
+Start with zero-network preview:
+
+```sh
+./build/restless library docs.your-domain.com
+```
+
+After confirming permission and policies for your exact target, opt in to documentation collection:
+
+```sh
+./build/restless library https://docs.your-domain.com/openapi.json --max-pages 12 --max-depth 2 --execute --authorized
+```
+
+Import the resulting `.restless/libraries/docs.your-domain.com/library.json` into [API Atlas](https://bspippi1337.github.io/restless/library/). The crawler only requests permitted documentation, never executes cataloged API operations or guesses endpoints.
 
 ## First safe workflow
 

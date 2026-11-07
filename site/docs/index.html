@@ -41,12 +41,12 @@ go build -o build/restless ./cmd/restless
 ./build/restless harvest \
   https://petstore3.swagger.io/api/v3/openapi.json \
   --host petstore3.swagger.io \
-  --out ./archive
+  --out .restless/botanical
 
 # After an authorized harvest:
-./build/restless index --dir ./archive
-./build/restless search "find pet" --dir ./archive
-./build/restless plan "find pet" --dir ./archive</code></pre><p class="code-foot">Always pass the same --out/--dir archive to each step.</p></div></div>
+./build/restless index --dir .restless/botanical
+./build/restless search "find pet" --dir .restless/botanical
+./build/restless plan "find pet" --dir .restless/botanical</code></pre><p class="code-foot">Always pass the same --out/--dir archive to each step.</p></div></div>
 </section>
 <section class="section feature-strip"><div class="container feature-inner"><div>
 <p class="eyebrow">REALITY CHECK</p><h2>We document boundaries,<br>not imaginary capabilities.</h2>

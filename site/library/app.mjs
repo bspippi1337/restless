@@ -12,18 +12,32 @@ async function copy(text){
  try{await navigator.clipboard.writeText(text);notice("Copied to clipboard.","success");}
  catch{notice("Clipboard unavailable. Use download or select the text manually.","error");}
 }
+const petBody={content:{"application/json":{schema:{
+ type:"object",properties:{name:{type:"string",example:"Pixel"},status:{type:"string",enum:["available","adopted"]}}
+}}}};
 const demo={
- openapi:"3.0.3",info:{title:"RESTLESS Demo API",version:"2.4.0",description:"Invented sample data, not a live service"},
+ openapi:"3.0.3",
+ info:{title:"RESTLESS Demo API",version:"2.4.0",description:"Synthetic demo, not an actual server"},
  servers:[{url:"https://demo.example.invalid/v2"}],
  paths:{
-  "/pets":{get:{operationId:"listPets",tags:["Pets"],summary:"List pets",parameters:[{name:"status",in:"query",schema:{type:"string",enum:["available","pending"]}}]},
-    post:{operationId:"createPet",tags:["Pets"],summary:"Register a pet",requestBody:{required:true,content:{"application/json":{schema:{type:"object",properties:{name:{type:"string",example:"Pixel"},status:{type:"string",enum:["available","adopted"]}}}}}}}},
-  "/pets/{petId}":{parameters:[{name:"petId",in:"path",required:true,schema:{type:"integer",example:42}}],
-    get:{operationId:"findPet",tags:["Pets"],summary:"Find pet by ID"},
-    patch:{operationId:"updatePet",tags:["Pets"],summary:"Change pet status",requestBody:{content:{"application/json":{schema:{type:"object",properties:{status:{type:"string",enum:["adopted","available"]}}}}}}}},
-    delete:{operationId:"removePet",tags:["Pets"],summary:"Remove a pet"}},
-  "/orders":{get:{operationId:"listOrders",tags:["Orders"],summary:"List orders"},post:{operationId:"createOrder",tags:["Orders"],summary:"Create an order",requestBody:{content:{"application/json":{schema:{type:"object",properties:{petId:{type:"integer",example:42},quantity:{type:"integer",default:1}}}}}}}},
-  "/accounts/{accountId}/orders":{parameters:[{name:"accountId",in:"path",required:true,schema:{type:"string"}}],get:{operationId:"accountOrders",tags:["Accounts"],summary:"Find account orders"}},
+  "/pets":{
+   get:{operationId:"listPets",tags:["Pets"],summary:"List pets",parameters:[{name:"status",in:"query",schema:{type:"string",enum:["available","pending"]}}]},
+   post:{operationId:"createPet",tags:["Pets"],summary:"Register a pet",requestBody:petBody}
+  },
+  "/pets/{petId}":{
+   parameters:[{name:"petId",in:"path",required:true,schema:{type:"integer",example:42}}],
+   get:{operationId:"findPet",tags:["Pets"],summary:"Find pet by ID"},
+   patch:{operationId:"updatePet",tags:["Pets"],summary:"Change pet status",requestBody:petBody},
+   delete:{operationId:"removePet",tags:["Pets"],summary:"Remove a pet"}
+  },
+  "/orders":{
+   get:{operationId:"listOrders",tags:["Orders"],summary:"List orders"},
+   post:{operationId:"createOrder",tags:["Orders"],summary:"Create an order",requestBody:petBody}
+  },
+  "/accounts/{accountId}/orders":{
+   parameters:[{name:"accountId",in:"path",required:true,schema:{type:"string"}}],
+   get:{operationId:"accountOrders",tags:["Accounts"],summary:"Find account orders"}
+  },
   "/health":{head:{operationId:"checkHealth",tags:["System"],summary:"Service health headers"}}
  }
 };

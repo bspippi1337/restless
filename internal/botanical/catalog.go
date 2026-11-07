@@ -91,6 +91,9 @@ type rawSpec struct {
 	} `yaml:"info"`
 	Security []map[string][]string `yaml:"security"`
 	Paths    map[string]rawPath    `yaml:"paths"`
+	Components struct {
+		Parameters map[string]Parameter `yaml:"parameters"`
+	} `yaml:"components"`
 }
 
 var htmlTags = regexp.MustCompile(`(?s)<[^>]*>`)
@@ -108,9 +111,6 @@ func BuildCatalog(directory string) (Catalog, error) {
 	scanner.Buffer(make([]byte, 4096), 1<<20)
 	entries := make(map[string]Record)
 	for scanner.Scan() {
-		if len(entries) >= maxCatalogDocuments {
-			return catalog, fmt.Errorf("catalog document limit exceeded (%d)", maxCatalogDocuments)
-		}
 		var r Record
 		if err := json.Unmarshal(scanner.Bytes(), &r); err != nil {
 			return catalog, fmt.Errorf("invalid archive manifest: %w", err)
@@ -125,6 +125,9 @@ func BuildCatalog(directory string) (Catalog, error) {
 			return catalog, fmt.Errorf("invalid archive path for %s", r.URL)
 		}
 		entries[r.URL] = r // Latest manifest entry wins without executing or re-fetching anything.
+		if len(entries) > maxCatalogDocuments {
+			return catalog, fmt.Errorf("catalog document limit exceeded (%d)", maxCatalogDocuments)
+		}
 	}
 	if err := scanner.Err(); err != nil {
 		return catalog, err
@@ -173,12 +176,14 @@ func BuildCatalog(directory string) (Catalog, error) {
 							continue
 						}
 						op := choice.op
-						parameters := mergeParameters(p.Parameters, op.Parameters)
+						pathParams, pathUnresolved := resolveParameters(p.Parameters, spec.Components.Parameters)
+						opParams, opUnresolved := resolveParameters(op.Parameters, spec.Components.Parameters)
+						parameters := mergeParameters(pathParams, opParams)
 						security := op.Security
 						if security == nil {
 							security = spec.Security
 						}
-						unresolved := op.RequestBody.Ref != ""
+						unresolved := op.RequestBody.Ref != "" || pathUnresolved || opUnresolved
 						for _, param := range parameters {
 							if param.Ref != "" {
 								unresolved = true

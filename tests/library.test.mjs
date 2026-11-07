@@ -156,3 +156,40 @@ test("Python code preview serializes JSON booleans via json.loads",()=>{
  assert.match(preview.python,/json\.loads\(/);
  assert.match(preview.python,/timeout=10/);
 });
+
+test("OpenAPI request examples redact secret-like schema properties and nested examples",()=>{
+ const spec={openapi:"3.0.3",info:{title:"Secret sample"},paths:{
+ "/config":{post:{operationId:"setConfig",requestBody:{content:{"application/json":{schema:{
+   type:"object",properties:{name:{type:"string",example:"demo"},
+    password:{type:"string",example:"DONOTEXPORT"},
+    credentials:{type:"object",example:{api_key:"PRIVATE",nested:{access_token:"TOKEN"}}}}
+ }}}}}}}};
+ const model=readAPI(spec),op=model.operations[0],sample=makeExample(model,op);
+ assert.equal(sample.body.name,"demo");
+ assert.notEqual(sample.body.password,"DONOTEXPORT");
+ assert.notEqual(sample.body.credentials.api_key,"PRIVATE");
+ assert.notEqual(sample.body.credentials.nested.access_token,"TOKEN");
+ assert.doesNotMatch(JSON.stringify(toPostman(model)),/DONOTEXPORT|PRIVATE|TOKEN/);
+});
+test("Unresolved schema references remain visible but are never treated as resolved examples",()=>{
+ const doc={openapi:"3.1.0",info:{title:"Refs"},paths:{
+ "/store":{post:{operationId:"store",requestBody:{content:{"application/json":{schema:{$ref:"#/components/schemas/Item"}}}}}}
+ }};
+ const model=readAPI(doc),op=model.operations[0];
+ assert.equal(op.unresolvedRefs,true);
+ assert.equal(makeExample(model,op).body.unresolvedRef,"#/components/schemas/Item");
+ assert.equal(buildRequestPreview(model,op).readyForReview,false);
+});
+test("Mermaid exports cannot break out of quoted graph nodes",()=>{
+ const doc={openapi:"3.0.3",info:{title:"a\\nB\\\"] --> x[evil<script>"},paths:{"/items]-->x":{get:{operationId:"x"}}}};
+ const out=toMermaid(readAPI(doc));
+ assert.doesNotMatch(out,/<script>|\\]\\s*-->/);
+ assert.match(out,/flowchart LR/);
+});
+test("Untrusted header values containing newlines are refused",()=>{
+ const doc={openapi:"3.0.3",info:{title:"Headers"},paths:{"/headers":{get:{parameters:[
+ {name:"X-Custom",in:"header",schema:{type:"string"}}
+ ]}}}};
+ const model=readAPI(doc);
+ assert.throws(()=>buildRequestPreview(model,model.operations[0],{values:{"header:X-Custom":"x\\r\\nExploit: yes"}}),/Unsafe or multiline/);
+});

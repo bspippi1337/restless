@@ -68,7 +68,10 @@ export function readAPI(input){
        const declared=[...(doc.paths?.[op.path]?.parameters||[]),...(raw.parameters||[])].find(x=>x?.name===p.name&&x?.in===p.in);
        return {...p,schema:declared?.schema||{},type:declared?.schema?.type||"string"};
      });
-     const o=normalizeOperation({...op,parameters:params,requestBody:raw.requestBody,responses:raw.responses},"","");
+     const bodyHasUnresolvedSchema=isObj(raw.requestBody?.content)&&
+       Object.values(raw.requestBody.content).some(item=>typeof item?.schema?.$ref==="string");
+     const o=normalizeOperation({...op,parameters:params,unresolvedRefs:op.unresolvedRefs||bodyHasUnresolvedSchema,
+       requestBody:raw.requestBody,responses:raw.responses},"","");
      if(o)operations.push(o);
    }
    documents=[{title:apiName,kind:"openapi-3",url:"Local JSON import",sha256:""}];
@@ -123,12 +126,29 @@ export function makeTree(model){
  const edges=nodes.filter(n=>n.parent).map(n=>({from:n.parent,to:n.id}));
  return {root,nodes,edges,maxDepth,operationCount:model.operations.length};
 }
+const SECRET_KEYS=/(?:password|passwd|secret|api[-_]?key|access[-_]?token|refresh[-_]?token|private[-_]?key)/i;
+function safeSample(value,depth=0){
+ if(depth>4)return "<nested value>";
+ if(Array.isArray(value))return value.slice(0,10).map(v=>safeSample(v,depth+1));
+ if(isObj(value)){
+  const out=Object.create(null);
+  for(const [key,val] of Object.entries(value).slice(0,40)){
+   out[key]=SECRET_KEYS.test(key)?"<REDACTED: enter locally>":safeSample(val,depth+1);
+  }
+  return out;
+ }
+ if(typeof value==="string")return value.slice(0,500);
+ if(value===null||typeof value==="boolean"||typeof value==="number")return value;
+ return "<unsupported sample>";
+}
 function sampleOf(schema,name="",depth=0){
+ if(SECRET_KEYS.test(name))return "<REDACTED: enter locally>";
  if(depth>3)return "<nested object>";
  if(!isObj(schema))return "<"+(name||"value")+">";
- if(Array.isArray(schema.enum)&&schema.enum.length)return schema.enum[0];
- if(Object.hasOwn(schema,"example"))return schema.example;
- if(Object.hasOwn(schema,"default"))return schema.default;
+ if(schema.$ref)return {unresolvedRef:String(schema.$ref).slice(0,300),warning:"Referenced schema not expanded"};
+ if(Array.isArray(schema.enum)&&schema.enum.length)return safeSample(schema.enum[0]);
+ if(Object.hasOwn(schema,"example"))return safeSample(schema.example);
+ if(Object.hasOwn(schema,"default"))return safeSample(schema.default);
  if(schema.type==="boolean")return false;
  if(schema.type==="integer"||schema.type==="number")return 0;
  if(schema.type==="array")return [sampleOf(schema.items||{},name,depth+1)];
@@ -154,7 +174,7 @@ export function makeExample(model,op){
  if(op.request&&isObj(op.request)){
    contentType=String(op.request.content_type||"");
    if(contentType)headers.push({name:"Content-Type",value:contentType});
-   if(Object.hasOwn(op.request,"example"))body=op.request.example;
+   if(Object.hasOwn(op.request,"example"))body=safeSample(op.request.example);
    if(op.request.unresolved_ref)body={unresolvedRef:op.request.unresolved_ref,warning:"Reference was not resolved in the source catalog"};
  }
  if(op.requestBody){
@@ -204,8 +224,9 @@ export function buildRequestPreview(model,op,input={}){
    if(value===undefined||value==="")continue;
    if(p.in==="query")query.append(p.name,String(value));
    else if(p.in==="header"){
-     if(/^[A-Za-z0-9!#$%&'*+.^_~|-]+$/.test(p.name)&&!/[\r\n]/.test(String(value)))
-       headers.push({name:p.name,value:String(value)});
+     if(!/^[A-Za-z0-9!#$%&'*+.^_~|-]+$/.test(p.name)||/[\r\n]/.test(String(value)))
+       throw Error("Unsafe or multiline header parameter: "+p.name);
+     headers.push({name:p.name,value:String(value)});
    }
  }
  let url=(model.server||"{{baseUrl}}").replace(/\/$/,"")+path;
@@ -268,7 +289,7 @@ export function toPostman(model){
 export function toMermaid(model){
  const tree=makeTree(model);
  const ids=new Map(tree.nodes.map((n,i)=>[n.id,"n"+i]));
- const esc=x=>String(x).replace(/["\n\r]/g," ").slice(0,85);
+ const esc=x=>String(x).replace(/[<>&\[\]{}"\\\n\r`]/g,"_").replace(/\s+/g," ").slice(0,85);
  const lines=["flowchart LR"];
  for(const n of tree.nodes){
    const label=n.path==="/"?model.apiName:n.name;

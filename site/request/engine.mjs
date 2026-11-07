@@ -58,6 +58,14 @@ export function validateRequest(config){
  return {url:target.href,host:target.hostname,method,headers,timeoutMs,
    consent:authorized,allowAuthorization:!!allowAuthorization};
 }
+function redactedURL(input){
+ const url=new URL(input);
+ for(const key of [...new Set(url.searchParams.keys())]){
+   if(/(?:^|[_-])(?:key|token|password|secret|auth|signature|sig|credential|code|session)(?:$|[_-])/i.test(key))
+     url.searchParams.set(key,"[REDACTED]");
+ }
+ return url.href;
+}
 function hex(bytes){return Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");}
 async function readBounded(response){
  if(!response.body)return new Uint8Array();
@@ -105,7 +113,7 @@ export async function executeRequest(config,transport=globalThis.fetch){
    const digest=await crypto.subtle.digest("SHA-256",bytes);
    return{
      mode:"ONE_EXPLICIT_AUTHORIZED_BROWSER_REQUEST",
-     networkRequests:1,method:verified.method,url:verified.url,
+     networkRequests:1,method:verified.method,url:redactedURL(verified.url),
      responseStatus:response.status,responseStatusText:response.statusText,
      durationMs,bytesRead:bytes.length,sha256:hex(new Uint8Array(digest)),
      responseHeaders:observedHeaders,responseBody:body,bodyFormat,

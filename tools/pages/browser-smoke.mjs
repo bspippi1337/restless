@@ -123,8 +123,11 @@ try{
   await mobile.locator("#load-demo").click();
   await mobile.locator("#dashboard").waitFor({state:"visible"});
   assert.ok(await mobile.locator(".graph-node").count()>=5);
+  // Allow the workspace's intentional smooth-scroll animation to settle, then
+  // capture the hero with sticky navigation in its actual top-of-page position.
+  await mobile.waitForFunction(()=>document.querySelector("#atlas-status")?.textContent.includes("Mapped"));
+  await mobile.waitForTimeout(800);
   await mobile.evaluate(()=>{document.documentElement.style.scrollBehavior="auto";window.scrollTo({top:0,behavior:"instant"});});
-  await mobile.waitForFunction(()=>window.scrollY===0);
   await mobile.screenshot({path:path.join(screens,"RESTLESS-42-API-Atlas-mobile.png"),fullPage:true});
   assert.equal(mobileErrors.length,0,"Mobile Atlas JS errors: "+mobileErrors.join(" | "));
 

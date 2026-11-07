@@ -33,6 +33,7 @@ type Config struct {
 	Delay       time.Duration
 	Authorized  bool
 	Client      *http.Client // Tests may inject a local client. Production defaults to a public-IP-only dialer.
+	OnDocument  func(Record)  // Optional UI progress callback after successful archive append.
 }
 
 type Record struct {
@@ -260,6 +261,9 @@ func Crawl(ctx context.Context, cfg Config) ([]Record, error) {
 			return records, err
 		}
 		records = append(records, record)
+		if cfg.OnDocument != nil {
+			cfg.OnDocument(record)
+		}
 		if ct != "text/html" || item.depth >= cfg.MaxDepth {
 			continue
 		}

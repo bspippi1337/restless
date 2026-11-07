@@ -8,6 +8,7 @@ on:
       - internal/botanical/**
       - internal/cli/harvest.go
       - internal/cli/catalog.go
+      - internal/cli/diff.go
       - internal/cli/root.go
 permissions:
   contents: write
@@ -29,14 +30,14 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          gofmt -w internal/botanical/*.go internal/cli/harvest.go internal/cli/catalog.go internal/cli/root.go
+          gofmt -w internal/botanical/*.go internal/cli/harvest.go internal/cli/catalog.go internal/cli/diff.go internal/cli/root.go
           if git diff --quiet; then
             echo "Already formatted"
             exit 0
           fi
           git config user.name "restless-format[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add internal/botanical/*.go internal/cli/harvest.go internal/cli/catalog.go internal/cli/root.go
+          git add internal/botanical/*.go internal/cli/harvest.go internal/cli/catalog.go internal/cli/diff.go internal/cli/root.go
           git commit -m "style(botanical): gofmt new crawler and CLI"
           # Branch may advance while the formatter is running. Rebase before publishing.
           for attempt in 1 2 3; do

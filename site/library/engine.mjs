@@ -13,6 +13,8 @@ export function validateDomain(text){
  if(typeof text!=="string"||!text.trim()||text.length>2048)throw Error("Enter a domain or an explicit HTTPS documentation URL.");
  const value=text.trim();
  if(/\s/.test(value))throw Error("Domain contains whitespace.");
+ const authority=value.replace(/^https:\/\//i,"").split(/[/?#]/)[0];
+ if(/:[0-9]+$/.test(authority))throw Error("Explicit ports are not supported.");
  let u;try{u=new URL(value.includes("://")?value:"https://"+value);}catch{throw Error("Invalid domain or HTTPS documentation URL.");}
  if(u.protocol!=="https:")throw Error("HTTPS is required.");
  if(u.username||u.password||u.port||u.search||u.hash)throw Error("Credentials, nonstandard ports, queries and fragments are not supported.");

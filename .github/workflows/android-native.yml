@@ -26,7 +26,12 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
+      # Ubuntu GitHub runners already include a supported Android SDK.
+      # Avoid the old setup-android action, which requests the removed "tools" package.
+      - name: Locate Android SDK
+        run: |
+          test -n "${ANDROID_HOME:-}"
+          test -x "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" || command -v sdkmanager
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'

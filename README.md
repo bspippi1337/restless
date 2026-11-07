@@ -24,7 +24,9 @@ RESTLESS helps a developer find the API operation they forgot **without guessing
 - **[Botanical architecture and safety notes](docs/botanical.md)**
 - **[Repository Garden and native maintenance tools](docs/repo-garden.md)**
 
-The separate Request Lab is the only browser tool allowed to send live network requests: one explicit, host-scoped, consent-gated HTTPS GET/HEAD/OPTIONS request at a time. Other browser tools remain offline.\n\nThe browser toolbox is a static, browser-only workbench inspired by CyberChef's recipe model. It offers JSON, CSV, encoding, SHA-256/512, JWT inspection, text processing, URL utilities, and offline OpenAPI analysis. It has no network execution path or backend processing, and its operation chaining and import/export run locally.
+The separate Request Lab is the only browser tool allowed to send live network requests: one explicit, host-scoped, consent-gated HTTPS GET/HEAD/OPTIONS request at a time. Other browser tools remain offline.
+
+The browser toolbox is a static, browser-only workbench inspired by CyberChef's recipe model. It offers JSON, CSV, encoding, SHA-256/512, JWT inspection, text processing, URL utilities, and offline OpenAPI analysis. It has no network execution path or backend processing, and its operation chaining and import/export run locally.
 
 ## Build from source
 

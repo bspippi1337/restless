@@ -175,6 +175,60 @@ export function makeExample(model,op){
    caveat:"PREVIEW ONLY. Command is not executed. Placeholders must be supplied, auth verified, target explicitly authorized."
  };
 }
+/**
+ * Assemble editable request EXAMPLES. This never performs HTTP requests.
+ * Unfilled required values remain clearly marked as {{placeholders}}.
+ */
+export function buildRequestPreview(model,op,input={}){
+ const example=makeExample(model,op);
+ const values=isObj(input.values)?input.values:{};
+ let missing=[];
+ const path=op.path.replace(/\{([^}]+)\}/g,(_,name)=>{
+   const v=values["path:"+name];
+   if(v===undefined||v===""){missing.push("path:"+name);return "{{"+name+"}}";}
+   return encodeURIComponent(String(v));
+ });
+ const query=new URLSearchParams();
+ const headers=example.headers.map(x=>({...x}));
+ for(const p of example.parameters){
+   const value=values[p.in+":"+p.name];
+   if(p.required&&(value===undefined||value==="")&&p.in!=="path")missing.push(p.in+":"+p.name);
+   if(value===undefined||value==="")continue;
+   if(p.in==="query")query.append(p.name,String(value));
+   else if(p.in==="header"){
+     if(/^[A-Za-z0-9!#$%&'*+.^_~|-]+$/.test(p.name)&&!/[\r\n]/.test(String(value)))
+       headers.push({name:p.name,value:String(value)});
+   }
+ }
+ let url=(model.server||"{{baseUrl}}").replace(/\/$/,"")+path;
+ if(query.toString())url+=(url.includes("?")?"&":"?")+query.toString();
+ let body=example.body;
+ if(typeof input.bodyText==="string"&&input.bodyText.trim()){
+   try{body=JSON.parse(input.bodyText);}catch(e){throw Error("Input body must contain valid JSON: "+e.message);}
+ }
+ const lines=["curl --request "+op.method,"--url "+shq(url)];
+ for(const h of headers)lines.push("--header "+shq(h.name+": "+h.value));
+ if(body!==null)lines.push("--data "+shq(JSON.stringify(body)));
+ const curl=lines.join(" \\\n  ");
+ const fetchOptions={method:op.method,headers:Object.fromEntries(headers.map(h=>[h.name,h.value])),credentials:"omit",redirect:"error"};
+ if(body!==null)fetchOptions.body=JSON.stringify(body);
+ const js="const response = await fetch("+JSON.stringify(url)+", "+JSON.stringify(fetchOptions,null,2)+");\n"+
+   "console.log(response.status, await response.text());\n"+
+   "// Review the documented method, target, authorization and possible side effects before using.";
+ const pyHeaders=Object.fromEntries(headers.map(h=>[h.name,h.value]));
+ const python="import requests\n"+
+   "response = requests.request("+JSON.stringify(op.method)+", "+JSON.stringify(url)+
+   ", headers="+JSON.stringify(pyHeaders)+
+   (body===null?"":", json="+JSON.stringify(body))+
+   ", timeout=10, allow_redirects=False)\nprint(response.status_code, response.text)\n"+
+   "# Illustrative code only. Validate permission and authentication first.";
+ return {
+  method:op.method,url,headers,body,missing,curl,javascript:js,python,
+  readyForReview:missing.length===0&&!op.unresolvedRefs,
+  disclaimer:"GENERATED TEXT ONLY. RESTLESS did not execute any API method. Not an authorization or availability check."
+ };
+}
+
 export function toPostman(model){
  if(!model||!Array.isArray(model.operations))throw Error("Load an API library first.");
  const items=model.operations.map(op=>{

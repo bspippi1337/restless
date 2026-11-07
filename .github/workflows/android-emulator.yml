@@ -41,7 +41,7 @@ jobs:
             adb install -r android/app/build/outputs/apk/debug/app-debug.apk
             adb shell am start -n org.restless42.app/.MainActivity
             sleep 3
-            adb exec-out screencap -p > ../RESTLESS-42-Android-Emulator.png
+            adb exec-out screencap -p > RESTLESS-42-Android-Emulator.png
       - name: Upload genuine Android screenshot
         if: always()
         uses: actions/upload-artifact@v4

@@ -120,3 +120,14 @@
 @media(max-width:920px){.atlas-hero{align-items:start;display:block}.hero-metrics{margin-top:1.5rem;width:max-content;max-width:100%}.connect-layout{grid-template-columns:1fr}.atlas-explainer{grid-template-columns:1fr}.atlas-dashboard{width:calc(100% - 1.3rem)}}
 @media(max-width:700px){.atlas-hero{padding-top:2.2rem}.atlas-hero h1{font-size:3.1rem}.hero-metrics{gap:.2rem;padding:.8rem}.hero-metrics div{padding:.15rem .45rem}.hero-metrics strong{font-size:1.15rem}.hero-metrics span{font-size:.58rem}.section-tag{display:block}.section-tag h2{margin-top:.6rem}.connect-input,.connect-upload{padding:1rem}.domain-row{flex-direction:column}.dashboard-head{display:block}.dashboard-actions{margin-top:1rem}.atlas-grid{display:flex;flex-direction:column}.graph-viewport{height:440px}.resource-list{max-height:400px}.inspector-panel{max-height:none}.inspector-panel>#inspector-content{display:block}.process-list{grid-template-columns:1fr 1fr}}
 @media(prefers-reduced-motion:reduce){.graph-node rect{transition:none}}
+
+/* Editable request design studio: all controls generate text, never send HTTP. */
+.input-label,.code-language-label{display:block;font-size:.7rem;color:#a9cfb1;font-weight:800;margin:.65rem 0 .32rem}
+.example-input,.body-input,#code-language{
+ width:100%;border:1px solid #50667b;background:#081421;color:#e8f5fa;
+ border-radius:7px;padding:.62rem .72rem;font:clamp(.74rem,.9vw,.83rem) ui-monospace,Consolas,monospace;
+}
+.example-input:focus,.body-input:focus,#code-language:focus{outline:2px solid #b7f76866;border-color:#b7f768}
+.example-input::placeholder{color:#809eab}
+.body-input{min-height:146px;resize:vertical;white-space:pre;tab-size:2}
+#code-language{margin-bottom:.5rem}

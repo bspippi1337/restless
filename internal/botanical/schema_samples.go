@@ -68,6 +68,7 @@ func boundedExample(value any,depth int)any{
   out:=make(map[string]any)
   for i,key:=range keys{
    if i>=20{out["__truncated__"]="maximum 20 example properties";break}
+   if redactedField(key){out[key]="<REDACTED: enter locally>";continue}
    out[key]=boundedExample(x[key],depth+1)
   }
   return out

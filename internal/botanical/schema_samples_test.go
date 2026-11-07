@@ -44,3 +44,15 @@ func TestSchemaDepthAndPropertyCountBounded(t *testing.T){
  nested:=rawSchema{Type:"object",Properties:map[string]rawSchema{"inner":{Type:"object",Properties:map[string]rawSchema{"depth":{Type:"string"}}}}}
  if schemaExample(nested,"root",4)!="<nested schema>"{t.Fatal("depth cap not enforced")}
 }
+
+func TestMediaExamplesRedactNamedSecretFields(t *testing.T) {
+  raw := rawRequestBody{Content: map[string]rawMediaType{
+    "application/json":{Example: map[string]any{"name":"Widget","api_key":"DO-NOT-EXPORT","nested":map[string]any{"password":"private-value"}}},
+  }}
+  example := summarizeRequest(raw)
+  if example == nil {t.Fatal("missing request sample")}
+  doc := example.Example.(map[string]any)
+  if doc["api_key"] == "DO-NOT-EXPORT" {t.Fatal("API key leaked through media example")}
+  nested := doc["nested"].(map[string]any)
+  if nested["password"] == "private-value" {t.Fatal("nested password leaked through media example")}
+}

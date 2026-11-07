@@ -132,10 +132,16 @@ public final class ToolboxEngine {
             .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString();}
         catch(CharacterCodingException e){throw new IllegalArgumentException("Bytes are not valid UTF-8",e);}
     }
+    private static String primitive(Object value) {
+        if(value==null||value==JSONObject.NULL)return "null";
+        if(value instanceof String)return JSONObject.quote((String)value);
+        if(value instanceof Number||value instanceof Boolean)return String.valueOf(value);
+        throw new IllegalArgumentException("Unsupported primitive JSON value");
+    }
     private static String pretty(Object value) {
         if(value instanceof JSONObject)return ((JSONObject)value).toString(2);
         if(value instanceof JSONArray)return ((JSONArray)value).toString(2);
-        return JSONObject.valueToString(value);
+        return primitive(value);
     }
     private static Object json(String value) throws Exception {
         JSONTokener parser=new JSONTokener(value);
@@ -156,7 +162,7 @@ public final class ToolboxEngine {
             for(int i=0;i<a.length();i++)segments.add(canonical(a.get(i)));
             return "["+String.join(",",segments)+"]";
         }
-        return JSONObject.valueToString(value);
+        return primitive(value);
     }
     private static String hex(byte[] bytes) {
         final char[] digits="0123456789abcdef".toCharArray();char[] out=new char[bytes.length*2];

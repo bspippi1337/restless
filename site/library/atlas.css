@@ -131,3 +131,53 @@
 .example-input::placeholder{color:#809eab}
 .body-input{min-height:146px;resize:vertical;white-space:pre;tab-size:2}
 #code-language{margin-bottom:.5rem}
+
+/* RESTLESS Atlas / editorial art direction. Native vector artwork, no external assets. */
+.atlas{--premium-glow:rgba(130,246,158,.26);isolation:isolate}
+.atlas-hero{position:relative;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
+ gap:clamp(2.3rem,5vw,5.8rem);align-items:center;padding-block:clamp(3rem,7vw,7rem) clamp(3.6rem,7vw,5.5rem)}
+.atlas-hero::before{content:"";position:absolute;left:-19%;top:-21%;width:78%;height:85%;z-index:-1;
+ background:radial-gradient(ellipse,rgba(34,84,75,.23),transparent 68%);pointer-events:none}
+.atlas-hero-copy{min-width:0}
+.atlas-hero-copy .eyebrow{margin-bottom:1.8rem}
+.atlas-hero-copy h1{font-size:clamp(3.2rem,5.45vw,6.5rem);letter-spacing:-.072em;font-weight:900;line-height:.98;
+ margin:0 0 1.65rem}
+.atlas-hero-copy .lede{max-width:46ch;font-size:clamp(1.03rem,1.35vw,1.23rem);line-height:1.72;margin:0}
+.atlas-hero-art{min-width:0;display:flex;flex-direction:column;gap:1rem}
+.atlas-art-frame{border-radius:17px;overflow:hidden;background:#08141f;border:1px solid #487065;
+ box-shadow:0 28px 90px rgba(0,0,0,.54),0 0 125px rgba(88,238,156,.08);transform:rotate(.35deg)}
+.atlas-art-frame img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover}
+.atlas-art-bar{min-height:40px;border-bottom:1px solid #2c4e4b;background:linear-gradient(110deg,#18342f,#101e2e);
+ display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:0 .8rem;
+ color:#b9d4cd;font:700 .67rem ui-monospace,Consolas,monospace;letter-spacing:.05em}
+.atlas-art-bar>span:last-child{color:#a4e990}
+.atlas-art-lights{display:flex;gap:5px;margin-right:auto}
+.atlas-art-lights i{display:block;width:7px;height:7px;border-radius:100%;background:#618e87}
+.atlas-art-lights i:nth-child(1){background:#da817d}
+.atlas-art-lights i:nth-child(2){background:#e6c17b}
+.atlas-art-lights i:nth-child(3){background:#8ee4ad}
+.atlas-hero .hero-metrics{width:100%;padding:1rem .4rem;border:1px solid #2e4d47;border-radius:13px;
+ background:linear-gradient(110deg,rgba(31,59,49,.74),rgba(18,37,52,.78));box-shadow:none;gap:0}
+.atlas-hero .hero-metrics>div{flex:1;min-width:0;padding:.15rem .5rem}
+.atlas-hero .hero-metrics strong{font:850 clamp(1rem,1.55vw,1.4rem) ui-monospace,monospace}
+.atlas-hero .hero-metrics span{white-space:normal;font-size:clamp(.62rem,.85vw,.76rem);text-align:center}
+.hero-cta{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-top:2.1rem}
+.hero-cta .button{padding:1rem 1.25rem;font-weight:800}
+.hero-claims{display:flex;align-items:center;gap:1rem 1.2rem;flex-wrap:wrap;margin-top:2.1rem;
+ font:700 .74rem ui-sans-serif,system-ui,sans-serif;color:#bacdc7}
+.hero-claims b{display:inline-grid;place-items:center;color:#b7f768;font-weight:900;margin-right:.35rem}
+.atlas .section-tag h2{font-weight:850}
+.atlas-onboard .connect-layout>*{box-shadow:0 16px 50px rgba(0,0,0,.15)}
+.atlas-grid{box-shadow:0 20px 80px rgba(0,0,0,.32)}
+.resource-panel .operation-button[aria-selected="true"]{box-shadow:inset 3px 0 #b7f768}
+.resource-panel input:focus-visible{outline:2px solid #b7f768;outline-offset:2px}
+.graph-panel::after{content:"EVIDENCE-BASED STRUCTURE";position:absolute;right:1.5rem;bottom:1rem;opacity:.26;
+ font:700 .65rem ui-monospace,monospace;letter-spacing:.12em;pointer-events:none}
+@media(max-width:1160px){.atlas-hero{gap:1.5rem;grid-template-columns:1fr 1fr}.atlas-art-bar{font-size:.56rem}}
+@media(max-width:920px){.atlas-hero{grid-template-columns:1fr}.atlas-hero-copy h1{max-width:15ch}
+.atlas-hero-copy .lede{max-width:61ch}.atlas-hero-art{width:min(720px,100%)}}
+@media(max-width:700px){.atlas-hero{padding-block:2.8rem 3.3rem;gap:2.3rem}
+.atlas-hero-copy h1{font-size:clamp(2.9rem,11vw,5rem);letter-spacing:-.06em}
+.atlas-hero-copy .lede{font-size:1rem}.hero-cta{margin-top:1.7rem}.hero-claims{margin-top:1.5rem}
+.atlas-art-frame{transform:none}.atlas-art-bar{font-size:.56rem}.atlas-hero .hero-metrics{flex-direction:row}
+.atlas-hero .hero-metrics strong{font-size:.92rem}.atlas-hero .hero-metrics span{font-size:.59rem}}

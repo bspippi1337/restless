@@ -122,7 +122,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: atlas-rc1-browser-screenshots
+          name: atlas-visual-qa-screenshots
           path: ${{ runner.temp }}/screenshots/*.png
           retention-days: 30
           if-no-files-found: ignore

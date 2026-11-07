@@ -9,6 +9,7 @@ on:
       - 'docs/RESTLESS_42_*'
       - 'tests/toolbox.test.mjs'
       - 'tests/contract.test.mjs'
+      - 'tests/library.test.mjs'
       - '.github/workflows/pages.yml'
   pull_request:
     paths:
@@ -17,6 +18,7 @@ on:
       - 'docs/RESTLESS_42_*'
       - 'tests/toolbox.test.mjs'
       - 'tests/contract.test.mjs'
+      - 'tests/library.test.mjs'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 

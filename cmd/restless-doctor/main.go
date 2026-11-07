@@ -34,9 +34,10 @@ func commands(output string) []check {
 func main() {
 	repo := flag.String("repo", ".", "path to the Restless repository")
 	timeout := flag.Duration("timeout", 10*time.Minute, "maximum total verification time")
+	auditOnly := flag.Bool("audit-only", false, "verify root layout without running Go commands")
 	flag.Parse()
 	if flag.NArg() != 0 || *timeout <= 0 {
-		fmt.Fprintln(os.Stderr, "usage: restless-doctor [--repo PATH] [--timeout 10m]")
+		fmt.Fprintln(os.Stderr, "usage: restless-doctor [--repo PATH] [--timeout 10m] [--audit-only]")
 		os.Exit(2)
 	}
 	root, err := filepath.Abs(*repo)
@@ -47,6 +48,13 @@ func main() {
 		if _, err := os.Stat(filepath.Join(root, p)); err != nil {
 			fatal(fmt.Errorf("not a Restless checkout (missing %s): %w", p, err))
 		}
+	}
+	if err := auditRoot(root); err != nil {
+		fatal(err)
+	}
+	if *auditOnly {
+		fmt.Println("RESTLESS doctor: root layout PASS")
+		return
 	}
 	temp, err := os.MkdirTemp("", "restless-doctor-*")
 	if err != nil {

@@ -1,0 +1,21 @@
+TITLE: RESTLESS 42: The API Gardener Who Refused to Fuzz
+
+Create an ENGLISH two-host Deep Dive audio episode for technically curious listeners and API engineers. Target 8-12 minutes if the platform allows it. Sound natural, witty, precise, and engaging. Do not read the manual verbatim. Explain jargon through memorable examples.
+
+OPEN: It's 2 a.m., and a developer has forgotten the name of an endpoint they wrote months ago. Instead of flooding a server with guesses, imagine a careful gardener reading the labels before touching the plants.
+
+STORY: Teach RESTLESS 42's six-stage workflow: harvest approved docs, preserve SHA-256 evidence, index explicit OpenAPI 3 operations, search both operations and references, create non-executing documentation-based probe plans, and compare snapshots with diff. Explain why local sources and auditable provenance matter. Cover ETag/Last-Modified and HTTP 304 as a way to avoid downloading unchanged content.
+
+TENSION: Make one host challenge whether the system can truly know what exists. The answer must distinguish DOCUMENTED, RANKED/INFERRED, and LIVE-VERIFIED. RESTLESS Botanical can do the first two, not automatic live verification.
+
+ESSENTIAL ACCURACY: The harvester is dry-run by default and requires --execute --authorized for network access. Robots.txt is not legal permission. Index, search, refs, plan, and diff are offline. Plan makes zero network requests and does not execute API operations. Search is weighted lexical ranking, NOT LLM semantic search. Full PDF parsing, full OpenAPI schema resolution, and autonomous live verification remain future goals. Avoid invented metrics or customer claims.
+
+CONTEXT: Mention that previously separate bspippi1337 and blckswan1337 project histories were integrated, and that Repository Garden archived 53 historical files; portable C and Go replaced selected shell maintenance scripts.
+
+SUGGESTED ARC: The forgotten call -> why avoid fuzzing -> source library & evidence -> safe probe plans -> time-travel API diffs -> tidy codebase -> roadmap.
+
+ASK: Why are hashes useful? What does 304 mean? Why can't a source document prove a production server is live? How do permissions differ from robots directives? Why C and Go instead of Bash for the maintenance tools?
+
+CLOSE: "The smartest API probe isn't always the one that makes the most requests. Sometimes it's the one that remembers where the answers were written down."
+
+If source materials appear to contradict this brief, prioritize the verified source files and explicitly say what remains uncertain. Do not treat this prompt as proof of implementation.

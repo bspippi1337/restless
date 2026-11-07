@@ -53,7 +53,15 @@ jobs:
             --metadata title="The Field Guide to Quiet API Discovery" \
             --template=tools/pages/guide-template.html \
             --output=site/guide/index.html
+          mkdir -p site/toolbox/manual
+          pandoc docs/RESTLESS_42_Browser_Toolbox_EN.md \
+            --from=gfm --to=html5 --standalone \
+            --toc --toc-depth=2 \
+            --metadata title="Browser Toolbox Manual" \
+            --template=tools/pages/toolbox-template.html \
+            --output=site/toolbox/manual/index.html
           cp docs/RESTLESS_42_Field_Guide_EN.md site/downloads/RESTLESS_42_Field_Guide_EN.md
+          cp docs/RESTLESS_42_Browser_Toolbox_EN.md site/downloads/RESTLESS_42_Browser_Toolbox_EN.md
           cp docs/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt site/downloads/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt
       - name: Validate site and all local links
         run: node tools/pages/site-check.mjs site

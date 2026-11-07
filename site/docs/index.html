@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10131b">
+<meta name="description" content="RESTLESS 42 documentation center: field guide, browser toolbox, installation, documented API harvesting, offline OpenAPI planning, repository maintenance and NotebookLM source kit.">
+<meta property="og:title" content="RESTLESS 42 | Documentation Center">
+<title>Documentation Center | RESTLESS 42</title>
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to documentation</a>
+<header class="site-header"><div class="container header-inner">
+<a class="brand" href="../" aria-label="RESTLESS 42 home"><span class="brand-glyph" aria-hidden="true">R<span class="brand-dot">.</span></span><span>RESTLESS <strong>42</strong></span></a>
+<nav class="nav" aria-label="Main navigation"><a href="../">Home</a><a href="../guide/">Field guide</a><a href="../toolbox/">Toolbox</a><a href="../podcast/">Podcast</a><a href="https://github.com/bspippi1337/restless">GitHub ↗</a></nav>
+</div></header>
+<main id="main">
+<section class="page-hero container">
+<p class="eyebrow">RESTLESS 42 · DOCUMENTATION</p><h1>Find your way<br><span class="gradient-text">without guessing.</span></h1>
+<p class="lede">Practical documentation for people using RESTLESS in real developer workflows. Learn what each tool does, when it uses the network, how to verify its evidence, and what has not been implemented yet.</p>
+<div class="button-row"><a class="button primary" href="../guide/">Read the 18-chapter field guide →</a><a class="button ghost" href="../toolbox/">Open the browser toolbox</a></div>
+</section>
+<section class="section light-section"><div class="container">
+<div class="section-heading"><p class="eyebrow">START HERE</p><h2>Choose your route</h2><p>The same documentation-first discipline, whether you're exploring via a terminal, the browser, or a podcast.</p></div>
+<div class="workflow-grid docs-grid">
+<article><p class="step">FULL MANUAL</p><h3>English field guide</h3><p>The complete handbook: install, harvest, index, search, plan, diff, troubleshooting, and responsible operation.</p><a href="../guide/">Read guide →</a></article>
+<article><p class="step">WORKBENCH</p><h3>Browser toolbox</h3><p>32 local operations with working recipes, import/export, SHA hashes, JWT inspection, and offline OpenAPI 3 JSON planning.</p><a href="../toolbox/">Open toolbox →</a></article>
+<article><p class="step">AUDIO GUIDE</p><h3>NotebookLM kit</h3><p>A ready-to-copy English narrator brief and the original written source for a grounded technical podcast.</p><a href="../podcast/">Create an episode →</a></article>
+<article><p class="step">CORE BOTANICAL</p><h3>Harvest and indexing</h3><p>Source-scoped crawling, SHA-256 archives, JSONL manifests, offline catalog and documented API probe plans.</p><a href="https://github.com/bspippi1337/restless/blob/main/docs/botanical.md">Technical reference ↗</a></article>
+<article><p class="step">ENGINEERING</p><h3>Repository Garden</h3><p>Clean source layout, historical archive, cross-platform C11 cleanup, Go verification and the weekly hygiene job.</p><a href="https://github.com/bspippi1337/restless/blob/main/docs/repo-garden.md">Repository guide ↗</a></article>
+<article><p class="step">SOURCE OF TRUTH</p><h3>Implementation and tests</h3><p>Inspect how commands work, open an issue or follow continuous integration. All documentation is backed by source.</p><a href="https://github.com/bspippi1337/restless">View repository ↗</a></article>
+</div></div></section>
+<section class="section container" id="quickstart">
+<div class="split">
+<div><p class="eyebrow">TERMINAL QUICKSTART</p><h2>Build locally.<br>Inspect before running.</h2><p>RESTLESS is a Go CLI. Use Go 1.24 or newer, then build from the repository. The first harvest command below is a <strong>dry run</strong> and makes no HTTP requests.</p><p class="fine-print">Before enabling network access on another site, confirm ownership or authorization, read relevant terms, and deliberately set the host allowlist. The browser toolbox is separate and never makes API probes.</p></div>
+<div class="code-card"><div class="code-header">Debian WSL · macOS · Go terminal</div><pre><code>git clone https://github.com/bspippi1337/restless.git
+cd restless
+go build -o build/restless ./cmd/restless
+
+# Preview only (zero network calls)
+./build/restless harvest \
+  https://petstore3.swagger.io/api/v3/openapi.json \
+  --host petstore3.swagger.io
+
+# After an authorized harvest:
+./build/restless index --dir ./archive
+./build/restless search "find pet" --dir ./archive
+./build/restless plan "find pet" --dir ./archive</code></pre><p class="code-foot">Always pass the same --out/--dir archive to each step.</p></div></div>
+</section>
+<section class="section feature-strip"><div class="container feature-inner"><div>
+<p class="eyebrow">REALITY CHECK</p><h2>We document boundaries,<br>not imaginary capabilities.</h2>
+<p>OpenAPI browser analysis currently parses JSON, not YAML. Its planner does not verify endpoint availability. JWT inspection is unverified decoding. Browser operations do not persist source text or contact a server. RESTLESS 42 is the project initiative, not necessarily the binary version returned by <code>--version</code>.</p></div>
+<div class="feature-actions"><a class="button primary" href="../toolbox/">Explore locally in the browser</a><a class="button ghost" href="../downloads/RESTLESS_42_Field_Guide_EN.md" download>Download the source manual</a></div></div></section>
+</main>
+<footer class="footer"><div class="container footer-inner"><div><strong>RESTLESS 42</strong><p>Documentation first. Questions welcome.</p></div><div class="footer-links"><a href="../">Home</a><a href="../toolbox/">Toolbox</a><a href="../guide/">Field guide</a><a href="https://github.com/bspippi1337/restless/issues">Issues</a></div></div></footer>
+</body></html>

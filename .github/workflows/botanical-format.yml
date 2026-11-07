@@ -38,4 +38,14 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add internal/botanical/*.go internal/cli/harvest.go internal/cli/catalog.go internal/cli/root.go
           git commit -m "style(botanical): gofmt new crawler and CLI"
-          git push origin HEAD:integration/blckswan-unification-42
+          # Branch may advance while the formatter is running. Rebase before publishing.
+          for attempt in 1 2 3; do
+            git fetch origin integration/blckswan-unification-42
+            git rebase origin/integration/blckswan-unification-42
+            if git push origin HEAD:integration/blckswan-unification-42; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Formatter could not publish after three safe fast-forward attempts" >&2
+          exit 1

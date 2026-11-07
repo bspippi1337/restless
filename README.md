@@ -16,6 +16,7 @@ RESTLESS helps a developer find the API operation they forgot **without guessing
 - **[32-operation browser toolbox](https://bspippi1337.github.io/restless/toolbox/)** (GitHub Pages)
 - **[Offline OpenAPI Contract Lab](https://bspippi1337.github.io/restless/contract/)** (document-only comparison)
 - **[Request Lab](https://bspippi1337.github.io/restless/request/)** (explicitly authorized live HTTPS GET/HEAD/OPTIONS; CORS enforced)
+- **[Request Lab operator manual](docs/RESTLESS_42_Request_Lab_EN.md)** (scope, authentication headers, privacy and CORS)
 - **[Native Android test APK](android/README.md)** (32 offline operations; downloadable from successful Actions builds)
 - **[Complete English field guide](docs/RESTLESS_42_Field_Guide_EN.md)** (also available as a rendered web handbook)
 - **[Browser toolbox operation manual](docs/RESTLESS_42_Browser_Toolbox_EN.md)**

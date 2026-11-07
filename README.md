@@ -43,7 +43,7 @@ The first command is a dry run and makes **no network requests**:
 ./build/restless harvest \
   https://petstore3.swagger.io/api/v3/openapi.json \
   --host petstore3.swagger.io \
-  --out ./botanical-archive
+  --out .restless/botanical
 ```
 
 Only after confirming authorization, scope, site terms, and licensing may you explicitly enable an actual documentation fetch:
@@ -52,17 +52,17 @@ Only after confirming authorization, scope, site terms, and licensing may you ex
 ./build/restless harvest \
   https://petstore3.swagger.io/api/v3/openapi.json \
   --host petstore3.swagger.io \
-  --out ./botanical-archive --max-pages 1 --max-depth 0 \
+  --out .restless/botanical --max-pages 1 --max-depth 0 \
   --execute --authorized
 ```
 
 Then inspect locally without sending additional API requests:
 
 ```sh
-./build/restless index --dir ./botanical-archive
-./build/restless refs "petstore" --dir ./botanical-archive
-./build/restless search "find pet by id" --dir ./botanical-archive
-./build/restless plan "find pet by id" --dir ./botanical-archive
+./build/restless index --dir .restless/botanical
+./build/restless refs "petstore" --dir .restless/botanical
+./build/restless search "find pet by id" --dir .restless/botanical
+./build/restless plan "find pet by id" --dir .restless/botanical
 ```
 
 For two separate saved documentation snapshots, use `restless diff --before DIR --after DIR` to compare documented operations. Source URLs and hashes remain part of the evidence trail.

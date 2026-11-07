@@ -77,8 +77,7 @@ func TestCatalogPreservesOpenAPIBodiesResponsesAndEvidence(t *testing.T) {
     ArchivePath:filepath.Join("sha256",hash),Bytes:len(text),FetchedAt:time.Now().UTC(),
   }
   encoded,err:=json.Marshal(record);if err!=nil{t.Fatal(err)}
-  if err=os.WriteFile(filepath.Join(directory,"index.jsonl"),append(encoded,'
-'),0600);err!=nil{t.Fatal(err)}
+  if err=os.WriteFile(filepath.Join(directory,"index.jsonl"),append(encoded,'\n'),0600);err!=nil{t.Fatal(err)}
   catalog,err:=BuildCatalog(directory);if err!=nil{t.Fatal(err)}
   if len(catalog.Operations)!=1{t.Fatalf("expected one explicit operation, got %d",len(catalog.Operations))}
   op:=catalog.Operations[0]

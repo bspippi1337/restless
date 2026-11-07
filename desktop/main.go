@@ -55,6 +55,7 @@ type screen struct {
 	operations map[string]botanical.Operation
 	current    library.Summary
 	inProgress bool
+	lastExample string
 }
 
 func main() {
@@ -135,7 +136,8 @@ func (s *screen) initialize() {
 	)
 	left := container.NewBorder(resourceHeader, nil, nil, nil, s.tree)
 	detailTitle := widget.NewLabelWithStyle("03 / SWAGGER-STYLE INSPECTOR + REQUEST EXAMPLES", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	detailPane := container.NewBorder(container.NewVBox(detailTitle, widget.NewLabel("All request examples are preview-only; no API operation is executed.")), nil, nil, nil, container.NewScroll(s.details))
+	copyExample := widget.NewButtonWithIcon("Copy cURL preview", theme.ContentCopyIcon(), s.copyExample)
+	detailPane := container.NewBorder(container.NewVBox(detailTitle, widget.NewLabel("All request examples are preview-only; no API operation is executed."), copyExample), nil, nil, nil, container.NewScroll(s.details))
 	logPanel := container.NewBorder(widget.NewLabelWithStyle("ARCHIVE EVIDENCE / PROGRESS", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), nil, nil, nil, container.NewScroll(s.logs))
 	right := container.NewVSplit(detailPane, logPanel)
 	right.Offset = 0.72
@@ -274,6 +276,7 @@ func (s *screen) exportLibrary() {
 	}, s.win)
 }
 func (s *screen) populate(summary library.Summary) {
+	s.lastExample = ""
 	s.nodes = map[string][]string{}
 	s.nodeLabels = map[string]string{}
 	s.operations = map[string]botanical.Operation{}
@@ -335,6 +338,7 @@ func (s *screen) selectOperation(op botanical.Operation) {
 	// The preview is a DOCUMENT, not an HTTP operation.
 	endpoint := "https://" + host + op.Path
 	example := "curl --request " + op.Method + " --url '" + strings.ReplaceAll(endpoint, "'", "'\\''") + "' --header 'Accept: application/json'"
+	s.lastExample = example
 	requestNotes := "No request body declared.\n"
 	if op.Request != nil {
 		b, err := json.MarshalIndent(op.Request, "", "  ")
@@ -359,6 +363,14 @@ func (s *screen) selectOperation(op botanical.Operation) {
 		op.Method, op.Path, op.Summary, op.OperationID, params, op.Security, op.UnresolvedRefs,
 		requestNotes, responseNotes, example, op.SourceURL, op.SourceSHA256)
 	s.details.SetText(detail)
+}
+func (s *screen) copyExample() {
+	if s.lastExample == "" {
+		dialog.ShowInformation("Select an operation", "Choose a documented API method before copying its request preview.", s.win)
+		return
+	}
+	s.win.Clipboard().SetContent(s.lastExample)
+	s.status.SetText("Copied cURL preview. Review permission, base URL, input values and side effects before executing.")
 }
 func (s *screen) searchFirst() {
 	query := strings.ToLower(strings.TrimSpace(s.search.Text))

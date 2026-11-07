@@ -6,7 +6,7 @@ on:
     paths:
       - 'internal/library/**'
       - 'internal/cli/library.go'
-      - 'internal/botanical/harvest.go'
+      - 'internal/botanical/**'
       - 'internal/cli/root.go'
       - 'desktop/**'
       - '.github/workflows/goformat-feature.yml'

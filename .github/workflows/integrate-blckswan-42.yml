@@ -62,6 +62,15 @@ jobs:
               git rm -f -- "$path" || true
             fi
           done
+          # Imported workflows are retained for review, but NEVER enabled by the merge.
+          # This avoids workflow-token permission failures and unreviewed CI execution.
+          while IFS= read -r -d '' wf; do
+            dest="archive/integrations/blckswan1337/$wf"
+            mkdir -p "$(dirname "$dest")"
+            git show "blckswan/main:$wf" > "$dest"
+            git add -- "$dest"
+          done < <(git ls-tree -r --name-only -z blckswan/main -- .github/workflows)
+          git restore --source=HEAD --staged --worktree -- .github/workflows
           git add docs/integration/blckswan-merge-conflicts.md
           if test -n "$(git ls-files -u)"; then
             echo "Unresolved merge entries remain; stopping safely"

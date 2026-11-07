@@ -1,6 +1,6 @@
-import {validateDomain,readAPI,makeTree,makeExample,toPostman,toMermaid} from "./engine.mjs";
+import {validateDomain,readAPI,makeTree,makeExample,buildRequestPreview,toPostman,toMermaid} from "./engine.mjs";
 const $=id=>document.getElementById(id),NS="http://www.w3.org/2000/svg";
-const state={model:null,tree:null,selected:null,search:"",method:"ALL",domain:null,lastCommand:"",tab:"parameters"};
+const state={model:null,tree:null,selected:null,search:"",method:"ALL",domain:null,lastCommand:"",tab:"parameters",inputs:Object.create(null),bodyText:"",code:"curl"};
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n;}
 function svg(tag,attrs){const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs||{}))n.setAttribute(k,String(v));return n;}
 function notice(message,kind="info"){$("atlas-status").textContent=message;$("atlas-status").dataset.kind=kind;}
@@ -124,7 +124,7 @@ function renderResources(){
  }
  if(!groups.size)list.append(el("p","input-hint","No matching documented operations."));
 }
-function select(op){state.selected=op;renderResources();renderGraph();renderInspector();}
+function select(op){state.selected=op;state.inputs=Object.create(null);state.bodyText="";renderResources();renderGraph();renderInspector();}
 function renderGraph(){
  const tree=state.tree,canvas=$("api-graph");canvas.replaceChildren();
  if(!tree.nodes.length)return;
@@ -166,15 +166,29 @@ function renderInspector(){
  $("op-method").textContent=op.method;$("op-method").className="method-chip method-"+op.method.toLowerCase();
  $("op-path").textContent=op.path;$("op-name").textContent=op.summary||op.operationId||op.method+" "+op.path;
  $("op-description").textContent=op.description||"Declared in the imported source. No live endpoint verification.";
- const example=makeExample(state.model,op);$("curl-example").textContent=example.curl;
+ const example=makeExample(state.model,op);
  const inputs=$("tab-parameters");inputs.replaceChildren();
  if(!example.parameters.length)inputs.append(el("p","input-hint","No parameters declared in this operation."));
  for(const p of example.parameters){
-  const box=el("div","param-row"),header=el("div","param-title");
-  header.append(el("strong","",p.name||"unnamed"),el("span","",p.in+" / "+p.type+(p.required?" / required":"")));
-  box.append(header,el("p","",p.description||"Documented parameter."),el("code","",JSON.stringify(p.example)));inputs.append(box);
+   const box=el("div","param-row"),header=el("div","param-title");
+   header.append(el("strong","",p.name||"unnamed"),el("span","",p.in+" / "+p.type+(p.required?" / required":"")));
+   const label=el("label","input-label","Enter "+p.in+" value for "+p.name);
+   const fieldInput=el("input","example-input");
+   fieldInput.type="text";fieldInput.placeholder=String(p.example);fieldInput.value=state.inputs[p.in+":"+p.name]||"";
+   fieldInput.maxLength=500;fieldInput.setAttribute("aria-label",label.textContent);
+   fieldInput.addEventListener("input",()=>{state.inputs[p.in+":"+p.name]=fieldInput.value;updateCode();});
+   box.append(header,el("p","",p.description||"Documented parameter."),label,fieldInput);
+   inputs.append(box);
  }
- if(example.body!==null){const box=el("div","param-row");box.append(el("strong","",example.contentType||"Request body"),el("pre","",JSON.stringify(example.body,null,2)));inputs.append(box);}
+ if(example.body!==null){
+   const box=el("div","param-row");
+   const label=el("label","input-label","Example request body JSON");
+   const textarea=el("textarea","body-input");
+   textarea.value=state.bodyText||JSON.stringify(example.body,null,2);
+   textarea.setAttribute("aria-label","Editable JSON request body");
+   textarea.addEventListener("input",()=>{state.bodyText=textarea.value;updateCode();});
+   box.append(el("strong","",example.contentType||"Documented JSON request body"),label,textarea);inputs.append(box);
+ }
  const evidence=$("tab-source");evidence.replaceChildren();
  field(evidence,"SOURCE DOCUMENT",op.sourceURL||"Local OpenAPI 3 JSON import",true);
  field(evidence,"SHA-256 PROVENANCE",op.sourceSHA256||"Unavailable for pasted specification",true);
@@ -182,7 +196,23 @@ function renderInspector(){
  field(evidence,"UNRESOLVED REFERENCES",String(op.unresolvedRefs));
  field(evidence,"REVIEW REQUIRED",String(example.reviewRequired));
  field(evidence,"ACTUAL API EXECUTIONS","ZERO. Documentation-derived only.");
- renderTab();
+ updateCode();renderTab();
+}
+function updateCode(){
+ if(!state.model||!state.selected)return;
+ try{
+   const preview=buildRequestPreview(state.model,state.selected,{values:state.inputs,bodyText:state.bodyText});
+   const code=preview[state.code]||preview.curl;
+   $("curl-example").textContent=code;
+   $("code-notice").textContent=preview.missing.length?
+     "Unfilled required inputs: "+preview.missing.join(", ")+". Code is a preview only.":
+     "Preview constructed locally. No HTTP request performed; review permission, host and possible effects.";
+   $("copy-curl").disabled=false;
+ }catch(e){
+   $("curl-example").textContent="";
+   $("code-notice").textContent="Input validation: "+e.message;
+   $("copy-curl").disabled=true;
+ }
 }
 function renderTab(){document.querySelectorAll(".inspector-tabs button").forEach(t=>{const active=t.dataset.tab===state.tab;t.setAttribute("aria-selected",String(active));$("tab-"+t.dataset.tab).hidden=!active;});}
 function basename(){return(state.model.apiName||"api").replace(/[^a-zA-Z0-9_-]+/g,"-").slice(0,60).toLowerCase();}
@@ -208,6 +238,7 @@ $("save-graph").addEventListener("click",saveGraph);
 $("export-postman").addEventListener("click",()=>download(basename()+"-postman.json",JSON.stringify(toPostman(state.model),null,2)));
 $("export-mermaid").addEventListener("click",()=>download(basename()+"-map.mmd",toMermaid(state.model),"text/plain;charset=utf-8"));
 $("export-json").addEventListener("click",()=>download(basename()+"-atlas.json",JSON.stringify(state.model,null,2)));
-$("copy-curl").addEventListener("click",()=>{if(state.selected)copy(makeExample(state.model,state.selected).curl);});
+$("copy-curl").addEventListener("click",()=>{if(state.selected)copy($("curl-example").textContent);});
+$("code-language").addEventListener("change",()=>{state.code=$("code-language").value;updateCode();});
 document.querySelectorAll(".inspector-tabs button").forEach(b=>b.addEventListener("click",()=>{state.tab=b.dataset.tab;renderTab();}));
 notice("No source loaded. This browser never guesses API paths. Import a real library.json or OpenAPI 3 JSON.");

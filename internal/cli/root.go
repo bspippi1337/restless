@@ -35,6 +35,7 @@ Restless is designed as a composable Unix-native runtime layer.`,
 	cmd.AddCommand(NewSearchCmd())
 	cmd.AddCommand(NewRefsCmd())
 	cmd.AddCommand(NewPlanCmd())
+	cmd.AddCommand(NewDiffCmd())
 	cmd.AddCommand(NewTeachCmd())
 	cmd.AddCommand(NewCallCmd())
 	cmd.AddCommand(NewShellCmd())

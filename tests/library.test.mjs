@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {validateDomain,readAPI,makeTree,makeExample,toPostman,toMermaid} from "../site/library/engine.mjs";
+import {validateDomain,readAPI,makeTree,makeExample,buildRequestPreview,toPostman,toMermaid} from "../site/library/engine.mjs";
 const spec={
  openapi:"3.0.3",info:{title:"Inventory API",version:"7.1"},
  servers:[{url:"https://api.inventory.example.net/v1"}],
@@ -92,4 +92,30 @@ test("Native catalog.json supports source traceability",()=>{
  assert.equal(m.kind,"RESTLESS_CATALOG");
  assert.equal(m.operations[0].method,"PATCH");
  assert.equal(m.operations[0].sourceSHA256,"a".repeat(64));
+});
+
+
+test("Editable request examples replace only supplied documented parameters",()=>{
+ const model=readAPI(spec),find=model.operations.find(x=>x.operationId==="findItem");
+ const empty=buildRequestPreview(model,find);
+ assert.deepEqual(empty.missing,["path:id"]);
+ assert.match(empty.curl,/\{\{id\}\}/);
+ const filled=buildRequestPreview(model,find,{values:{"path:id":"item/42"}});
+ assert.equal(filled.missing.length,0);
+ assert.match(filled.url,/item%2F42/);
+ assert.match(filled.javascript,/await fetch/);
+ assert.match(filled.python,/requests.request/);
+ assert.equal(filled.readyForReview,true);
+});
+test("Editable query input and JSON request body generate valid previews",()=>{
+ const model=readAPI(spec);
+ const get=model.operations.find(x=>x.operationId==="listItems");
+ const q=buildRequestPreview(model,get,{values:{"query:limit":"12"}});
+ assert.match(q.url,/\?limit=12/);
+ const post=model.operations.find(x=>x.method==="POST");
+ const body=buildRequestPreview(model,post,{bodyText:'{"name":"actual widget","stock":3}'});
+ assert.deepEqual(body.body,{name:"actual widget",stock:3});
+ assert.match(body.curl,/--data/);
+ assert.match(body.javascript,/"body"/);
+ assert.throws(()=>buildRequestPreview(model,post,{bodyText:"{invalid"}),/valid JSON/);
 });

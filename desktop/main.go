@@ -335,17 +335,21 @@ func (s *screen) selectOperation(op botanical.Operation) {
 	// The preview is a DOCUMENT, not an HTTP operation.
 	endpoint := "https://" + host + op.Path
 	example := "curl --request " + op.Method + " --url '" + strings.ReplaceAll(endpoint, "'", "'\\''") + "' --header 'Accept: application/json'"
-	 requestNotes := "No request body declared.\n"
- if op.Request != nil {
-  b,err:=json.MarshalIndent(op.Request,"","  ")
-  if err==nil {requestNotes=string(b)+"\n"}
- }
- responseNotes := "No response types declared.\n"
- if len(op.Responses)>0 {
-  b,err:=json.MarshalIndent(op.Responses,"","  ")
-  if err==nil {responseNotes=string(b)+"\n"}
- }
-detail := fmt.Sprintf(
+	requestNotes := "No request body declared.\n"
+	if op.Request != nil {
+		b, err := json.MarshalIndent(op.Request, "", "  ")
+		if err == nil {
+			requestNotes = string(b) + "\n"
+		}
+	}
+	responseNotes := "No response types declared.\n"
+	if len(op.Responses) > 0 {
+		b, err := json.MarshalIndent(op.Responses, "", "  ")
+		if err == nil {
+			responseNotes = string(b) + "\n"
+		}
+	}
+	detail := fmt.Sprintf(
 		"DOCUMENTED API OPERATION\n\n%s %s\n%s\n\nOperation ID: %s\n\n"+
 			"INPUT PARAMETERS\n%s\nDECLARED SECURITY\n%v\n\nUNRESOLVED REFERENCES: %t\n\n"+
 			"DOCUMENTED REQUEST BODY\n%s\nDOCUMENTED RESPONSES\n%s\n"+

@@ -102,6 +102,8 @@ try{
   assert.match(await desktop.locator("#atlas-status").innerText(),/Zero API operations executed/i);
   await desktop.locator("#search").fill("remove");
   assert.equal(await desktop.locator(".operation-button").count(),1);
+  assert.ok(await desktop.locator(".graph-node").count()<=4,"Search must reduce the actual API map");
+  assert.match(await desktop.locator("#graph-count").innerText(),/documented resource nodes/);
   await desktop.locator(".operation-button").click();
   assert.equal(await desktop.locator("#op-method").innerText(),"DELETE");
   await desktop.locator('.inspector-tabs button[data-tab="example"]').click();

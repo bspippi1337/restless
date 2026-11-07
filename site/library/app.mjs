@@ -105,7 +105,7 @@ function renderFilters(){
  for(const method of ["ALL",...Object.keys(state.model.stats.methods).sort()]){
   const b=el("button","method-filter",method==="ALL"?"ALL":method+" "+state.model.stats.methods[method]);
   b.type="button";b.setAttribute("aria-pressed",String(method===state.method));
-  b.addEventListener("click",()=>{state.method=method;renderFilters();renderResources();});strip.append(b);
+  b.addEventListener("click",()=>{state.method=method;renderFilters();renderResources();renderGraph();});strip.append(b);
  }
 }
 function renderResources(){
@@ -125,22 +125,48 @@ function renderResources(){
  }
  if(!groups.size)list.append(el("p","input-hint","No matching documented operations."));
 }
-function select(op){state.selected=op;state.inputs=Object.create(null);state.bodyText="";renderResources();renderGraph();renderInspector();}
+function select(op){
+ state.selected=op;state.inputs=Object.create(null);state.bodyText="";
+ renderResources();renderGraph();renderInspector();
+ const target=$("api-graph").querySelector(".graph-node.selected");
+ if(target){
+  const box=target.getBBox(),view=$("graph-viewport");
+  view.scrollTo({left:Math.max(0,(box.x+box.width/2)*state.graphZoom-view.clientWidth/2),
+    top:Math.max(0,(box.y+box.height/2)*state.graphZoom-view.clientHeight/2),behavior:"smooth"});
+ }
+}
 function renderGraph(){
- const tree=state.tree,canvas=$("api-graph");canvas.replaceChildren();
- if(!tree.nodes.length)return;
+ const canvas=$("api-graph");canvas.replaceChildren();
+ const matched=state.model.operations.filter(match);
+ const tree=state.method==="ALL"&&!state.search?state.tree:makeTree({...state.model,operations:matched});
+ // Full catalogs remain available through the resource list and Mermaid export.
+ // Keep the interactive SVG bounded even for a 1,000-operation OpenAPI contract.
+ const limit=260,visible=new Set(["/"]);
+ if(tree.nodes.length>limit){
+   const existing=new Set(tree.nodes.map(n=>n.id));
+   let parent="";
+   for(const segment of (state.selected?.path||"").split("/").filter(Boolean)){
+     parent+="/"+segment;
+     if(existing.has(parent))visible.add(parent);
+   }
+   for(const n of tree.nodes){if(visible.size>=limit)break;visible.add(n.id);}
+ }else{for(const n of tree.nodes)visible.add(n.id);}
  const positions=new Map(),ordered=[];let leaf=0;
  function layout(n){
-  for(const child of n.children.sort((a,b)=>a.name.localeCompare(b.name)))layout(child);
-  const y=n.children.length?(positions.get(n.children[0].id).y+positions.get(n.children[n.children.length-1].id).y)/2:85+leaf++*79;
+  const children=n.children.filter(c=>visible.has(c.id)).sort((a,b)=>a.name.localeCompare(b.name));
+  for(const child of children)layout(child);
+  const y=children.length?(positions.get(children[0].id).y+positions.get(children[children.length-1].id).y)/2:85+leaf++*79;
   positions.set(n.id,{x:30+n.depth*217,y});ordered.push(n);
  }
  layout(tree.root);
- const width=Math.max(760,tree.maxDepth*217+255),height=Math.max(450,leaf*79+110);
+ const depth=ordered.reduce((m,n)=>Math.max(m,n.depth),0);
+ const width=Math.max(760,depth*217+255),height=Math.max(450,leaf*79+110);
  state.graphBounds={width,height};
  canvas.setAttribute("viewBox","0 0 "+width+" "+height);
  updateGraphZoom(false);
- $("graph-count").textContent=tree.nodes.length+" documented resource nodes";
+ $("graph-count").textContent=visible.size===tree.nodes.length?
+   visible.size+" documented resource nodes":
+   "Showing "+visible.size+" of "+tree.nodes.length+" documented nodes. Filter the paths or methods to inspect the rest";
  for(const edge of tree.edges){
   const a=positions.get(edge.from),b=positions.get(edge.to);if(!a||!b)continue;
   canvas.append(svg("path",{class:"graph-edge",d:"M "+(a.x+172)+" "+a.y+" C "+(a.x+191)+" "+a.y+" "+(b.x-20)+" "+b.y+" "+b.x+" "+b.y}));
@@ -277,7 +303,7 @@ $("copy-command").addEventListener("click",()=>copy(state.lastCommand));
 $("load-demo").addEventListener("click",()=>load(readAPI(demo),"Synthetic local demonstration. No servers contacted."));
 $("open-json").addEventListener("click",()=>$("json-file").click());
 $("json-file").addEventListener("change",async e=>{const file=e.target.files?.[0];e.target.value="";await importFile(file);});
-$("search").addEventListener("input",()=>{state.search=$("search").value.trim();renderResources();});
+$("search").addEventListener("input",()=>{state.search=$("search").value.trim();renderResources();renderGraph();});
 $("reset-graph").addEventListener("click",()=>{state.graphZoom=1;updateGraphZoom(false);$("graph-viewport").scrollTo({top:0,left:0});});
 $("fit-graph").addEventListener("click",fitGraph);
 $("zoom-in").addEventListener("click",()=>zoomGraph(1.25));

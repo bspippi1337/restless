@@ -75,3 +75,14 @@ test("Timeout range is bounded",()=>{
   assert.throws(()=>validateRequest({...base,timeoutMs:999}),/1–15/);
   assert.throws(()=>validateRequest({...base,timeoutMs:15001}),/1–15/);
 });
+
+
+test("Evidence reports redact sensitive URL query values without changing the one request sent",async()=>{
+ const url="https://petstore3.swagger.io/api/v3/pets?access_token=PRIVATE-SAMPLE&language=en";
+ let called="";
+ const report=await executeRequest({...base,url},async target=>{called=target;return new Response("OK");});
+ assert.equal(called,url);
+ assert.ok(!report.url.includes("PRIVATE-SAMPLE"));
+ assert.match(report.url,/REDACTED/);
+ assert.match(report.url,/language=en/);
+});

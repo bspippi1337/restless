@@ -102,3 +102,26 @@ test("Input and step options have hard limits",async()=>{
  await assert.rejects(runRecipe("x".repeat(2_000_001),[]),/2 million/);
  assert.throws(()=>validateRecipe([{id:"json-path",option:"x".repeat(501)}]),/500/);
 });
+
+
+test("Special JSON and query keys do not collide with object prototypes",async()=>{
+  const sorted=JSON.parse(await applyOperation("json-sort",'{"__proto__":{"safe":true},"constructor":"literal","a":1}'));
+  assert.deepEqual(sorted.__proto__,{safe:true});
+  assert.equal(sorted.constructor,"literal");
+  const query=JSON.parse(await applyOperation("query-parse","__proto__=safe&constructor=plain"));
+  assert.deepEqual(query.__proto__,["safe"]);
+  assert.deepEqual(query.constructor,["plain"]);
+  const url=JSON.parse(await applyOperation("url-inspect","https://example.org/?__proto__=safe&toString=x"));
+  assert.deepEqual(url.query.__proto__,["safe"]);
+  assert.deepEqual(url.query.toString,["x"]);
+});
+test("Unknown external OpenAPI component refs remain review-only and are never fetched",async()=>{
+  const spec=JSON.stringify({openapi:"3.0.3",paths:{"/danger":{post:{summary:"Create resource",parameters:[{$ref:"https://external.invalid/secret"}]}}}});
+  const ops=parseOpenAPIOperations(spec);
+  assert.equal(ops.length,1);
+  assert.equal(ops[0].parameters[0].unresolvedRef,true);
+  assert.equal(ops[0].reviewRequired,true);
+  const p=JSON.parse(await applyOperation("openapi-plan",spec,"create resource"));
+  assert.equal(p.networkRequests,0);
+  assert.deepEqual(p.candidates[0].reviewReasons.includes("Unresolved references"),true);
+});

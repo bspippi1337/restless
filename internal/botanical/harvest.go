@@ -134,8 +134,9 @@ func Crawl(ctx context.Context, cfg Config) ([]Record, error) {
 	queue := []queued{{start, 0, "seed"}}
 	seen := map[string]bool{}
 	var records []Record
+	attempts := 0
 
-	for len(queue) > 0 && len(records) < cfg.MaxPages {
+	for len(queue) > 0 && attempts < cfg.MaxPages {
 		item := queue[0]
 		queue = queue[1:]
 		key := item.url.String()
@@ -156,6 +157,7 @@ func Crawl(ctx context.Context, cfg Config) ([]Record, error) {
 			case <-timer.C:
 			}
 		}
+		attempts++
 		request, err := http.NewRequestWithContext(ctx, http.MethodGet, key, nil)
 		if err != nil {
 			continue

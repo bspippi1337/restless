@@ -1,0 +1,44 @@
+:root { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+body { margin:0; background:#0b0d10; color:#e9eef5; }
+header { padding:16px 18px; border-bottom:1px solid #1a2230; background:#0b0d10; position:sticky; top:0; }
+.brand { display:flex; gap:12px; align-items:center; }
+.logo { width:34px; height:34px; display:grid; place-items:center; border:1px solid #263246; border-radius:10px; }
+.title { font-weight:700; letter-spacing:0.2px; }
+.sub { color:#a9b6c8; font-size:12px; margin-top:2px; }
+
+main { display:grid; grid-template-columns: 420px 1fr; gap:12px; padding:12px; }
+.panel { border:1px solid #1a2230; border-radius:14px; padding:14px; background:#0e1218; }
+h3 { margin:10px 0 10px; font-size:14px; color:#cfe0ff; }
+label { display:block; font-size:12px; color:#a9b6c8; margin:10px 0 6px; }
+input, select, textarea {
+  width:100%; box-sizing:border-box; padding:10px;
+  border-radius:12px; border:1px solid #243146;
+  background:#0b0d10; color:#e9eef5; outline:none;
+}
+textarea { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+button {
+  width:100%; margin-top:12px; padding:11px 12px;
+  border-radius:12px; border:1px solid #2b3a55;
+  background:#121a26; color:#e9eef5; font-weight:650;
+  cursor:pointer;
+}
+button:hover { background:#162035; }
+
+.row { display:flex; gap:10px; }
+.col { flex:1; }
+.viewer { background:#0b0d10; border:1px solid #243146; border-radius:12px; padding:12px; overflow:auto; max-height:320px; }
+.meta { font-size:12px; color:#a9b6c8; margin-bottom:8px; }
+.muted { color:#8ea0b9; }
+.tiny { font-size:11px; color:#8ea0b9; }
+
+.hints { display:flex; flex-direction:column; gap:8px; }
+.hint {
+  padding:10px; border:1px solid #243146; border-radius:12px;
+  background:#0b0d10; cursor:pointer; word-break:break-all;
+}
+.hint:hover { border-color:#3a4f76; }
+
+.history { display:flex; flex-direction:column; gap:10px; }
+.hist { padding:10px; border:1px solid #243146; border-radius:12px; background:#0b0d10; }
+.click { cursor:pointer; word-break:break-all; }
+.click:hover { color:#cfe0ff; }

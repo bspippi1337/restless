@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>API Navigator</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">◆</div>
+      <div>
+        <div class="title">API Navigator</div>
+        <div class="sub">Smart, dynamic choices while you explore</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel left">
+      <h3>Request</h3>
+
+      <label>URL</label>
+      <input id="url" placeholder="https://api.example.com/users"/>
+
+      <div class="row">
+        <div class="col">
+          <label>Method</label>
+          <select id="method">
+            <option>GET</option>
+            <option>POST</option>
+            <option>PUT</option>
+            <option>PATCH</option>
+            <option>DELETE</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Auth</label>
+          <select id="authmode">
+            <option value="none">None</option>
+            <option value="bearer">Bearer</option>
+            <option value="basic">Basic</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="authbox" class="authbox"></div>
+
+      <label>Headers (JSON)</label>
+      <textarea id="headers" rows="4" placeholder='{"Accept":"application/json"}'></textarea>
+
+      <label>Body (JSON)</label>
+      <textarea id="body" rows="6" placeholder='{"name":"Pippi"}'></textarea>
+
+      <button id="send">Send</button>
+
+      <h3>Next choices</h3>
+      <div id="hints" class="hints"></div>
+
+      <h3>History</h3>
+      <div id="history" class="history"></div>
+    </section>
+
+    <section class="panel right">
+      <h3>Response</h3>
+      <div class="meta" id="meta"></div>
+      <pre id="json" class="viewer"></pre>
+      <h3>Raw</h3>
+      <pre id="raw" class="viewer"></pre>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

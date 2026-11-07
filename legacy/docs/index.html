@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <title>Restless • Universal API Client</title>
+  <meta name="description" content="Elegant, profesjonell landing page med animert funksjonsdemo og håndverksfølelse." />
+  <style>
+    :root{
+      --bg0:#05070c;
+      --bg1:#070a12;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.04);
+      --stroke: rgba(255,255,255,.12);
+      --stroke2: rgba(255,255,255,.08);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --muted2: rgba(255,255,255,.52);
+      --shadow: 0 24px 70px rgba(0,0,0,.55);
+      --shadow2: 0 18px 40px rgba(0,0,0,.35);
+      --radius: 18px;
+      --radius2: 26px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --accentA: 72 208 255;   /* cyan */
+      --accentB: 172 255 133;  /* green */
+      --accentC: 255 126 233;  /* magenta */
+      --accentD: 255 206 97;   /* amber */
+    }
+
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg0:#f7f8fb;
+        --bg1:#ffffff;
+        --card: rgba(0,0,0,.04);
+        --card2: rgba(0,0,0,.03);
+        --stroke: rgba(0,0,0,.10);
+        --stroke2: rgba(0,0,0,.07);
+        --text: rgba(0,0,0,.88);
+        --muted: rgba(0,0,0,.60);
+        --muted2: rgba(0,0,0,.46);
+        --shadow: 0 24px 70px rgba(16,24,40,.12);
+        --shadow2: 0 18px 40px rgba(16,24,40,.10);
+      }
+    }
+
+    *{ box-sizing: border-box; }
+    html,body{ height: 100%; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(1100px 700px at 15% 8%, rgba(var(--accentA)/.22), transparent 55%),
+        radial-gradient(900px 640px at 88% 18%, rgba(var(--accentC)/.16), transparent 55%),
+        radial-gradient(1000px 700px at 50% 105%, rgba(var(--accentB)/.14), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1) 55%, var(--bg0));
+      overflow-x:hidden;
+    }
+
+    /* subtle film grain */
+    body::before{
+      content:"";
+      position: fixed;
+      inset:0;
+      pointer-events:none;
+      opacity: .10;
+      mix-blend-mode: overlay;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      background-size: 180px 180px;
+    }
+
+    /* floating aurora ribbon */
+    .aurora{
+      position:absolute;
+      inset:-20vh -10vw auto -10vw;
+      height: 58vh;
+      filter: blur(28px);
+      opacity: .75;
+      transform: translateZ(0);
+      background:
+        radial-gradient(1200px 320px at 30% 40%, rgba(var(--accentA)/.22), transparent 60%),
+        radial-gradient(900px 320px at 65% 30%, rgba(var(--accentC)/.18), transparent 65%),
+        radial-gradient(900px 320px at 80% 70%, rgba(var(--accentD)/.12), transparent 62%);
+      animation: drift 14s ease-in-out infinite;
+    }
+    @keyframes drift{
+      0%,100%{ transform: translate3d(0,0,0) scale(1); }
+      50%{ transform: translate3d(2vw,1.8vh,0) scale(1.04); }
+    }
+
+    a{ color: inherit; text-decoration: none; }
+    .wrap{ width:min(1160px, 92vw); margin: 0 auto; position:relative; }
+    header{
+      position: sticky;
+      top:0;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--stroke2);
+      background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.08));
+    }
+    @media (prefers-color-scheme: light){
+      header{ background: linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.35)); }
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 14px 0;
+      gap: 14px;
+    }
+    .brand{
+      display:flex; align-items:center; gap: 12px;
+      letter-spacing: .2px;
+      min-width: 210px;
+    }
+    .mark{
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke);
+      background:
+        radial-gradient(18px 18px at 30% 30%, rgba(var(--accentA)/.45), transparent 70%),
+        radial-gradient(22px 22px at 70% 40%, rgba(var(--accentC)/.35), transparent 70%),
+        radial-gradient(24px 24px at 55% 75%, rgba(var(--accentB)/.28), transparent 70%),
+        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      box-shadow: var(--shadow2);
+      position:relative;
+      overflow:hidden;
+    }
+    .mark::after{
+      content:"";
+      position:absolute; inset:-40%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+      transform: rotate(20deg) translateX(-30%);
+      animation: sheen 6s ease-in-out infinite;
+      opacity:.9;
+    }
+    @keyframes sheen{
+      0%,35%{ transform: rotate(20deg) translateX(-70%); opacity:0; }
+      55%{ opacity:1; }
+      80%,100%{ transform: rotate(20deg) translateX(70%); opacity:0; }
+    }
+    .brand h1{
+      font-size: 14px;
+      margin:0;
+      font-weight: 700;
+    }
+    .brand p{
+      margin:0;
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    .links{ display:flex; gap: 10px; flex-wrap: wrap; justify-content:center; }
+    .links a{
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      color: var(--muted);
+      transition: .2s ease;
+    }
+    .links a:hover{
+      color: var(--text);
+      border-color: var(--stroke2);
+      background: rgba(255,255,255,.04);
+    }
+
+    .actions{ display:flex; align-items:center; gap: 10px; justify-content:flex-end; min-width: 240px; }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke2);
+      background: rgba(255,255,255,.04);
+      box-shadow: none;
+      font-size: 13px;
+      color: var(--text);
+      transition: .18s ease;
+      white-space: nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.06); border-color: var(--stroke); }
+    .btn.primary{
+      border-color: rgba(var(--accentA)/.40);
+      background: linear-gradient(180deg, rgba(var(--accentA)/.20), rgba(255,255,255,.04));
+      box-shadow: var(--shadow2);
+    }
+    .btn.primary:hover{ border-color: rgba(var(--accentA)/.55); }
+
+    main{ position:relative; }
+    .hero{
+      padding: 62px 0 30px;
+      position:relative;
+    }
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 22px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .heroGrid{ grid-template-columns: 1fr; }
+      .actions{ min-width: auto; }
+      .brand{ min-width: auto; }
+    }
+
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke2);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      font-size: 13px;
+      max-width: fit-content;
+    }
+    .dot{
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: rgb(var(--accentB));
+      box-shadow: 0 0 0 6px rgba(var(--accentB)/.14);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%,100%{ transform: scale(1); box-shadow: 0 0 0 6px rgba(var(--accentB)/.14); }
+      50%{ transform: scale(1.08); box-shadow: 0 0 0 10px rgba(var(--accentB)/.10); }
+    }
+
+    .title{
+      margin: 18px 0 12px;
+      font-size: clamp(34px, 5vw, 54px);
+      letter-spacing: -0.02em;
+      line-height: 1.02;
+    }
+    .title .shine{
+      background: linear-gradient(90deg,
+        rgba(var(--accentA)/.95),
+        rgba(var(--accentC)/.85),
+        rgba(var(--accentB)/.92));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: saturate(1.05);
+    }
+    .subtitle{
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+      max-width: 62ch;
+    }
+
+    .stats{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .pill{
+      border: 1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      padding: 10px 12px;
+      border-radius: 14px;
+      min-width: 180px;
+      box-shadow: none;
+    }
+    .pill b{ display:block; font-size: 13px; font-family: var(--mono); }
+    .pill span{ display:block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+    .panel{
+      border: 1px solid var(--stroke2);
+      border-radius: var(--radius2);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    /* Terminal */
+    .terminalTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+      gap: 10px;
+    }
+    .lights{ display:flex; gap: 8px; }
+    .light{ width: 10px; height: 10px; border-radius: 999px; opacity:.9; }
+    .l1{ background: rgba(255,90,90,.95); }
+    .l2{ background: rgba(255,200,90,.95); }
+    .l3{ background: rgba(90,255,165,.95); }
+
+    .termTitle{
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .badge{
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+    }
+
+    .terminalBody{
+      padding: 16px;
+      min-height: 360px;
+      font-family: var(--mono);
+      font-size: 12.8px;
+      line-height: 1.55;
+      color: rgba(255,255,255,.88);
+      position:relative;
+      background:
+        radial-gradient(700px 240px at 50% 0%, rgba(var(--accentA)/.10), transparent 62%),
+        radial-gradient(520px 240px at 90% 30%, rgba(var(--accentC)/.08), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.10));
+    }
+    @media (prefers-color-scheme: light){
+      .terminalBody{
+        color: rgba(0,0,0,.82);
+        background:
+          radial-gradient(700px 240px at 50% 0%, rgba(var(--accentA)/.10), transparent 62%),
+          radial-gradient(520px 240px at 90% 30%, rgba(var(--accentC)/.08), transparent 60%),
+          linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.35));
+      }
+    }
+
+    /* scanlines + chroma slices */
+    .terminalBody::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      opacity:.18;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,.00) 0px,
+          rgba(255,255,255,.00) 3px,
+          rgba(255,255,255,.06) 4px
+        );
+      mix-blend-mode: overlay;
+    }
+
+    .ansiLogo{
+      white-space: pre;
+      font-size: 12px;
+      line-height: 1.05;
+      margin: 0 0 10px;
+      opacity: .95;
+      position:relative;
+      display:block;
+    }
+
+    .glitchWrap{
+      position:relative;
+      border: 1px solid var(--stroke2);
+      border-radius: 16px;
+      padding: 12px 12px 10px;
+      background: rgba(255,255,255,.03);
+      overflow:hidden;
+      margin-bottom: 12px;
+    }
+    .glitchWrap::after{
+      content:"";
+      position:absolute; inset:-20%;
+      background:
+        radial-gradient(240px 80px at 25% 35%, rgba(var(--accentA)/.20), transparent 60%),
+        radial-gradient(180px 90px at 70% 30%, rgba(var(--accentC)/.16), transparent 60%),
+        radial-gradient(220px 90px at 55% 80%, rgba(var(--accentB)/.12), transparent 62%);
+      filter: blur(18px);
+      opacity:.55;
+      animation: fog 9s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes fog{
+      0%,100%{ transform: translate3d(0,0,0); }
+      50%{ transform: translate3d(2%, -2%, 0); }
+    }
+
+    .glitchLayer{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      opacity: .0;
+      mix-blend-mode: screen;
+      background:
+        linear-gradient(90deg, rgba(var(--accentA)/.35), transparent 35%),
+        linear-gradient(90deg, rgba(var(--accentC)/.22), transparent 40%),
+        linear-gradient(90deg, rgba(var(--accentB)/.18), transparent 38%);
+      transform: translateX(-2%);
+      filter: blur(0.2px);
+    }
+
+    .glitchOn .glitchLayer{
+      opacity: .55;
+      animation: slice 520ms steps(2,end) 1;
+    }
+
+    @keyframes slice{
+      0%{ clip-path: inset(4% 0 82% 0); transform: translateX(-3%); }
+      20%{ clip-path: inset(18% 0 62% 0); transform: translateX(2%); }
+      40%{ clip-path: inset(45% 0 35% 0); transform: translateX(-1%); }
+      60%{ clip-path: inset(62% 0 20% 0); transform: translateX(4%); }
+      80%{ clip-path: inset(10% 0 74% 0); transform: translateX(-2%); }
+      100%{ clip-path: inset(0 0 0 0); transform: translateX(0%); }
+    }
+
+    .lines{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .line{
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+    }
+    .prompt{ color: rgba(var(--accentA)/.90); }
+    .cmd{ color: var(--text); }
+    .out{ color: var(--muted); padding-left: 22px; }
+    .ok{ color: rgba(var(--accentB)/.92); }
+    .warn{ color: rgba(var(--accentD)/.92); }
+    .err{ color: rgba(255,90,90,.92); }
+
+    .cursor{
+      display:inline-block;
+      width: 9px;
+      height: 14px;
+      margin-left: 6px;
+      background: rgba(var(--accentA)/.85);
+      transform: translateY(2px);
+      animation: blink 1.05s steps(2,end) infinite;
+      border-radius: 2px;
+    }
+    @keyframes blink{
+      0%,49%{ opacity:1; }
+      50%,100%{ opacity:0; }
+    }
+
+    /* Sections */
+    section{ padding: 34px 0; }
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 980px){
+      .grid3{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      border: 1px solid var(--stroke2);
+      border-radius: var(--radius);
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      box-shadow: none;
+      position:relative;
+      overflow:hidden;
+      min-height: 160px;
+    }
+    .card::after{
+      content:"";
+      position:absolute; inset:-30%;
+      background:
+        radial-gradient(220px 80px at 30% 30%, rgba(var(--accentA)/.12), transparent 65%),
+        radial-gradient(200px 90px at 75% 35%, rgba(var(--accentC)/.08), transparent 62%);
+      filter: blur(14px);
+      opacity:.7;
+      pointer-events:none;
+    }
+    .card h3{
+      margin: 0 0 8px;
+      font-size: 14px;
+      letter-spacing: .2px;
+    }
+    .card p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      position:relative;
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .split{ grid-template-columns: 1fr; }
+    }
+
+    .mini{
+      border: 1px solid var(--stroke2);
+      border-radius: var(--radius);
+      padding: 16px;
+      background: rgba(255,255,255,.03);
+    }
+    .mini h4{ margin:0 0 10px; font-size: 13px; font-family: var(--mono); color: var(--muted); }
+    .mini ul{ margin:0; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .mini li{ margin: 6px 0; }
+
+    .footer{
+      padding: 28px 0 44px;
+      border-top: 1px solid var(--stroke2);
+      color: var(--muted2);
+      font-size: 12px;
+      display:flex;
+      justify-content:space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* Motion safety */
+    @media (prefers-reduced-motion: reduce){
+      *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+      .cursor{ display:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="aurora" aria-hidden="true"></div>
+
+  <header>
+    <div class="wrap">
+      <div class="nav">
+        <div class="brand">
+          <div class="mark" aria-hidden="true"></div>
+          <div>
+            <h1>Restless</h1>
+            <p>universal api client • tui / cli / automation</p>
+          </div>
+        </div>
+
+        <nav class="links" aria-label="Seksjoner">
+          <a href="#features">Funksjoner</a>
+          <a href="#demo">Demo</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#design">Design</a>
+        </nav>
+
+        <div class="actions">
+          <a class="btn" href="#demo">Se demo</a>
+          <a class="btn primary" href="#cta">Kom i gang</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap hero">
+      <div class="heroGrid">
+        <div>
+          <div class="kicker"><span class="dot" aria-hidden="true"></span> Bygd for fart, kontroll og ro i kroppen</div>
+          <h2 class="title">
+            Gjør API-kaos om til <span class="shine">flyt</span>.
+          </h2>
+          <p class="subtitle">
+            Restless er en universal API-klient med proff TUI, raske workflows og “automagi” som føles som håndverk:
+            små detaljer, presise svar, og en UI som holder seg kald selv når nettet er varmt.
+          </p>
+
+          <div class="stats">
+            <div class="pill">
+              <b>Request builder</b>
+              <span>Headers, auth, body, retries, templates</span>
+            </div>
+            <div class="pill">
+              <b>Discovery & presets</b>
+              <span>Samler endepunkter og lagrer flows</span>
+            </div>
+            <div class="pill">
+              <b>CLI/TUI først</b>
+              <span>Funker i terminal, CI og på farten</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="panel" id="demo" aria-label="Animert terminaldemo">
+          <div class="terminalTop">
+            <div class="lights" aria-hidden="true">
+              <div class="light l1"></div>
+              <div class="light l2"></div>
+              <div class="light l3"></div>
+            </div>
+            <div class="termTitle">restless • live demo</div>
+            <div class="badge" id="badge">auto-glitch: armed</div>
+          </div>
+
+          <div class="terminalBody" id="terminal">
+            <div class="glitchWrap" id="glitchWrap">
+              <div class="glitchLayer" aria-hidden="true"></div>
+              <pre class="ansiLogo" aria-label="Logo (ANSI-stil)">
+  ╔════════════════════╗
+  ║   BLCKSWAN / RESTLESS  ║
+  ╚════════════════════╝
+  ██████╗ ███████╗███████╗████████╗██╗     ███████╗███████╗███████╗
+  ██╔══██╗██╔════╝██╔════╝╚══██╔══╝██║     ██╔════╝██╔════╝██╔════╝
+  ██████╔╝█████╗  ███████╗   ██║   ██║     █████╗  ███████╗███████╗
+  ██╔══██╗██╔══╝  ╚════██║   ██║   ██║     ██╔══╝  ╚════██║╚════██║
+  ██████╔╝███████╗███████║   ██║   ███████╗███████╗███████║███████║
+  ╚═════╝ ╚══════╝╚══════╝   ╚═╝   ╚══════╝╚══════╝╚══════╝╚══════╝
+</pre>
+              <div class="out">overlay-basert glitch (tekst forblir korrekt) • inspirert av din ANSI auto-glitch</div>
+            </div>
+
+            <div class="lines" id="lines" aria-live="polite" aria-relevant="additions"></div>
+            <div class="out" id="hint" style="margin-top:10px; opacity:.85">
+              Tips: trykk <span class="ok">G</span> for glitch, <span class="ok">R</span> for å starte demo på nytt.
+            </div>
+          </div

@@ -15,9 +15,12 @@ await pandoc("docs/RESTLESS_42_Field_Guide_EN.md","site/guide/index.html",
   "tools/pages/guide-template.html","The Field Guide to Quiet API Discovery");
 await pandoc("docs/RESTLESS_42_Browser_Toolbox_EN.md","site/toolbox/manual/index.html",
   "tools/pages/toolbox-template.html","Browser Toolbox Manual");
+await pandoc("docs/RESTLESS_42_API_Atlas_EN.md","site/library/manual/index.html",
+  "tools/pages/atlas-template.html","API Atlas: Domain to Library");
 const bundle=[
   "RESTLESS_42_Field_Guide_EN.md",
   "RESTLESS_42_Browser_Toolbox_EN.md",
+  "RESTLESS_42_API_Atlas_EN.md",
   "RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt"
 ];
 if(await import("node:fs").then(m=>m.existsSync(path.join(root,"docs/RESTLESS_42_Request_Lab_EN.md")))){

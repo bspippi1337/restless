@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0e15">
+<meta name="description" content="RESTLESS 42 API Atlas: turn authorized documentation into a provenance-backed resource map, Swagger-style explorer, input examples and Postman collection.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src https:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta property="og:title" content="RESTLESS 42 | API Atlas">
+<title>API Atlas | RESTLESS 42</title>
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="./atlas.css">
+</head>
+<body>
+<a class="skip-link" href="#atlas">Skip to API Atlas</a>
+<header class="site-header"><div class="container header-inner">
+<a class="brand" href="../" aria-label="RESTLESS 42 home"><span class="brand-glyph" aria-hidden="true">R<span class="brand-dot">.</span></span><span>RESTLESS <strong>42</strong></span></a>
+<nav class="nav" aria-label="Main navigation"><a href="../">Toolbox</a><a href="./" aria-current="page">API Atlas</a><a href="../contract/">Contract Lab</a><a href="../docs/">Docs</a><a href="https://github.com/bspippi1337/restless/releases">Downloads ↗</a></nav>
+</div></header>
+<main id="atlas" class="atlas">
+<section class="atlas-hero container">
+<div><p class="eyebrow"><span class="pulse" aria-hidden="true"></span> RESTLESS 42 / SOURCE-BACKED EXPLORATION</p>
+<h1>Map the API.<br><span class="gradient-text">Trust the evidence.</span></h1>
+<p class="lede">A navigable API topology built from declared OpenAPI operations and cryptographically archived documentation. Explore methods, schemas, inputs and examples without inventing routes or sending mutation requests.</p>
+</div>
+<div class="hero-metrics">
+<div><strong>0</strong><span>Guessed endpoints</span></div>
+<div><strong>100%</strong><span>Provenance-aware</span></div>
+<div><strong>3</strong><span>Export formats</span></div>
+</div>
+</section>
+<section class="atlas-onboard container" aria-labelledby="connect-title">
+<div class="section-tag"><span>01 / SOURCE</span><h2 id="connect-title">One domain. One scoped library.</h2></div>
+<div class="connect-layout">
+<div class="connect-input">
+<label for="domain">Domain or an exact documentation URL</label>
+<div class="domain-row"><input id="domain" type="text" spellcheck="false" autocapitalize="none" autocomplete="off" placeholder="docs.your-domain.com or https://docs.your-domain.com/openapi.json"><button type="button" id="preview" class="btn-lime">Preview scope</button></div>
+<p class="input-hint">The native RESTLESS CLI builds a real library by following allowed documentation links, respecting robots.txt, rate limits and the exact host. The browser cannot bypass CORS.</p>
+<div class="domain-output" id="domain-output" hidden>
+<div class="domain-output-top"><span id="domain-badge">SCOPE PREVIEW</span><button class="mini-button" type="button" id="copy-command">Copy CLI command</button></div>
+<pre id="domain-command"></pre><p id="domain-note"></p>
+<label class="confirm-line"><input type="checkbox" id="authorized"> I confirm authorization to request this exact HTTPS documentation URL.</label>
+<button type="button" class="mini-button" id="fetch-doc" disabled>Fetch this explicit JSON document (CORS)</button>
+</div>
+</div>
+<div class="connect-upload">
+<p class="upload-caption">OR EXPLORE AN EXISTING LIBRARY</p>
+<button type="button" id="open-json" class="upload-action"><span class="upload-icon">↥</span><span><strong>Import JSON</strong><small>library.json · catalog.json · OpenAPI 3 JSON</small></span></button>
+<input type="file" id="json-file" accept=".json,application/json" hidden>
+<button type="button" id="load-demo" class="upload-action secondary"><span class="upload-icon">◇</span><span><strong>Load a working example</strong><small>Three resources, eight documented methods, input samples</small></span></button>
+<p class="input-hint">Maximum 2 MB. Files are parsed locally, never uploaded to RESTLESS.</p>
+</div>
+</div>
+<div id="atlas-status" class="atlas-status" role="status" aria-live="polite">Ready. Preview your domain, import a real archive, or load the example.</div>
+</section>
+<section class="atlas-dashboard" id="dashboard" hidden>
+<div class="dashboard-head">
+<div class="dashboard-title"><p class="eyebrow">02 / DISCOVERED API TOPOLOGY</p><h2 id="api-title">Imported API</h2><p id="api-meta"></p></div>
+<div class="dashboard-actions">
+<button type="button" class="dark-btn" id="export-postman">Postman collection ↓</button>
+<button type="button" class="dark-btn" id="export-mermaid">Mermaid graph ↓</button>
+<button type="button" class="dark-btn" id="export-json">Atlas JSON ↓</button>
+</div>
+</div>
+<div class="stat-bar" id="stat-bar"></div>
+<div class="atlas-grid">
+<aside class="resource-panel">
+<div class="pane-head"><div><p>RESOURCES</p><h3>API structure</h3></div><span id="resource-total"></span></div>
+<label class="hidden-label" for="search">Search paths, methods or operation names</label>
+<input id="search" type="search" placeholder="Search methods, paths, tags...">
+<div class="method-strip" id="method-strip" role="group" aria-label="Filter by documented HTTP method"></div>
+<div id="resource-list" class="resource-list"></div>
+</aside>
+<section class="graph-panel" aria-labelledby="graph-heading">
+<div class="pane-head">
+<div><p>RELATIONSHIPS</p><h3 id="graph-heading">Resource map</h3></div>
+<div class="graph-actions"><button type="button" id="reset-graph" class="mini-button">Reset view</button><button type="button" id="save-graph" class="mini-button">Save SVG</button></div>
+</div>
+<div class="graph-viewport" id="graph-viewport"><svg id="api-graph" role="img" aria-label="Interactive documentation-derived API resource graph" xmlns="http://www.w3.org/2000/svg"></svg></div>
+<p class="pane-foot">Solid edges are documented path relationships. Select a node or operation to inspect evidence. Layout is a local visualization, not a network trace.</p>
+</section>
+<aside class="inspector-panel">
+<div class="pane-head"><div><p>INSPECTOR</p><h3>Operation details</h3></div><span id="operation-indicator">SELECT</span></div>
+<div id="inspector-empty" class="inspector-empty"><div class="empty-graphic">◇</div><h3>Select an operation</h3><p>See parameters, auth requirements, sample requests and source hashes. Nothing executes automatically.</p></div>
+<div id="inspector-content" hidden>
+<div class="op-heading"><span id="op-method" class="method-chip"></span><code id="op-path"></code></div>
+<h4 id="op-name"></h4><p id="op-description"></p>
+<div class="inspector-tabs" role="tablist" aria-label="Operation inspector"><button type="button" data-tab="parameters" role="tab" aria-selected="true">Inputs</button><button type="button" data-tab="example" role="tab">Example</button><button type="button" data-tab="source" role="tab">Evidence</button></div>
+<div class="tab-panel" id="tab-parameters"></div>
+<div class="tab-panel" id="tab-example" hidden><p class="small-warning">Preview only. Requires real values and explicit authorization. No live calls.</p><pre id="curl-example"></pre><button type="button" id="copy-curl" class="mini-button">Copy cURL preview</button></div>
+<div class="tab-panel" id="tab-source" hidden></div>
+</div>
+</aside>
+</div>
+</section>
+<section class="atlas-explainer container">
+<div><p class="eyebrow">BUILT FOR RESEARCH, NOT GUESSING</p><h2>From source document<br>to searchable knowledge.</h2><p>RESTLESS archives permitted documentation with SHA-256, extracts explicitly declared HTTP methods and preserves evidence of where each route came from. The same archive feeds this visual map, request previews and a standard Postman collection export.</p></div>
+<div class="process-list"><div><span>01</span><strong>Scope</strong><p>Exact hostname, robots.txt, explicit permission</p></div><div><span>02</span><strong>Archive</strong><p>Bounded, rate-limited documentation GET requests</p></div><div><span>03</span><strong>Index</strong><p>OpenAPI operations, parameters, sources and hashes</p></div><div><span>04</span><strong>Explore</strong><p>Graph, Swagger-style catalog and safe request examples</p></div></div>
+</section>
+</main>
+<footer class="footer"><div class="container footer-inner"><div><strong>RESTLESS 42 / API ATLAS</strong><p>Documentation first. Facts over fuzz.</p></div><div class="footer-links"><a href="../guide/">Field guide</a><a href="../toolbox/">Recipe toolbox</a><a href="https://github.com/bspippi1337/restless">Source code</a></div></div></footer>
+<script type="module" src="./app.mjs"></script>
+</body></html>

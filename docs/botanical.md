@@ -26,6 +26,10 @@ bin/restless index --dir "$DIR"
 bin/restless search "find pets by status" --dir "$DIR" --limit 5
 bin/restless refs "petstore" --dir "$DIR" --limit 5
 bin/restless plan "find pet by id" --dir "$DIR" --limit 3
+
+# Compare previously archived versions without contacting the server
+# Keep two separate archive directories and run "index" in each first.
+bin/restless diff --before "$HOME/restless-archives/v1" --after "$HOME/restless-archives/v2"
 ```
 
 ## Archive and provenance
@@ -35,13 +39,13 @@ bin/restless plan "find pet by id" --dir "$DIR" --limit 3
 - `catalog.json` is atomically replaced and stores documents alongside explicitly documented OpenAPI 3 HTTP operations. It includes method, path, summary, tags, required parameters, declared security requirements, source URL and hash.
 - Duplicate URLs in the manifest take the last entry. No network access occurs during indexing.
 - Plain text / HTML / Markdown are indexed as searchable reference terms, exposed through `restless refs`. PDF bytes are marked `pdf-unparsed`; PDF text extraction is **not implemented**. Neither arbitrary prose nor PDF creates API endpoints.
-- Only OpenAPI **3.x** paths are recognized currently. Referenced path items are skipped; unresolved parameter/body references are flagged for human review; schema resolution and server selection are not implemented.
+- Only OpenAPI **3.x** paths are recognized currently. Local parameter references under `#/components/parameters` are resolved offline with cycle and depth checks; external, missing or cyclic parameter references are flagged for manual review. Referenced path items are skipped, and unresolved request-body references are flagged; schema resolution and server selection are not implemented.
 
 ## Offline reference search, operation search and probe planning
 
 `restless refs` searches local documentation records and returns source URL, document type, content hash and matching terms. `restless search` uses deterministic weighted lexical ranking of documented operations (operation ID, method, path, summary, tags, description, parameter names). It is not embedding-based or LLM semantic search yet.
 
-`restless plan` returns ranked candidates and evidence links. Each candidate includes its documented method/path, source hash, declared authentication, required parameters and review warnings. Non-read methods, credentials, path parameters and unresolved references demand manual review. **Plan never makes requests, runs scripts or resolves URLs.** The JSON field `network_requests` is always zero.
+`restless plan` returns ranked candidates and evidence links. `restless diff` compares operation contracts across two locally indexed snapshots and reports additions, removals, and modifications; it ignores changes to archive hashes when the documented operation itself is unchanged. Each candidate includes its documented method/path, source hash, declared authentication, required parameters and review warnings. Non-read methods, credentials, path parameters and unresolved references demand manual review. **Plan never makes requests, runs scripts or resolves URLs.** The JSON field `network_requests` is always zero.
 
 A plan is not approval to call an API. A documented GET may have real side effects; explicit operator authorization and target scoping remain mandatory for later live probing.
 

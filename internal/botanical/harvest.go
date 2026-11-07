@@ -195,8 +195,7 @@ func appendRecord(path string, record Record) error {
     file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
     if err != nil { return err }
     defer file.Close()
-    _, err = file.Write(append(b, '
-'))
+    _, err = file.Write(append(b, '\n'))
     return err
 }
 

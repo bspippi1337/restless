@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10131b">
+<meta name="description" content="RESTLESS 42 Request Lab: explicit, consent-gated HTTPS GET/HEAD/OPTIONS inspection with bounded responses and browser CORS enforcement.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src https:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta property="og:title" content="RESTLESS 42 | Request Lab">
+<title>Authorized Request Lab | RESTLESS 42</title>
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="./request.css">
+</head>
+<body>
+<a class="skip-link" href="#request-lab">Skip to the request controls</a>
+<header class="site-header"><div class="container header-inner">
+<a class="brand" href="../" aria-label="RESTLESS 42 home"><span class="brand-glyph" aria-hidden="true">R<span class="brand-dot">.</span></span><span>RESTLESS <strong>42</strong></span></a>
+<nav class="nav" aria-label="Main navigation"><a href="../">Home</a><a href="../docs/">Docs</a><a href="../toolbox/">Toolbox</a><a href="../contract/">Contract Lab</a><a href="https://github.com/bspippi1337/restless">GitHub ↗</a></nav>
+</div></header>
+<main id="request-lab" class="container request-workspace">
+<section class="request-hero">
+<p class="eyebrow">REQUEST LAB · EXPLICIT NETWORK MODE</p>
+<h1>Make one request.<br><span class="gradient-text">Know what happened.</span></h1>
+<p class="lede">A deliberately restrained browser HTTP console. Inspect public HTTPS APIs you own or are authorized to test, using GET, HEAD or OPTIONS only. No scanning, no retries and no redirect following.</p>
+<p class="fine-print"><a href="./manual/">Read the operator manual and CORS safety guide →</a></p>
+<div class="live-notice"><span class="live-dot" aria-hidden="true"></span><strong>Unlike Toolbox and Contract Lab, this page can send a real network request.</strong><p>Nothing is sent until you confirm permission, enter an exact approved hostname and press Send. Browser CORS restrictions still apply.</p></div>
+</section>
+<section class="request-form" aria-labelledby="config-title">
+<div class="form-header"><div><p class="eyebrow">01 / CONFIGURE</p><h2 id="config-title">Destination and scope</h2></div><button type="button" class="secondary-button" id="example">Load a non-executing example</button></div>
+<div class="field-grid">
+<div class="field wide"><label for="url">HTTPS request URL</label><input type="url" id="url" autocomplete="off" spellcheck="false" placeholder="https://api.your-domain.com/v1/status"><small>Must use HTTPS, with no embedded username or password.</small></div>
+<div class="field"><label for="approved-host">Exact approved hostname</label><input type="text" id="approved-host" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="api.your-domain.com"><small>Typed separately; must equal the URL hostname.</small></div>
+<div class="field"><label for="method">Method</label><select id="method"><option>GET</option><option>HEAD</option><option>OPTIONS</option></select></div>
+<div class="field"><label for="timeout">Timeout</label><select id="timeout"><option value="5000">5 seconds</option><option value="10000" selected>10 seconds</option><option value="15000">15 seconds</option></select></div>
+</div>
+<div class="headers-field">
+<label for="headers">Optional request headers as JSON</label><textarea id="headers" spellcheck="false" placeholder='{"Accept":"application/json"}'>{"Accept":"application/json"}</textarea>
+<p class="fine-print">No cookies or browser-controlled headers. If you explicitly include an Authorization header, enable the extra credential confirmation below. Request/response headers stay in memory, and the report never stores request header values.</p>
+</div>
+<div class="permission-panel">
+<label class="check-row"><input type="checkbox" id="permission"><span><strong>I own or have explicit authorization to access this exact target.</strong><small>I have checked the target's terms, scope and possible effects. A GET can still have side effects.</small></span></label>
+<label class="check-row"><input type="checkbox" id="credentials"><span><strong>Allow a manually entered Authorization header.</strong><small>Off by default. Credentials are not saved; inspect your browser and clipboard security before pasting tokens.</small></span></label>
+</div>
+<div class="run-controls"><button id="send" class="button primary" type="button" disabled>Send approved request <span aria-hidden="true">→</span></button><button id="reset" class="button ghost" type="button">Reset</button></div>
+</section>
+<div id="status" role="status" aria-live="polite" class="request-status">Ready. Enter a target and confirm permission to enable Send.</div>
+<section id="response" class="response-panel" hidden>
+<div class="form-header"><div><p class="eyebrow">02 / REVIEW EVIDENCE</p><h2>Observed response</h2></div><div class="response-actions"><button type="button" id="copy-response" class="secondary-button">Copy body</button><button type="button" id="download-report" class="secondary-button">Save JSON report</button></div></div>
+<div class="response-stats">
+<div><span>HTTP status</span><strong id="http-status">—</strong></div>
+<div><span>Duration</span><strong id="duration">—</strong></div>
+<div><span>Body size</span><strong id="body-size">—</strong></div>
+<div><span>SHA-256</span><strong id="sha" class="hash-value">—</strong></div>
+</div>
+<div class="response-columns">
+<div><label for="body">Response body (text/UTF-8, binary hex preview)</label><textarea id="body" readonly spellcheck="false"></textarea></div>
+<div><label for="response-headers">Headers visible to the browser</label><textarea id="response-headers" readonly spellcheck="false"></textarea></div>
+</div>
+<p class="fine-print">One user-triggered fetch may cause a browser-managed CORS preflight. Only CORS-exposed response headers can be read. A successful HTTP response does not imply the API is authorized for automation or scanning. A 4xx/5xx response is recorded, not retried.</p>
+</section>
+<section class="request-bottom">
+<div><h2>Quiet by default.<br>Explicit when needed.</h2><p>RESTLESS's normal browser Toolbox and Contract Lab remain offline with <code>connect-src 'none'</code>. Request Lab lives on its own route and supports network access only from a deliberate button press and with clear safeguards.</p></div>
+<div class="request-points"><h3>Hard stops</h3><ul><li>GET, HEAD or OPTIONS only</li><li>Exact approved hostname; public DNS name</li><li>No raw IPs, localhost or HTTP</li><li>No cookies, redirects or automatic retries</li><li>1–15 second timeout, 2 MB response limit</li><li>Normal browser CORS enforcement</li></ul></div>
+</section>
+</main>
+<footer class="footer"><div class="container footer-inner"><div><strong>RESTLESS 42</strong><p>Authority must be explicit. Evidence must be real.</p></div><div class="footer-links"><a href="../docs/">Documentation</a><a href="../toolbox/">Offline Toolbox</a><a href="../contract/">Contract Lab</a><a href="https://github.com/bspippi1337/restless">Source</a></div></div></footer>
+<script type="module" src="./app.mjs"></script>
+</body></html>

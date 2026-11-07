@@ -14,11 +14,17 @@ RESTLESS helps a developer find the API operation they forgot **without guessing
 
 - **[Documentation center](https://bspippi1337.github.io/restless/docs/)** (when repository GitHub Pages is enabled)
 - **[32-operation browser toolbox](https://bspippi1337.github.io/restless/toolbox/)** (GitHub Pages)
+- **[Offline OpenAPI Contract Lab](https://bspippi1337.github.io/restless/contract/)** (document-only comparison)
+- **[Request Lab](https://bspippi1337.github.io/restless/request/)** (explicitly authorized live HTTPS GET/HEAD/OPTIONS; CORS enforced)
+- **[Request Lab operator manual](docs/RESTLESS_42_Request_Lab_EN.md)** (scope, authentication headers, privacy and CORS)
+- **[Native Android test APK](android/README.md)** (32 offline operations; downloadable from successful Actions builds)
 - **[Complete English field guide](docs/RESTLESS_42_Field_Guide_EN.md)** (also available as a rendered web handbook)
 - **[Browser toolbox operation manual](docs/RESTLESS_42_Browser_Toolbox_EN.md)**
 - **[NotebookLM podcast source and brief](docs/RESTLESS_42_NotebookLM_Podcast_Brief_EN.txt)**
 - **[Botanical architecture and safety notes](docs/botanical.md)**
 - **[Repository Garden and native maintenance tools](docs/repo-garden.md)**
+
+The separate Request Lab is the only browser tool allowed to send live network requests: one explicit, host-scoped, consent-gated HTTPS GET/HEAD/OPTIONS request at a time. Other browser tools remain offline.
 
 The browser toolbox is a static, browser-only workbench inspired by CyberChef's recipe model. It offers JSON, CSV, encoding, SHA-256/512, JWT inspection, text processing, URL utilities, and offline OpenAPI analysis. It has no network execution path or backend processing, and its operation chaining and import/export run locally.
 

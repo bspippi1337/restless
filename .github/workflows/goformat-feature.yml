@@ -25,6 +25,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.24.13'
+      - name: Report repository gofmt gaps
+        run: |
+          echo "Repository-wide gofmt differences:"
+          gofmt -l .
       - name: Format new Go sources and commit only actual changes
         run: |
           set -Eeuo pipefail

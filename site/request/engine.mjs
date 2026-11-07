@@ -113,7 +113,7 @@ export async function executeRequest(config,transport=globalThis.fetch){
    const digest=await crypto.subtle.digest("SHA-256",bytes);
    return{
      mode:"ONE_EXPLICIT_AUTHORIZED_BROWSER_REQUEST",
-     networkRequests:1,method:verified.method,url:redactedURL(verified.url),
+     networkRequests:1,browserMayPreflight:true,method:verified.method,url:redactedURL(verified.url),
      responseStatus:response.status,responseStatusText:response.statusText,
      durationMs,bytesRead:bytes.length,sha256:hex(new Uint8Array(digest)),
      responseHeaders:observedHeaders,responseBody:body,bodyFormat,

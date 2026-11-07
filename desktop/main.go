@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"image/color"
 	"io"
-	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"time"

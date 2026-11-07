@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="RESTLESS 42 logo">
+<rect x="3" y="3" width="90" height="90" rx="21" fill="#101923" stroke="#b7f768" stroke-width="6"/>
+<path d="M26 70V26h24c15 0 19 8 19 17 0 9-7 15-16 16l18 11H53L39 59v11Z" fill="#eaf0fa"/>
+<path d="M40 39h10c4 0 6 2 6 5 0 4-2 6-6 6H40Z" fill="#101923"/>
+<circle cx="73" cy="72" r="7" fill="#b7f768"/>
+</svg>

@@ -36,18 +36,18 @@ type Config struct {
 }
 
 type Record struct {
-	URL         string    `json:"url"`
-	Source      string    `json:"source"`
-	Status      int       `json:"status"`
-	ContentType string    `json:"content_type"`
-	SHA256      string    `json:"sha256"`
-	ArchivePath string    `json:"archive_path"`
-	Bytes       int       `json:"bytes"`
-	Depth       int       `json:"depth"`
-	FetchedAt       time.Time `json:"fetched_at"`
-	ETag            string    `json:"etag,omitempty"`
-	LastModified    string    `json:"last_modified,omitempty"`
-	ResponseStatus  int       `json:"response_status,omitempty"`
+	URL            string    `json:"url"`
+	Source         string    `json:"source"`
+	Status         int       `json:"status"`
+	ContentType    string    `json:"content_type"`
+	SHA256         string    `json:"sha256"`
+	ArchivePath    string    `json:"archive_path"`
+	Bytes          int       `json:"bytes"`
+	Depth          int       `json:"depth"`
+	FetchedAt      time.Time `json:"fetched_at"`
+	ETag           string    `json:"etag,omitempty"`
+	LastModified   string    `json:"last_modified,omitempty"`
+	ResponseStatus int       `json:"response_status,omitempty"`
 }
 
 type queued struct {
@@ -248,8 +248,8 @@ func Crawl(ctx context.Context, cfg Config) ([]Record, error) {
 				URL: key, Source: item.source, Status: http.StatusOK,
 				ContentType: ct, SHA256: hash, ArchivePath: archivePath,
 				Bytes: len(body), Depth: item.depth, FetchedAt: time.Now().UTC(),
-				ETag: boundedETag(response.Header.Get("ETag")),
-				LastModified: boundedLastModified(response.Header.Get("Last-Modified")),
+				ETag:           boundedETag(response.Header.Get("ETag")),
+				LastModified:   boundedLastModified(response.Header.Get("Last-Modified")),
 				ResponseStatus: http.StatusOK,
 			}
 		} else {

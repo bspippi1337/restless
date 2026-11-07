@@ -20,8 +20,12 @@ const maxCachedManifestLines = 50000
 func readCachedRecords(directory string) (map[string]Record, error) {
 	records := make(map[string]Record)
 	f, err := os.Open(filepath.Join(directory, "index.jsonl"))
-	if errors.Is(err, os.ErrNotExist) { return records, nil }
-	if err != nil { return nil, err }
+	if errors.Is(err, os.ErrNotExist) {
+		return records, nil
+	}
+	if err != nil {
+		return nil, err
+	}
 	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
@@ -41,7 +45,9 @@ func readCachedRecords(directory string) (map[string]Record, error) {
 		}
 		records[record.URL] = record
 	}
-	if err := scanner.Err(); err != nil { return nil, err }
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
 	return records, nil
 }
 
@@ -57,12 +63,16 @@ func verifiedCachedBody(directory string, record Record) ([]byte, error) {
 	}
 	archive := filepath.Join(directory, "sha256", record.SHA256)
 	fi, err := os.Lstat(archive)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	if !fi.Mode().IsRegular() || fi.Size() > maxDocumentBytes {
 		return nil, fmt.Errorf("cached archive is not a bounded regular file: %s", record.URL)
 	}
 	b, err := os.ReadFile(archive)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	if int64(len(b)) > maxDocumentBytes {
 		return nil, fmt.Errorf("cached document exceeds size limit: %s", record.URL)
 	}
@@ -89,6 +99,8 @@ func boundedLastModified(value string) string {
 	if len(value) > 256 || strings.ContainsAny(value, "\r\n") {
 		return ""
 	}
-	if _, err := http.ParseTime(value); err != nil { return "" }
+	if _, err := http.ParseTime(value); err != nil {
+		return ""
+	}
 	return value
 }

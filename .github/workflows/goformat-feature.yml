@@ -32,15 +32,15 @@ jobs:
       - name: Format new Go sources and commit only actual changes
         run: |
           set -Eeuo pipefail
-          gofmt -w internal/library/*.go internal/cli/library.go internal/cli/root.go internal/botanical/harvest.go
+          gofmt -w internal/library/*.go internal/cli/library.go internal/cli/root.go internal/botanical/*.go
           if [ -d desktop ]; then find desktop -name '*.go' -print0 | xargs -0 -r gofmt -w; fi
-          if git diff --quiet -- internal/library internal/cli/library.go internal/cli/root.go internal/botanical/harvest.go desktop; then
+          if git diff --quiet -- internal/library internal/cli/library.go internal/cli/root.go internal/botanical desktop; then
             echo 'All sources were already formatted'
             exit 0
           fi
           git config user.name 'restless-42-ci'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add internal/library internal/cli/library.go internal/cli/root.go internal/botanical/harvest.go
+          git add internal/library internal/cli/library.go internal/cli/root.go internal/botanical
           if [ -d desktop ]; then git add desktop; fi
           git commit -m 'style: gofmt new library and native GUI code'
           git push origin HEAD:feature/domain-library-native-ui-42

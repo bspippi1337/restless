@@ -12,9 +12,9 @@ import (
 func NewDiffCmd() *cobra.Command {
 	var beforeDir, afterDir string
 	cmd := &cobra.Command{
-		Use: "diff",
+		Use:   "diff",
 		Short: "Compare documented API operations between two offline catalogs",
-		Args: cobra.NoArgs,
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if beforeDir == "" || afterDir == "" {
 				return fmt.Errorf("--before and --after catalog directories are required")
@@ -28,7 +28,9 @@ func NewDiffCmd() *cobra.Command {
 				return fmt.Errorf("load after catalog: %w", err)
 			}
 			difference, err := botanical.CompareCatalogs(before, after)
-			if err != nil { return err }
+			if err != nil {
+				return err
+			}
 			enc := json.NewEncoder(cmd.OutOrStdout())
 			enc.SetIndent("", "  ")
 			return enc.Encode(difference)

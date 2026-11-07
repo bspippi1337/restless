@@ -9,6 +9,7 @@ on:
       - 'docs/RESTLESS_42_*'
       - 'tests/toolbox.test.mjs'
       - 'tests/contract.test.mjs'
+      - 'tests/request.test.mjs'
       - '.github/workflows/pages.yml'
   pull_request:
     paths:
@@ -17,6 +18,7 @@ on:
       - 'docs/RESTLESS_42_*'
       - 'tests/toolbox.test.mjs'
       - 'tests/contract.test.mjs'
+      - 'tests/request.test.mjs'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -48,6 +50,9 @@ jobs:
           node --check site/contract/engine.mjs
           node --check site/contract/app.mjs
           node --test tests/contract.test.mjs
+          node --check site/request/engine.mjs
+          node --check site/request/app.mjs
+          node --test tests/request.test.mjs
       - name: Render the full field guide into HTML and copy NotebookLM sources
         run: |
           set -Eeuo pipefail

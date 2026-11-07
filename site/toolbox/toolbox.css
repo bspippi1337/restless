@@ -69,3 +69,10 @@
 .recipe-step.drop-target{border-color:var(--lime);box-shadow:0 0 0 2px #b7f76855;background:#24372b}
 .operation-item[draggable],.recipe-step[draggable]{cursor:grab}
 .operation-item[draggable]:active,.recipe-step[draggable]:active{cursor:grabbing}
+/* Make the Contract Lab visible without shrinking the workbench. */
+.workbench-intro{flex-wrap:wrap}
+.workbench-intro>div:first-child{flex:1 1 530px}
+.toolbox-promo{display:flex;flex-direction:column;gap:.5rem;flex:1 1 200px;padding:1rem 1.1rem;background:#182633;border:1px solid #456b74;border-radius:12px}
+.toolbox-promo strong{font-size:.82rem;color:#daeaf0}
+.toolbox-promo a{color:#a9efc0;font-size:.8rem;font-weight:700;text-decoration:none}
+.toolbox-promo a:hover{text-decoration:underline}

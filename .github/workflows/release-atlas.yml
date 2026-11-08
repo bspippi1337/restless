@@ -12,6 +12,11 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/release-atlas.yml'
+      - 'desktop/**'
+      - 'internal/library/**'
+      - 'site/library/**'
+      - 'android/**'
+      - 'docs/RELEASE_NOTES_v0.6.0-rc.1.md'
   workflow_dispatch:
 
 permissions:
